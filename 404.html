@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f7f9fc; color: #666; }
+        .loader { text-align: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p>Sedang mengalihkan...</p>
+    </div>
+
+    <script>
+        // --- PENTING: GANTI DENGAN URL SCRIPT GOOGLE ANDA ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5FAs-sXVqrCu-4XvNBJVE6jP4oCndAMhNQAUEADRCJYR3xi4FgxAGgxZI_un9EmbPLg/exec'; 
+
+        // Ambil path URL saat ini (contoh: /kkk)
+        const path = window.location.pathname;
+
+        // Jika user buka halaman utama (/) atau kosong, lempar ke index.html (Dashboard)
+        if (path === '/' || path === '') {
+            window.location.href = '/';
+        } else {
+            // Bersihkan path (buang garis miring depan) untuk dapat slug "kkk"
+            const slug = path.substring(1); 
+
+            // Panggil Google Script dengan parameter slug
+            // Google Script akan merespon HTML berisi script redirect
+            fetch(`${SCRIPT_URL}?s=${slug}`)
+                .then(response => response.text())
+                .then(htmlContent => {
+                    // Tulis response HTML dari Google Script ke halaman ini
+                    // Ini akan mengeksekusi perintah window.location.href yang ada di script Google
+                    document.open();
+                    document.write(htmlContent);
+                    document.close();
+                })
+                .catch(error => {
+                    document.body.innerHTML = '<h3>Link rusak atau tidak ditemukan.</h3>';
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
