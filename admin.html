@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shortlink Manager</title>
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --bg-body: #f7f9fc;
+            --bg-card: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
+            --primary: #000000;
+            --primary-hover: #333333;
+            --danger: #e53935;
+            --danger-hover: #c62828;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; width: 100%; }
+        
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes skeleton { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
+
+        /* --- LOGIN SCREEN --- */
+        #login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--bg-card);
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            animation: fadeIn 0.6s ease;
+        }
+        .login-logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- DASHBOARD --- */
+        header {
+            background: var(--bg-card);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand { font-weight: 700; font-size: 18px; }
+        
+        /* --- FORMS & INPUTS --- */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            background: #fafafa;
+            transition: var(--transition);
+        }
+        input:focus {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        
+        .btn-secondary { background: #f0f0f0; color: var(--text-main); }
+        .btn-secondary:hover { background: #e0e0e0; }
+
+        .btn-danger { background: #fee; color: var(--danger); }
+        .btn-danger:hover { background: #fdd; color: var(--danger-hover); }
+
+        .btn-icon { width: auto; padding: 8px 12px; font-size: 13px; }
+        
+        /* --- LIST ITEMS --- */
+        .link-item {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            animation: fadeIn 0.4s ease forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-main { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .link-info { flex: 1; min-width: 0; margin-right: 15px; }
+        
+        .short-url {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge-clicks {
+            font-size: 11px;
+            background: #f0f0f0;
+            color: var(--text-sub);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid #e0e0e0;
+        }
+
+        .long-url {
+            font-size: 13px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 12px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .action-btn:hover { background: #f5f5f5; color: var(--primary); }
+        .action-btn.delete:hover { background: #fee; color: var(--danger); }
+
+        /* --- SKELETON LOADING --- */
+        .skeleton {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            border-radius: 4px;
+            background-size: 200% 100%;
+            animation: skeleton 1.5s linear infinite;
+        }
+        .sk-item { height: 100px; margin-bottom: 16px; border-radius: var(--radius); }
+
+        /* --- MODAL & TOAST --- */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: #fff; border: 1px solid #eee; box-shadow: var(--shadow-md);
+            padding: 30px; border-radius: 20px; width: 90%; max-width: 320px; text-align: center;
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal.active .modal-box { transform: scale(1); }
+        
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #333; color: #fff; padding: 12px 24px; border-radius: 50px;
+            font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none;
+            transition: all 0.3s ease; z-index: 200; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Responsive Tweaks */
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .card { padding: 20px; }
+            .short-url { font-size: 15px; flex-direction: column; align-items: flex-start; }
+            .badge-clicks { margin-left: 0; margin-top: 5px; display: inline-block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">Short.</div>
+            <div class="form-group">
+                <input type="password" id="pass" placeholder="Password" onkeypress="if(event.key==='Enter') login()">
+            </div>
+            <button class="btn btn-primary" onclick="login()">Masuk Dashboard</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="app" class="hidden">
+        <header>
+            <div class="container header-content">
+                <div class="brand">Dashboard Link</div>
+                <button class="action-btn" onclick="logout()" style="font-size: 14px;">Keluar</button>
+            </div>
+        </header>
+
+        <main class="container">
+            <!-- Form Card -->
+            <section class="card">
+                <h3 style="margin: 0 0 20px 0; font-size: 18px;">Buat Link Baru</h3>
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-group">
+                    <label class="form-label">URL Tujuan</label>
+                    <input type="url" id="url" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Slug Pendek (Opsional)</label>
+                    <input type="text" id="slug" placeholder="contoh: kelas-10">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" id="btn-save" onclick="saveLink()">Buat Link</button>
+                    <button class="btn btn-secondary" onclick="resetForm()" id="btn-cancel" style="width: auto;">Reset</button>
+                </div>
+            </section>
+
+            <!-- List Section -->
+            <section>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="font-size: 16px; margin: 0;">Daftar Link</h3>
+                    <span id="total-count" style="font-size: 12px; font-weight: 600; color: var(--text-sub);">0 Link</span>
+                </div>
+                
+                <div id="list-container">
+                    <!-- Skeleton Loader Default -->
+                    <div class="skeleton sk-item"></div>
+                    <div class="skeleton sk-item"></div>
+                    <div class="skeleton sk-item"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL QR -->
+    <div id="modal-qr" class="modal">
+        <div class="modal-box">
+            <h3 style="margin-bottom: 15px;">QR Code</h3>
+            <div id="qr-container" style="width: 200px; height: 200px; background: #f5f5f5; margin: 0 auto 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <img id="qr-img" src="" style="width: 100%; height: 100%; border-radius: 8px; display: none;">
+            </div>
+            <p id="qr-text" style="font-size: 12px; color: #666; word-break: break-all; margin-bottom: 20px;"></p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+                <button class="btn btn-primary" onclick="downloadQR()">Unduh</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast">Notifikasi</div>
+
+    <script>
+        // --- KONFIGURASI ---
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby5FAs-sXVqrCu-4XvNBJVE6jP4oCndAMhNQAUEADRCJYR3xi4FgxAGgxZI_un9EmbPLg/exec"; 
+        const DOMAIN_DISPLAY = "go.sayaguru.id";
+
+        // --- AUTH ---
+        function login() {
+            const val = document.getElementById('pass').value;
+            if(val === "1") {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                loadLinks();
+            } else {
+                showToast("Password salah!");
+                document.getElementById('pass').classList.add('shake'); // Efek getar bisa ditambahkan di CSS
+                setTimeout(()=> document.getElementById('pass').classList.remove('shake'), 500);
+            }
+        }
+        function logout() { location.reload(); }
+
+        // --- API ---
+        async function apiCall(action, data = {}) {
+            const fd = new FormData();
+            fd.append('action', action);
+            fd.append('data', JSON.stringify(data));
+            try {
+                const res = await fetch(GAS_URL, { method: 'POST', body: fd });
+                return await res.json();
+            } catch (e) {
+                showToast("Gagal terhubung ke server");
+                return { status: 'error' };
+            }
+        }
+
+        async function loadLinks() {
+            // Tampilkan Skeleton Loading
+            const container = document.getElementById('list-container');
+            container.innerHTML = `
+                <div class="skeleton sk-item"></div>
+                <div class="skeleton sk-item"></div>
+                <div class="skeleton sk-item"></div>
+            `;
+
+            const res = await apiCall('getLinks');
+            
+            if(res.status === 'success') {
+                renderList(res.data);
+            } else {
+                container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Gagal memuat data.</p>';
+            }
+        }
+
+        async function saveLink() {
+            const id = document.getElementById('edit-id').value;
+            const url = document.getElementById('url').value;
+            const slug = document.getElementById('slug').value.trim();
+
+            if(!url || !slug) return showToast("Mohon isi semua kolom");
+            if(!url.startsWith('http')) return showToast("URL harus dimulai dengan http/https");
+
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerText;
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            let res;
+            if(id) res = await apiCall('updateLink', { id, longUrl: url, slug });
+            else res = await apiCall('createLink', { longUrl: url, slug });
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+            if(res.status === 'success') {
+                showToast(res.message);
+                resetForm();
+                loadLinks();
+            } else {
+                showToast(res.message);
+            }
+        }
+
+        async function deleteLink(id) {
+            if(confirm("Yakin ingin menghapus link ini?")) {
+                const res = await apiCall('deleteLink', { id });
+                if(res.status === 'success') {
+                    showToast("Link dihapus");
+                    loadLinks();
+                }
+            }
+        }
+
+        // --- RENDER ---
+        function renderList(data) {
+            const container = document.getElementById('list-container');
+            document.getElementById('total-count').innerText = `${data.length} Link`;
+
+            if(data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#999;">Belum ada link.<br>Buat link pertamamu sekarang!</div>';
+                return;
+            }
+
+            let html = '';
+            data.forEach((item, idx) => {
+                // Delay animasi staggered
+                const delay = idx * 0.05;
+                html += `
+                    <div class="link-item" style="animation-delay: ${delay}s">
+                        <div class="link-main">
+                            <div class="link-info">
+                                <div class="short-url">
+                                    ${DOMAIN_DISPLAY}/${item.slug}
+                                    <span class="badge-clicks">👁 ${item.clicks}</span>
+                                </div>
+                                <a href="${item.longUrl}" target="_blank" class="long-url">${item.longUrl}</a>
+                            </div>
+                        </div>
+                        <div class="actions-grid">
+                            <button class="action-btn" onclick="copyLink('${item.slug}')">Salin</button>
+                            <button class="action-btn" onclick="openQR('${item.slug}')">QR Code</button>
+                            <button class="action-btn" onclick="editItem('${item.id}', '${item.slug}', '${item.longUrl}')">Edit</button>
+                            <button class="action-btn delete" style="grid-column: span 3; margin-top: 5px; border-top: 1px dashed #eee; padding-top: 10px;" onclick="deleteLink('${item.id}')">Hapus Link</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function editItem(id, slug, url) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('slug').value = slug;
+            document.getElementById('url').value = url;
+            document.getElementById('btn-save').innerText = "Update Link";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('slug').value = '';
+            document.getElementById('url').value = '';
+            document.getElementById('btn-save').innerText = "Buat Link";
+        }
+
+function copyLink(slug) {
+    // Gabungkan domain + slug
+    const fullShortLink = `https://${DOMAIN_DISPLAY}/${slug}`;
+    
+    // Salin ke clipboard
+    navigator.clipboard.writeText(fullShortLink).then(() => {
+        // Tampilkan notifikasi sukses
+        showToast("Link Pendek Disalin: " + fullShortLink);
+    }).catch(err => {
+        // Fallback jika browser memblokir clipboard
+        console.error('Gagal menyalin', err);
+        prompt("Tekan Ctrl+C untuk menyalin link ini:", fullShortLink);
+    });
+}
+
+        // --- QR ---
+        function openQR(slug) {
+            const link = `https://${DOMAIN_DISPLAY}/${slug}`;
+            const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}&color=000000&bgcolor=ffffff`;
+            
+            const img = document.getElementById('qr-img');
+            img.src = apiUrl;
+            img.style.display = 'block';
+            
+            document.getElementById('qr-text').innerText = link;
+            document.getElementById('modal-qr').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-qr').classList.remove('active');
+        }
+
+        function downloadQR() {
+            const img = document.getElementById('qr-img');
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = `qr-${Date.now()}.png`;
+            a.click();
+            showToast("QR Code didownload");
+        }
+
+        // --- TOAST UTILS ---
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
