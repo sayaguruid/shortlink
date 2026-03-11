@@ -6,8 +6,9 @@
     <title>Shortlink Dashboard</title>
     <!-- Font Modern -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Library QR Code -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    
+    <!-- PERBAIKAN: Menggunakan Library QR Code yang BENAR untuk Browser -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     
     <style>
         :root {
@@ -188,8 +189,9 @@
         }
 
         #qr-container canvas {
-            border: 1px solid #eee; /* Border tipis agar QR terlihat di bg putih */
+            border: 1px solid #eee; 
             border-radius: 4px;
+            padding: 10px; /* Memberi ruang putih di sekeliling QR */
         }
 
         #toast {
@@ -439,13 +441,22 @@
             render(filtered);
         }
 
-        // --- QR CODE LOGIC (FIXED & DOWNLOADABLE) ---
+        // --- QR CODE LOGIC (FIXED LIBRARY) ---
         function showQr(text) {
             const container = document.getElementById('qr-container');
-            container.innerHTML = ""; // Bersihkan QR lama
+            container.innerHTML = ""; 
+
+            // Tampilkan Modal dulu agar elemen terlihat oleh library
+            document.getElementById('qr-modal').style.display = 'flex';
+
+            // Cek apakah library QRCode sudah terload
+            if (typeof QRCode === 'undefined') {
+                alert("Library QR Code gagal dimuat. Periksa koneksi internet atau coba refresh halaman.");
+                return;
+            }
 
             try {
-                // Buat QR Code baru
+                // Gunakan library qrcodejs (Browser Version)
                 new QRCode(container, {
                     text: text,
                     width: 200,
@@ -454,12 +465,9 @@
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
-                
-                // Tampilkan Modal
-                document.getElementById('qr-modal').style.display = 'flex';
             } catch (e) {
                 console.error(e);
-                alert("Gagal memuat QR Code. Periksa koneksi internet Anda.");
+                alert("Gagal generate QR Code.");
             }
         }
 
@@ -468,24 +476,20 @@
         }
 
         function downloadQr() {
-            // Ambil elemen Canvas yang digenerate oleh library
+            // Library qrcodejs biasanya membuat elemen <canvas> atau <img> di dalam container
             const canvas = document.querySelector('#qr-container canvas');
             
             if (canvas) {
-                // Konversi canvas ke gambar PNG
                 const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-                
-                // Buat link download sementara
                 const link = document.createElement('a');
                 link.download = 'qrcode.png';
                 link.href = image;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
                 showToast("QR Code didownload!");
             } else {
-                // Fallback jika library merender img tag bukan canvas (jarang terjadi tapi mungkin)
+                // Fallback jika library menghasilkan <img>
                 const img = document.querySelector('#qr-container img');
                 if(img) {
                     const link = document.createElement('a');
@@ -493,7 +497,7 @@
                     link.download = 'qrcode.png';
                     link.click();
                 } else {
-                    alert("Gagal menemukan gambar QR Code untuk diunduh.");
+                    alert("Gagal menemukan gambar QR Code.");
                 }
             }
         }
