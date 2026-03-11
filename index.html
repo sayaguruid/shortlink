@@ -1,53 +1,43 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Shortlink GitHub Pages</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    h1 { color: #333; }
-    ul { list-style: none; padding: 0; }
-    li { margin: 10px 0; }
-    a { text-decoration: none; color: #1a73e8; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-  </style>
+<meta charset="UTF-8">
+<title>Redirect</title>
 </head>
+
 <body>
-  <h1>Shortlink GitHub Pages</h1>
-  <ul id="links"></ul>
 
-  <script>
-    const webAppUrl = "https://script.google.com/macros/s/xxxxxxxx/exec"; // ganti dengan Web App URL
-    const path = window.location.pathname.slice(1);
+Redirecting...
 
-    if (path) {
-      // Redirect melalui Google Apps Script
-      fetch(`${webAppUrl}?link=${path}`)
-        .then(response => response.text())
-        .then(url => {
-          if (url !== "Link tidak ditemukan") {
-            window.location.href = url;
-          } else {
-            document.body.innerHTML = "<h2>Shortlink tidak ditemukan</h2>";
-          }
-        });
-    } else {
-      // Tampilkan daftar shortlink
-      const links = {
-        yt: "YouTube",
-        gh: "GitHub",
-        wa: "WhatsApp"
-      };
-      const ul = document.getElementById("links");
-      for (const key in links) {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = "/" + key;
-        a.textContent = key + " → " + links[key];
-        li.appendChild(a);
-        ul.appendChild(li);
-      }
-    }
-  </script>
+<script>
+
+const api="YOUR_SCRIPT_URL";
+
+const path=window.location.pathname.slice(1);
+
+if(path){
+
+fetch("https://ipapi.co/json")
+.then(r=>r.json())
+.then(data=>{
+
+fetch(`${api}?link=${path}&country=${data.country_name}&ip=${data.ip}`)
+.then(r=>r.text())
+.then(url=>{
+
+if(url!="404"){
+location.replace(url);
+}else{
+document.body.innerHTML="Link tidak ditemukan";
+}
+
+});
+
+});
+
+}
+
+</script>
+
 </body>
 </html>
