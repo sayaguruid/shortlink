@@ -2,570 +2,329 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shortlink Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Bio - sayaguru.id</title>
+    <!-- Font Poppins (Populer di Website Edukasi Indonesia) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- RemixIcon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #ffffff;
-            --bg-subtle: #f9fafb;
-            --text: #111111;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --primary: #000000;
-            --danger: #ef4444;
-            --radius: 8px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            /* Sesuaikan warna ini dengan warna tema website sayaguru.id */
+            --primary-color: #0056b3;    /* Biru Tua Profesional */
+            --primary-light: #e6f0ff;    /* Biru sangat muda untuk background icon */
+            --text-dark: #1f2937;        /* Hitam keabuan */
+            --text-gray: #6b7280;        /* Abu-abu teks */
+            --bg-body: #f3f4f6;          /* Abu-abu background luar */
+            --bg-card: #ffffff;          /* Putih kartu */
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-subtle);
-            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* --- COMPONENTS --- */
-        .btn {
-            padding: 12px 20px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: white;
-            color: var(--text);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-        .btn:hover { background: #f3f4f6; border-color: #d1d5db; }
-        .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-primary:hover { background: #333; border-color: #333; }
-        .btn-danger { color: var(--danger); border-color: #fee2e2; background: #fef2f2; }
-        .btn-danger:hover { background: #fee2e2; }
-
-        input {
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-family: inherit;
-            font-size: 16px;
-            width: 100%;
-            box-sizing: border-box;
-            background: white;
-        }
-        input:focus { outline: 2px solid var(--primary); border-color: transparent; }
-
-        /* --- VIEW: LOGIN --- */
-        #view-login {
-            display: none;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-            background: var(--bg);
-            padding: 20px;
-        }
-        .login-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 360px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        .brand-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; letter-spacing: -0.5px; }
-
-        /* --- VIEW: DASHBOARD === */
-        #view-dashboard { display: none; min-height: 100vh; flex-direction: column; }
-        
-        header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(5px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 2rem;
+        }
+
+        /* --- Navbar Sederhana (Mirip Website Utama) --- */
+        .navbar {
+            width: 100%;
+            background-color: var(--bg-card);
+            padding: 1rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
             align-items: center;
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 100;
+        }
+
+        .brand-logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 15px;
             width: 100%;
-        }
-
-        /* Input Toolbar */
-        .toolbar {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+            max-width: 600px;
+            margin-top: 2rem;
+            padding: 0 1.5rem;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .flex-grow { flex: 2; min-width: 200px; }
-        .flex-small { flex: 1; min-width: 120px; }
-
-        /* Table */
-        .table-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th {
-            text-align: left;
-            padding: 12px 15px;
-            font-size: 12px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #f9fafb; }
-
-        .link-code { font-weight: 600; font-family: monospace; font-size: 14px; }
-        .link-full { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; word-break: break-all; }
-        .url-text { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
-        
-        .action-group { display: flex; gap: 5px; justify-content: flex-end; flex-wrap: wrap; }
-        .action-group .btn { padding: 6px 10px; font-size: 12px; }
-
-        /* View: Redirect (Loading) */
-        #view-redirect {
-            display: none;
-            height: 100vh;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: white;
-            color: var(--text);
+            gap: 2rem;
         }
-        .spinner {
-            width: 30px; height: 30px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary);
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            background: linear-gradient(135deg, var(--bg-card) 0%, #f9fafb 100%);
+            padding: 2.5rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .hero-img {
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 15px;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-light);
+        }
+
+        .hero h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .hero p {
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        /* --- Link List (Gaya Website Card) --- */
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .link-card {
+            background-color: var(--bg-card);
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-light);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .link-content {
+            flex: 1;
+        }
+
+        .link-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-dark);
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+
+        .link-desc {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            display: block;
+            line-height: 1.4;
+        }
+
+        .link-action {
+            color: var(--primary-color);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.2s;
+        }
+
+        .link-card:hover .link-action {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* --- Footer Website Style --- */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #e5e7eb;
+            width: 100%;
+            background-color: var(--bg-card);
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+        }
+
+        .footer-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 5px;
+        }
+
+        /* --- Loading --- */
+        .state-message { text-align: center; padding: 1rem; color: var(--text-gray); font-size: 0.9rem; }
+        .spinner { 
+            width: 24px; height: 24px; border: 3px solid #e5e7eb; 
+            border-top-color: var(--primary-color); border-radius: 50%; 
+            animation: spin 0.8s linear infinite; margin: 0 auto 10px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Modal & Toast */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            display: none; justify-content: center; align-items: center; z-index: 100;
-            backdrop-filter: blur(3px);
-            padding: 20px;
-        }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 16px;
-            width: 100%; max-width: 320px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
-        }
-
-        #qr-container canvas {
-            border: 1px solid #eee; 
-            border-radius: 4px;
-            max-width: 100%;
-            height: auto;
-        }
-
-        #toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
-            background: var(--primary); color: white; padding: 12px 24px;
-            border-radius: 50px; font-size: 14px; opacity: 0; transition: 0.3s;
-            pointer-events: none; z-index: 200; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-            white-space: nowrap;
-        }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* --- MOBILE --- */
-        @media (max-width: 600px) {
-            .container { margin: 15px auto; }
-            .toolbar { flex-direction: column; align-items: stretch; }
-            .flex-grow, .flex-small { width: 100%; min-width: unset; margin-bottom: 10px; }
-            .btn-primary { width: 100%; justify-content: center; }
-            header { padding: 10px 15px; }
-            .brand-title { font-size: 18px; }
-            td, th { padding: 10px; }
-            .link-code { font-size: 13px; }
+        /* Responsive Mobile */
+        @media (max-width: 480px) {
+            .container { padding: 0 1rem; margin-top: 1.5rem; }
+            .hero { padding: 2rem 1.25rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- === 1. VIEW LOGIN === -->
-    <div id="view-login">
-        <div class="login-card">
-            <div class="brand-title">Short.</div>
-            <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Masuk untuk mengelola link</p>
-            
-            <input type="password" id="pass" placeholder="Password" style="margin-bottom: 15px;" 
-                   oninput="document.getElementById('login-error').style.display='none'" 
-                   onkeydown="if(event.key==='Enter') login()">
-            
-            <button class="btn btn-primary" style="width:100%" onclick="login()">Masuk</button>
-            <p id="login-error" style="color:var(--danger); font-size:13px; margin-top:15px; display:none;">Password salah</p>
-        </div>
-    </div>
+    <!-- Navbar Simpel -->
+    <nav class="navbar">
+        <a href="https://www.sayaguru.id" class="brand-logo">
+            <i class="ri-graduation-cap-fill"></i> sayaguru.id
+        </a>
+    </nav>
 
-    <!-- === 2. VIEW DASHBOARD === -->
-    <div id="view-dashboard">
-        <header>
-            <div class="brand-title" style="margin:0;">Short.</div>
-            <button class="btn" onclick="logout()">Logout</button>
-        </header>
+    <div class="container">
+        
+        <!-- Hero Section: Intro Singkat -->
+        <section class="hero">
+            <img src="https://picsum.photos/seed/sayaguru_brand/200/200" alt="Profile" class="hero-img">
+            <h1>Rekomendasi Pilihan</h1>
+            <p>Koleksi kursus menulis, alat peraga, dan sumber belajar terkurasi untuk guru modern.</p>
+        </section>
 
-        <div class="container">
-            
-            <!-- Input Bar -->
-            <div class="toolbar">
-                <div class="flex-grow">
-                    <input type="text" id="in-url" placeholder="URL Tujuan (https://...)">
-                </div>
-                <div class="flex-small">
-                    <input type="text" id="in-short" placeholder="Kode (opsional)">
-                </div>
-                <button class="btn btn-primary" onclick="add()">Buat Link</button>
-                
-                <div style="width:100%; height:1px; background:var(--border); margin: 10px 0; display:none;" class="divider"></div>
-                
-                <div style="width: 100%;">
-                    <input type="text" id="search" placeholder="Cari link..." onkeyup="search()">
+        <!-- Bagian Link Utama -->
+        <div>
+            <div class="section-title">Program Unggulan</div>
+            <div id="link-container" class="link-list">
+                <div class="state-message">
+                    <div class="spinner"></div>
+                    Memuat data...
                 </div>
             </div>
-
-            <!-- Tabel Data -->
-            <div class="table-card">
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Short Link</th>
-                                <th>URL Asli</th>
-                                <th>Klik</th>
-                                <th style="text-align:right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list"></tbody>
-                    </table>
-                </div>
-                <div id="loading" style="padding:20px; text-align:center; color:#999;">Memuat data...</div>
-            </div>
         </div>
+
     </div>
 
-    <!-- === 3. VIEW REDIRECT === -->
-    <div id="view-redirect">
-        <div class="spinner"></div>
-        <div style="font-weight:500">Mengarahkan...</div>
-    </div>
-
-    <!-- QR Modal -->
-    <div id="qr-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin:0 0 15px 0; font-size:16px;">QR Code</h3>
-            <div id="qr-container" style="display:flex; justify-content:center; margin-bottom:20px; background:#fff;"></div>
-            <div style="display:flex; gap:10px; justify-content:center; flex-direction:column;">
-                <button class="btn btn-primary" onclick="downloadQr()">Download PNG</button>
-                <button class="btn" onclick="closeModal()">Tutup</button>
-            </div>
+    <!-- Footer Website -->
+    <footer>
+        <p>&copy; 2023 sayaguru.id. All rights reserved.</p>
+        <div class="footer-links" style="margin-top: 5px;">
+            <a href="#">Tentang Kami</a> • <a href="#">Kontak</a> • <a href="#">Privacy</a>
         </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast">Notifikasi</div>
+    </footer>
 
     <script>
-        // --- KONFIGURASI ---
-        const API = "https://script.google.com/macros/s/AKfycbzxlXXLIyvODNs61iQV0ZPJEwCa3B_W-gCjKuWJdIDo9q7bQ3EmMqyVqqV7tcRDw9nIuw/exec";
-        const DOMAIN = window.location.origin + "/";
+        // ==========================================
+        // PENTING: Masukkan URL Script Google Apps Script Anda di sini
+        // ==========================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4XAJ857b16cy1fFv1RELgS4ZMQr3pkkWzdq4M961-CuPkSWtYupYk4Sl1B1y0yzZnJQ/exec'; 
 
-        // --- ROUTING UTAMA ---
-        function init() {
-            const hash = window.location.hash; 
-            
-            // 1. Cek Redirect
-            if (hash && hash.length > 1) {
-                document.getElementById('view-redirect').style.display = 'flex';
-                doRedirect(hash.substring(1));
-                return; // Stop proses lain
-            }
+        const linkContainer = document.getElementById('link-container');
 
-            // 2. Cek Sesi Login
-            if (localStorage.getItem('auth') === 'true') {
-                showDashboard();
-            } else {
-                showLogin();
-            }
-        }
-
-        function showLogin() { 
-            document.getElementById('view-login').style.display = 'flex'; 
-            setTimeout(() => document.getElementById('pass').focus(), 100);
-        }
-        function showDashboard() {
-            document.getElementById('view-login').style.display = 'none';
-            document.getElementById('view-redirect').style.display = 'none';
-            document.getElementById('view-dashboard').style.display = 'flex';
-            load();
-        }
-
-        // --- AUTH (LOGIN KE SERVER) ---
-        async function login() {
-            const p = document.getElementById('pass').value;
-            const btn = document.querySelector('#view-login .btn-primary');
-            const errBox = document.getElementById('login-error');
-
-            if(!p) return;
-
-            btn.disabled = true; btn.innerText = "Cek...";
-
-            try {
-                // Kirim password ke GAS untuk dicek
-                const res = await fetch(API, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "login", password: p })
-                });
-                const result = await res.json();
-
-                if (result.status === "success") {
-                    localStorage.setItem("auth", "true");
-                    window.location.href = DOMAIN; // Refresh bersih
-                } else {
-                    errBox.style.display = 'block';
-                    document.getElementById('pass').value = '';
-                }
-            } catch(e) {
-                alert("Gagal koneksi ke server.");
-            } finally {
-                btn.disabled = false; btn.innerText = "Masuk";
-            }
-        }
-
-        function logout() { 
-            localStorage.removeItem("auth"); 
-            window.location.reload(); 
-        }
-
-        // --- LOGIC REDIRECT ---
-        async function doRedirect(code) {
-            try {
-                let country = "Unknown", ip = "Unknown";
-                try {
-                    const r = await fetch("https://ipapi.co/json");
-                    const d = await r.json();
-                    country = d.country_name; ip = d.ip;
-                } catch(e){}
-
-                const url = `${API}?link=${code}&country=${country}&ip=${ip}`;
-                const res = await fetch(url);
-                const contentType = res.headers.get("content-type");
-                
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    const json = await res.json();
-                    if (json.status === "success" && json.url) {
-                        window.location.href = json.url;
-                    } else {
-                        alert("Link tidak ditemukan.");
-                    }
-                } else {
-                    const text = await res.text();
-                    if (text && !text.includes("404")) {
-                        window.location.href = text;
-                    } else {
-                        alert("Link tidak ditemukan (404).");
-                    }
-                }
-            } catch (e) {
-                alert("Gagal mengarahkan link.");
-            }
-        }
-
-        // --- DASHBOARD FUNCTIONS ---
-        let allData = [];
-
-        async function load() {
-            try {
-                const res = await fetch(API + "?type=links");
-                const data = await res.json();
-                allData = data.reverse(); 
-                render(allData);
-            } catch(e) { console.error(e); }
-            finally { document.getElementById('loading').style.display = 'none'; }
-        }
-
-        function render(data) {
-            const tbody = document.getElementById('list');
-            tbody.innerHTML = "";
-            if (data.length === 0) tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:20px;'>Belum ada data</td></tr>";
-
-            data.forEach(d => {
-                const [id, short, url, clicks, created] = d;
-                const shortLink = DOMAIN + "#" + short; 
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <div class="link-code">${short}</div>
-                        <a href="${shortLink}" target="_blank" class="link-full">${shortLink}</a>
-                    </td>
-                    <td>
-                        <a href="${url}" target="_blank" class="url-text" title="${url}">${url}</a>
-                    </td>
-                    <td style="font-weight:600;">${clicks}</td>
-                    <td style="text-align:right">
-                        <div class="action-group">
-                            <button class="btn" onclick="copy('${shortLink}')">Copy</button>
-                            <button class="btn" onclick="showQr('${shortLink}')">QR</button>
-                            <button class="btn btn-danger" onclick="del(${id})">Hapus</button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function add() {
-            const url = document.getElementById('in-url').value.trim();
-            let short = document.getElementById('in-short').value.trim();
-
-            if (!url) return alert("URL tidak boleh kosong");
-            if (!url.startsWith('http')) url = 'https://' + url;
-            if (!short) short = Math.random().toString(36).substring(2, 7);
-
-            const btn = document.querySelector('.btn-primary');
-            const originalText = btn.innerText;
-            btn.disabled = true; btn.innerText = "Proses...";
-
-            try {
-                await fetch(API, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "add", short: short, url: url })
-                });
-                showToast("Berhasil dibuat");
-                document.getElementById('in-url').value = '';
-                document.getElementById('in-short').value = '';
-                load();
-            } catch(e) { alert("Gagal membuat link"); }
-            
-            btn.disabled = false; btn.innerText = originalText;
-        }
-
-        async function del(id) {
-            if (!confirm("Yakin hapus link ini?")) return;
-            await fetch(API, {
-                method: "POST",
-                body: JSON.stringify({ action: "delete", id: id })
-            });
-            load();
-        }
-
-        function search() {
-            const q = document.getElementById('search').value.toLowerCase();
-            const filtered = allData.filter(d => 
-                d[1].toLowerCase().includes(q) || d[2].toLowerCase().includes(q)
-            );
-            render(filtered);
-        }
-
-        // --- QR CODE LOGIC ---
-        function showQr(text) {
-            const container = document.getElementById('qr-container');
-            container.innerHTML = ""; 
-            document.getElementById('qr-modal').style.display = 'flex';
-
-            if (typeof QRCode === 'undefined') {
-                alert("Library QR Code gagal dimuat.");
+        async function fetchLinks() {
+            if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_WEB_APP_URL_HERE') {
+                linkContainer.innerHTML = '<div class="state-message">Error: Konfigurasi URL Script belum dilakukan.</div>';
                 return;
             }
 
             try {
-                new QRCode(container, {
-                    text: text,
-                    width: 200,
-                    height: 200,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            } catch (e) {
-                console.error(e);
-                alert("Gagal generate QR Code.");
+                const response = await fetch(SCRIPT_URL);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const data = await response.json();
+                renderLinks(data);
+            } catch (error) {
+                console.error('Error:', error);
+                linkContainer.innerHTML = `
+                    <div class="state-message">
+                        Gagal memuat tautan.<br>
+                        Silakan cek koneksi Anda atau hubungi admin.
+                    </div>
+                `;
             }
         }
 
-        function closeModal() { 
-            document.getElementById('qr-modal').style.display = 'none'; 
+        function renderLinks(links) {
+            linkContainer.innerHTML = '';
+            
+            links.forEach(link => {
+                // Pastikan nama icon valid
+                const iconClass = link.icon.startsWith('ri-') ? link.icon : `ri-${link.icon}`;
+                
+                const card = document.createElement('a');
+                card.className = 'link-card';
+                card.href = link.url;
+                card.target = '_blank';
+                card.rel = 'noopener noreferrer';
+
+                card.innerHTML = `
+                    <div class="link-icon-wrapper">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="link-content">
+                        <span class="link-title">${link.title}</span>
+                        ${link.desc ? `<span class="link-desc">${link.desc}</span>` : ''}
+                    </div>
+                    <div class="link-action">
+                        <i class="ri-arrow-right-line" style="font-size: 1.2rem;"></i>
+                    </div>
+                `;
+
+                linkContainer.appendChild(card);
+            });
         }
 
-        function downloadQr() {
-            const canvas = document.querySelector('#qr-container canvas');
-            if (canvas) {
-                const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-                const link = document.createElement('a');
-                link.download = 'qrcode.png';
-                link.href = image;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast("QR Code didownload!");
-            } else {
-                const img = document.querySelector('#qr-container img');
-                if(img) {
-                    const link = document.createElement('a');
-                    link.href = img.src;
-                    link.download = 'qrcode.png';
-                    link.click();
-                } else {
-                    alert("Gagal menemukan gambar QR Code.");
-                }
-            }
-        }
-
-        // --- UTILS ---
-        function copy(text) { 
-            navigator.clipboard.writeText(text); 
-            showToast("Link disalin!"); 
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-        }
-
-        window.addEventListener('DOMContentLoaded', init);
-
+        document.addEventListener('DOMContentLoaded', fetchLinks);
     </script>
 </body>
 </html>
