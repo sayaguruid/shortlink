@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Login</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:white;
+}
+
+.box{
+background:#222;
+padding:40px;
+border-radius:10px;
+}
+
+input{
+padding:10px;
+width:100%;
+margin-bottom:10px;
+}
+
+button{
+padding:10px;
+width:100%;
+background:#4CAF50;
+border:none;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Admin Login</h2>
+
+<input id="pass" type="password" placeholder="password">
+
+<button onclick="login()">Login</button>
+
+</div>
+
+<script>
+
+function login(){
+
+if(document.getElementById("pass").value=="admin123"){
+
+localStorage.setItem("login","1");
+location.href="dashboard.html";
+
+}else{
+
+alert("Password salah");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
