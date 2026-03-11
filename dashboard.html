@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Shortlink Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f7fb;
+margin:0;
+}
+
+header{
+background:#111;
+color:white;
+padding:15px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+td,th{
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+button{
+padding:6px 10px;
+border:none;
+background:#4CAF50;
+color:white;
+cursor:pointer;
+}
+
+.delete{
+background:red;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+Shortlink Dashboard
+
+</header>
+
+<div class="container">
+
+<input id="search" placeholder="Search" onkeyup="search()">
+
+<br><br>
+
+<input id="short" placeholder="short">
+<input id="url" placeholder="url">
+
+<button onclick="add()">Tambah</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Short</th>
+<th>URL</th>
+<th>Klik</th>
+<th>QR</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody id="list"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+if(!localStorage.getItem("login")){
+location.href="login.html";
+}
+
+const api="https://script.google.com/macros/s/AKfycbze8v3O5Hf_i1IRlHwAuGtZe4h667IDS_Jnkyhi12KFG4G1QbyDfwcI7apufpKEuB7abg/exec";
+
+function load(){
+
+fetch(api+"?type=links")
+.then(r=>r.json())
+.then(data=>{
+
+let html="";
+
+data.forEach(d=>{
+
+const shortUrl=location.origin+"/"+d[1];
+
+html+=`
+<tr>
+<td>${d[1]}</td>
+<td>
+<a href="${shortUrl}" target="_blank">${shortUrl}</a>
+<button onclick="copy('${shortUrl}')">copy</button>
+</td>
+<td>${d[3]}</td>
+<td><canvas id="qr${d[0]}"></canvas></td>
+<td>
+<button class="delete" onclick="del(${d[0]})">hapus</button>
+</td>
+</tr>
+`;
+
+});
+
+document.getElementById("list").innerHTML=html;
+
+data.forEach(d=>{
+
+QRcode(document.getElementById("qr"+d[0]),location.origin+"/"+d[1]);
+
+});
+
+});
+
+}
+
+function copy(text){
+
+navigator.clipboard.writeText(text);
+alert("copied");
+
+}
+
+function add(){
+
+fetch(api,{
+method:"POST",
+body:JSON.stringify({
+action:"add",
+short:document.getElementById("short").value,
+url:document.getElementById("url").value
+})
+})
+.then(()=>load());
+
+}
+
+function del(id){
+
+fetch(api,{
+method:"POST",
+body:JSON.stringify({
+action:"delete",
+id:id
+})
+})
+.then(()=>load());
+
+}
+
+function search(){
+
+const s=document.getElementById("search").value.toLowerCase();
+
+document.querySelectorAll("#list tr").forEach(tr=>{
+
+tr.style.display=tr.innerText.toLowerCase().includes(s)?"":"none";
+
+});
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>
