@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Link Bio - sayaguru.id</title>
-    <!-- Font Poppins (Populer di Website Edukasi Indonesia) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- RemixIcon -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <style>
         :root {
-            /* Sesuaikan warna ini dengan warna tema website sayaguru.id */
-            --primary-color: #0056b3;    /* Biru Tua Profesional */
-            --primary-light: #e6f0ff;    /* Biru sangat muda untuk background icon */
-            --text-dark: #1f2937;        /* Hitam keabuan */
-            --text-gray: #6b7280;        /* Abu-abu teks */
-            --bg-body: #f3f4f6;          /* Abu-abu background luar */
-            --bg-card: #ffffff;          /* Putih kartu */
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Palette Minimalis Hitam Putih */
+            --bg-body: #f9fafb;        /* Abu-abu sangat muda */
+            --bg-card: #ffffff;        /* Putih bersih */
+            --text-main: #111111;      /* Hitam pekat untuk judul */
+            --text-sub: #666666;       /* Abu-abu untuk deskripsi */
+            --border-color: #e5e5e5;   /* Border tipis */
+            --accent: #000000;         /* Aksen hitam */
+            --radius: 16px;            /* Sudut lebih melengkung tapi modern */
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Bayangan sangat halus */
         }
 
         * {
@@ -32,91 +32,96 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-body);
-            color: var(--text-dark);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 2rem;
         }
 
-        /* --- Navbar Sederhana (Mirip Website Utama) --- */
+        /* --- Navbar Minimalis --- */
         .navbar {
             width: 100%;
             background-color: var(--bg-card);
-            padding: 1rem 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .brand-logo {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--primary-color);
+            font-weight: 500; /* Lebih tipis agar minimalis */
+            font-size: 1.1rem;
+            color: var(--text-main);
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
+            justify-content: center; /* Tengah */
         }
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 580px; /* Sedikit lebih kecil agar rapi */
             margin-top: 2rem;
             padding: 0 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            flex: 1; /* Agar footer terdorong ke bawah */
         }
 
-        /* --- Hero Section --- */
+        /* --- Hero Section Bersih --- */
         .hero {
             text-align: center;
-            background: linear-gradient(135deg, var(--bg-card) 0%, #f9fafb 100%);
+            background: var(--bg-card);
             padding: 2.5rem 1.5rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
         }
 
         .hero-img {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 1rem;
-            border: 3px solid var(--primary-light);
+            border: 2px solid var(--border-color); /* Border tipis */
+            padding: 3px; /* Jarak antara border dan gambar */
         }
 
         .hero h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.35rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
-            color: var(--text-dark);
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
         .hero p {
-            font-size: 0.95rem;
-            color: var(--text-gray);
-            line-height: 1.6;
-        }
-
-        /* --- Link List (Gaya Website Card) --- */
-        .section-title {
             font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-gray);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            margin-left: 0.5rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            font-weight: 300;
+            max-width: 90%;
+            margin: 0 auto;
         }
 
+        /* --- Section Title --- */
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            margin-left: 0.5rem;
+            opacity: 0.7;
+        }
+
+        /* --- Link List Style --- */
         .link-list {
             display: flex;
             flex-direction: column;
@@ -125,35 +130,42 @@
 
         .link-card {
             background-color: var(--bg-card);
-            padding: 1.25rem;
+            padding: 1.2rem 1.5rem;
             border-radius: var(--radius);
             text-decoration: none;
             color: inherit;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.2rem;
             box-shadow: var(--shadow);
             border: 1px solid transparent;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .link-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary-light);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--text-main); /* Border jadi hitam saat hover */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
         }
 
+        /* Icon Wrapper: Abang Muda, Ikon Hitam */
         .link-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            background-color: #f2f2f2;
+            color: var(--text-main);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        
+        .link-card:hover .link-icon-wrapper {
+            background-color: var(--text-main); /* Jadi hitam saat hover */
+            color: #fff; /* Ikon jadi putih saat hover */
         }
 
         .link-content {
@@ -161,91 +173,103 @@
         }
 
         .link-title {
-            font-weight: 600;
+            font-weight: 500;
             font-size: 1rem;
-            color: var(--text-dark);
-            margin-bottom: 0.2rem;
+            color: var(--text-main);
+            margin-bottom: 0.1rem;
             display: block;
         }
 
         .link-desc {
-            font-size: 0.85rem;
-            color: var(--text-gray);
+            font-size: 0.8rem;
+            color: var(--text-sub);
             display: block;
             line-height: 1.4;
+            font-weight: 300;
         }
 
+        /* Panah kecil di kanan */
         .link-action {
-            color: var(--primary-color);
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            transition: transform 0.3s;
         }
 
         .link-card:hover .link-action {
-            opacity: 1;
-            transform: translateX(0);
+            transform: translateX(4px);
+            color: var(--text-main);
         }
 
-        /* --- Footer Website Style --- */
+        /* --- Footer --- */
         footer {
-            margin-top: 3rem;
+            margin-top: auto;
+            padding: 2rem 1rem 1.5rem;
             text-align: center;
-            padding: 2rem;
-            border-top: 1px solid #e5e7eb;
             width: 100%;
-            background-color: var(--bg-card);
         }
 
         footer p {
-            font-size: 0.8rem;
-            color: var(--text-gray);
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 400;
         }
 
         .footer-links a {
-            color: var(--primary-color);
+            color: var(--text-sub);
             text-decoration: none;
-            font-weight: 500;
-            margin: 0 5px;
+            font-size: 0.75rem;
+            margin: 0 8px;
+            transition: color 0.2s;
         }
 
-        /* --- Loading --- */
-        .state-message { text-align: center; padding: 1rem; color: var(--text-gray); font-size: 0.9rem; }
+        .footer-links a:hover {
+            color: var(--text-main);
+            text-decoration: underline;
+        }
+
+        /* --- Loading & States --- */
+        .state-message { 
+            text-align: center; 
+            padding: 2rem; 
+            color: var(--text-sub); 
+            font-size: 0.9rem; 
+            font-weight: 300;
+        }
         .spinner { 
-            width: 24px; height: 24px; border: 3px solid #e5e7eb; 
-            border-top-color: var(--primary-color); border-radius: 50%; 
-            animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+            width: 20px; height: 20px; border: 2px solid #eee; 
+            border-top-color: var(--text-main); border-radius: 50%; 
+            animation: spin 0.8s linear infinite; margin: 0 auto 12px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Responsive Mobile */
         @media (max-width: 480px) {
-            .container { padding: 0 1rem; margin-top: 1.5rem; }
+            .container { padding: 0 1.2rem; margin-top: 1.5rem; }
             .hero { padding: 2rem 1.25rem; }
+            .link-card { padding: 1rem 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar Simpel -->
+    <!-- Navbar -->
     <nav class="navbar">
         <a href="https://www.sayaguru.id" class="brand-logo">
-            <i class="ri-graduation-cap-fill"></i> sayaguru.id
+            <i class="ri-graduation-cap-line"></i> sayaguru.id
         </a>
     </nav>
 
     <div class="container">
         
-        <!-- Hero Section: Intro Singkat -->
+        <!-- Hero -->
         <section class="hero">
             <img src="https://picsum.photos/seed/sayaguru_brand/200/200" alt="Profile" class="hero-img">
             <h1>Rekomendasi Pilihan</h1>
-            <p>Koleksi kursus menulis, alat peraga, dan sumber belajar terkurasi untuk guru modern.</p>
+            <p>Koleksi kursus, alat peraga, dan sumber belajar terkurasi untuk guru modern.</p>
         </section>
 
-        <!-- Bagian Link Utama -->
+        <!-- Links -->
         <div>
-            <div class="section-title">Program Unggulan</div>
+            <div class="section-title">Menu Utama</div>
             <div id="link-container" class="link-list">
                 <div class="state-message">
                     <div class="spinner"></div>
@@ -256,17 +280,17 @@
 
     </div>
 
-    <!-- Footer Website -->
+    <!-- Footer -->
     <footer>
-        <p>&copy; 2023 sayaguru.id. All rights reserved.</p>
-        <div class="footer-links" style="margin-top: 5px;">
-            <a href="#">Tentang Kami</a> • <a href="#">Kontak</a> • <a href="#">Privacy</a>
+        <p>&copy; 2023 sayaguru.id</p>
+        <div class="footer-links">
+            <a href="#">Tentang</a> • <a href="#">Kontak</a> • <a href="#">Privasi</a>
         </div>
     </footer>
 
     <script>
         // ==========================================
-        // PENTING: Masukkan URL Script Google Apps Script Anda di sini
+        // SCRIPT URL (Sesuaikan dengan Web App Anda)
         // ==========================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4XAJ857b16cy1fFv1RELgS4ZMQr3pkkWzdq4M961-CuPkSWtYupYk4Sl1B1y0yzZnJQ/exec'; 
 
@@ -274,7 +298,7 @@
 
         async function fetchLinks() {
             if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_WEB_APP_URL_HERE') {
-                linkContainer.innerHTML = '<div class="state-message">Error: Konfigurasi URL Script belum dilakukan.</div>';
+                linkContainer.innerHTML = '<div class="state-message">Error: URL Script belum dikonfigurasi.</div>';
                 return;
             }
 
@@ -288,7 +312,7 @@
                 linkContainer.innerHTML = `
                     <div class="state-message">
                         Gagal memuat tautan.<br>
-                        Silakan cek koneksi Anda atau hubungi admin.
+                        Silakan periksa koneksi internet Anda.
                     </div>
                 `;
             }
@@ -298,7 +322,7 @@
             linkContainer.innerHTML = '';
             
             links.forEach(link => {
-                // Pastikan nama icon valid
+                // Pastikan format icon benar
                 const iconClass = link.icon.startsWith('ri-') ? link.icon : `ri-${link.icon}`;
                 
                 const card = document.createElement('a');
@@ -316,7 +340,7 @@
                         ${link.desc ? `<span class="link-desc">${link.desc}</span>` : ''}
                     </div>
                     <div class="link-action">
-                        <i class="ri-arrow-right-line" style="font-size: 1.2rem;"></i>
+                        <i class="ri-arrow-right-s-line"></i>
                     </div>
                 `;
 
