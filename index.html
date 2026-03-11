@@ -42,6 +42,10 @@
             font-size: 14px;
             font-weight: 500;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .btn:hover { background: #f3f4f6; border-color: #d1d5db; }
         .btn-primary {
@@ -174,13 +178,18 @@
 
         /* Modal & Toast */
         .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             display: none; justify-content: center; align-items: center; z-index: 100;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3px);
         }
         .modal-content {
-            background: white; padding: 30px; border-radius: 12px;
-            width: 280px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            background: white; padding: 30px; border-radius: 16px;
+            width: 320px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+        }
+
+        #qr-container canvas {
+            border: 1px solid #eee; /* Border tipis agar QR terlihat di bg putih */
+            border-radius: 4px;
         }
 
         #toast {
@@ -247,7 +256,7 @@
         </div>
     </div>
 
-    <!-- === 3. VIEW REDIRECT (Otomatis jika ada Hash) === -->
+    <!-- === 3. VIEW REDIRECT === -->
     <div id="view-redirect">
         <div class="spinner"></div>
         <div style="font-weight:500">Mengarahkan...</div>
@@ -257,9 +266,15 @@
     <div id="qr-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin:0 0 15px 0; font-size:16px;">QR Code</h3>
-            <div id="qr-container" style="display:flex; justify-content:center; margin-bottom:15px;"></div>
-            <p id="qr-text" style="font-size:12px; color:#666; word-break:break-all;"></p>
-            <button class="btn" style="width:100%; margin-top:15px;" onclick="closeModal()">Tutup</button>
+            
+            <!-- Tempat QR Code muncul -->
+            <div id="qr-container" style="display:flex; justify-content:center; margin-bottom:20px; background:#fff;"></div>
+            
+            <!-- Tombol Aksi Modal -->
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn" style="flex:1" onclick="closeModal()">Tutup</button>
+                <button class="btn btn-primary" style="flex:1" onclick="downloadQr()">Download PNG</button>
+            </div>
         </div>
     </div>
 
@@ -268,20 +283,16 @@
 
     <script>
         // --- KONFIGURASI ---
-        // API URL yang Anda berikan
         const API = "https://script.google.com/macros/s/AKfycbzTdSCtEI-wgCQPJo4lsWPfJYGcVL2fNRV3SLA8Pd_W-287wQYIZC5VZo6IgCyqdgoIeA/exec";
         const DOMAIN = window.location.origin + "/";
 
         // --- ROUTING SEDERHANA ---
         function init() {
-            const hash = window.location.hash; // Cek apakah ada hash (#)
-            
+            const hash = window.location.hash; 
             if (hash && hash.length > 1) {
-                // Ada Hash -> Mode Redirect
                 document.getElementById('view-redirect').style.display = 'flex';
                 doRedirect(hash.substring(1));
             } else {
-                // Tidak ada Hash -> Mode App
                 if (localStorage.getItem("login") === "1") {
                     showDashboard();
                 } else {
@@ -290,10 +301,7 @@
             }
         }
 
-        function showLogin() {
-            document.getElementById('view-login').style.display = 'flex';
-        }
-
+        function showLogin() { document.getElementById('view-login').style.display = 'flex'; }
         function showDashboard() {
             document.getElementById('view-login').style.display = 'none';
             document.getElementById('view-redirect').style.display = 'none';
@@ -306,7 +314,7 @@
             const p = document.getElementById('pass').value;
             if (p === "admin123") {
                 localStorage.setItem("login", "1");
-                window.location.href = DOMAIN; // Refresh bersihkan hash
+                window.location.href = DOMAIN;
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -316,7 +324,6 @@
         // --- LOGIC REDIRECT ---
         async function doRedirect(code) {
             try {
-                // 1. Ambil IP & Negara
                 let country = "Unknown", ip = "Unknown";
                 try {
                     const r = await fetch("https://ipapi.co/json");
@@ -324,24 +331,18 @@
                     country = d.country_name; ip = d.ip;
                 } catch(e){}
 
-                // 2. Request ke GAS
-                // Catatan: Pastikan backend GAS Anda mendukung parameter ?link=...
                 const url = `${API}?link=${code}&country=${country}&ip=${ip}`;
                 const res = await fetch(url);
-                
-                // Cek tipe respons (Text atau JSON)
                 const contentType = res.headers.get("content-type");
                 
                 if (contentType && contentType.indexOf("application/json") !== -1) {
-                    // Respon JSON (Backend Baru)
                     const json = await res.json();
                     if (json.status === "success" && json.url) {
                         window.location.href = json.url;
                     } else {
-                        alert("Link tidak ditemukan atau kadaluarsa.");
+                        alert("Link tidak ditemukan.");
                     }
                 } else {
-                    // Respon Text (Backend Lama)
                     const text = await res.text();
                     if (text && !text.includes("404")) {
                         window.location.href = text;
@@ -350,7 +351,6 @@
                     }
                 }
             } catch (e) {
-                console.error(e);
                 alert("Gagal mengarahkan link.");
             }
         }
@@ -362,7 +362,7 @@
             try {
                 const res = await fetch(API + "?type=links");
                 const data = await res.json();
-                allData = data.reverse(); // Tampilkan terbaru di atas
+                allData = data.reverse(); 
                 render(allData);
             } catch(e) { console.error(e); }
             finally { document.getElementById('loading').style.display = 'none'; }
@@ -375,7 +375,6 @@
 
             data.forEach(d => {
                 const [id, short, url, clicks, created] = d;
-                // Menggunakan Hash agar tidak 404 di GitHub Pages
                 const shortLink = DOMAIN + "#" + short; 
 
                 const tr = document.createElement('tr');
@@ -440,20 +439,70 @@
             render(filtered);
         }
 
+        // --- QR CODE LOGIC (FIXED & DOWNLOADABLE) ---
+        function showQr(text) {
+            const container = document.getElementById('qr-container');
+            container.innerHTML = ""; // Bersihkan QR lama
+
+            try {
+                // Buat QR Code baru
+                new QRCode(container, {
+                    text: text,
+                    width: 200,
+                    height: 200,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                
+                // Tampilkan Modal
+                document.getElementById('qr-modal').style.display = 'flex';
+            } catch (e) {
+                console.error(e);
+                alert("Gagal memuat QR Code. Periksa koneksi internet Anda.");
+            }
+        }
+
+        function closeModal() { 
+            document.getElementById('qr-modal').style.display = 'none'; 
+        }
+
+        function downloadQr() {
+            // Ambil elemen Canvas yang digenerate oleh library
+            const canvas = document.querySelector('#qr-container canvas');
+            
+            if (canvas) {
+                // Konversi canvas ke gambar PNG
+                const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                
+                // Buat link download sementara
+                const link = document.createElement('a');
+                link.download = 'qrcode.png';
+                link.href = image;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast("QR Code didownload!");
+            } else {
+                // Fallback jika library merender img tag bukan canvas (jarang terjadi tapi mungkin)
+                const img = document.querySelector('#qr-container img');
+                if(img) {
+                    const link = document.createElement('a');
+                    link.href = img.src;
+                    link.download = 'qrcode.png';
+                    link.click();
+                } else {
+                    alert("Gagal menemukan gambar QR Code untuk diunduh.");
+                }
+            }
+        }
+
         // --- UTILS ---
         function copy(text) { 
             navigator.clipboard.writeText(text); 
             showToast("Link disalin!"); 
         }
-
-        function showQr(text) {
-            document.getElementById('qr-container').innerHTML = "";
-            new QRCode(document.getElementById('qr-container'), { text: text, width: 150, height: 150 });
-            document.getElementById('qr-text').innerText = text;
-            document.getElementById('qr-modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('qr-modal').style.display = 'none'; }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -462,7 +511,6 @@
             setTimeout(() => t.classList.remove('show'), 2000);
         }
 
-        // Jalankan
         window.addEventListener('DOMContentLoaded', init);
 
     </script>
