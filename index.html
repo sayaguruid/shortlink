@@ -1,43 +1,398 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Redirect</title>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortlink Pro</title>
+    <!-- Library QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #2e51ff;
+            --primary-dark: #1a38eb;
+            --bg-light: #f1f5f9;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --white: #ffffff;
+            --danger: #ef4444;
+            --success: #10b981;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
+        body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-light); color: var(--text-dark); height: 100vh; overflow-x: hidden; }
+        
+        /* --- COMPONENTS --- */
+        .btn { padding: 10px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: var(--text-gray); }
+        .btn-outline:hover { background: #f8fafc; color: var(--primary); border-color: var(--primary); }
+
+        input { padding: 10px 12px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(46, 81, 255, 0.1); }
+
+        /* --- VIEW: REDIRECT (Loading) --- */
+        #view-redirect { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; background: #111; color: white; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- VIEW: LOGIN --- */
+        #view-login { display: none; height: 100vh; justify-content: center; align-items: center; background: var(--bg-light); }
+        .login-card { background: var(--white); padding: 40px; border-radius: 12px; box-shadow: var(--shadow); width: 100%; max-width: 350px; text-align: center; }
+        .login-logo { width: 50px; height: 50px; background: var(--primary); border-radius: 10px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; }
+
+        /* --- VIEW: DASHBOARD --- */
+        #view-dashboard { display: none; min-height: 100vh; flex-direction: column; }
+        
+        /* Navbar */
+        .navbar { background: var(--white); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
+        .brand { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; width: 100%; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--white); padding: 20px; border-radius: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+        .stat-label { color: var(--text-gray); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .stat-value { font-size: 26px; font-weight: 700; color: var(--text-dark); }
+
+        /* Toolbar */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; background: var(--white); padding: 15px; border-radius: 10px; box-shadow: var(--shadow); align-items: center; }
+        .toolbar input { margin: 0; }
+        .input-group { flex: 2; min-width: 200px; }
+        .input-short { flex: 0.5; min-width: 120px; }
+        .search-group { flex: 1; min-width: 150px; margin-left: auto; }
+
+        /* Table */
+        .table-responsive { background: var(--white); border-radius: 10px; box-shadow: var(--shadow); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; color: var(--text-gray); font-weight: 600; font-size: 13px; }
+        tr:hover { background: #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+        
+        .link-short { font-weight: 600; color: var(--primary); }
+        .link-long { color: var(--text-gray); font-size: 13px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .link-long:hover { color: var(--primary); overflow: visible; white-space: normal; z-index: 10; position: relative; background: #f8fafc; }
+
+        /* Toast & Modal */
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: white; padding: 12px 24px; border-radius: 8px; transform: translateY(100px); transition: 0.3s; z-index: 100; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        #toast.show { transform: translateY(0); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 99; backdrop-filter: blur(2px); }
+        .modal-box { background: white; padding: 30px; border-radius: 12px; text-align: center; max-width: 90%; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
 <body>
 
-Redirecting...
+    <!-- === VIEW 1: REDIRECTOR === -->
+    <div id="view-redirect">
+        <div class="spinner"></div>
+        <div id="redirect-msg">Mengarahkan link...</div>
+    </div>
 
-<script>
+    <!-- === VIEW 2: LOGIN === -->
+    <div id="view-login">
+        <div class="login-card">
+            <div class="login-logo">S</div>
+            <h2 style="margin-top:0">Admin Login</h2>
+            <p style="color:var(--text-gray); font-size:14px;">Masuk untuk mengelola link</p>
+            <input type="password" id="login-pass" placeholder="Password admin..." onkeydown="if(event.key==='Enter') doLogin()">
+            <button class="btn btn-primary" style="width:100%; margin-top:15px; justify-content:center;" onclick="doLogin()">Masuk Dashboard</button>
+            <div id="login-error" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;">Password salah!</div>
+        </div>
+    </div>
 
-const api="https://script.google.com/macros/s/AKfycbze8v3O5Hf_i1IRlHwAuGtZe4h667IDS_Jnkyhi12KFG4G1QbyDfwcI7apufpKEuB7abg/exec";
+    <!-- === VIEW 3: DASHBOARD === -->
+    <div id="view-dashboard">
+        <nav class="navbar">
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                Shortlink Pro
+            </div>
+            <button class="btn btn-outline" onclick="doLogout()">Logout</button>
+        </nav>
 
-const path=window.location.pathname.slice(1);
+        <div class="container">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Link</div>
+                    <div class="stat-value" id="stat-links">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="stat-label">Total Klik</div>
+                    <div class="stat-value" id="stat-clicks">0</div>
+                </div>
+            </div>
 
-if(path){
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="input-group">
+                    <input type="text" id="inp-url" placeholder="Tempel URL panjang di sini...">
+                </div>
+                <div class="input-short">
+                    <input type="text" id="inp-short" placeholder="Short (opsional)">
+                </div>
+                <button class="btn btn-primary" onclick="createLink()">Buat Link</button>
+                
+                <div class="search-group">
+                    <input type="text" id="inp-search" placeholder="Cari link..." onkeyup="filterTable()">
+                </div>
+            </div>
 
-fetch("https://ipapi.co/json")
-.then(r=>r.json())
-.then(data=>{
+            <!-- Table -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Short Link</th>
+                            <th>URL Asli</th>
+                            <th>Klik</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="link-table-body">
+                        <!-- Data -->
+                    </tbody>
+                </table>
+                <div id="table-loading" style="padding:30px; text-align:center; color:#999;">Memuat data...</div>
+            </div>
+        </div>
+    </div>
 
-fetch(`${api}?link=${path}&country=${data.country_name}&ip=${data.ip}`)
-.then(r=>r.text())
-.then(url=>{
+    <!-- === MODALS & TOASTS === -->
+    <div id="qr-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>QR Code</h3>
+            <div id="qr-container" style="margin:20px 0; display:flex; justify-content:center;"></div>
+            <p id="qr-text" style="font-size:12px; color:#666; word-break:break-all; margin-bottom:15px;"></p>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeModal()">Tutup</button>
+        </div>
+    </div>
 
-if(url!="404"){
-location.replace(url);
-}else{
-document.body.innerHTML="Link tidak ditemukan";
-}
+    <div id="toast">Notifikasi</div>
 
-});
+    <script>
+        // ================= KONFIGURASI =================
+        // GANTI DENGAN URL WEB APP ANDA
+        const API_URL = "URL_WEB_APP_GAS_ANDA_DISINI"; 
+        const DOMAIN = window.location.origin + "/";
+        // ================================================
 
-});
+        const views = {
+            redirect: document.getElementById('view-redirect'),
+            login: document.getElementById('view-login'),
+            dashboard: document.getElementById('view-dashboard')
+        };
+        let allData = [];
 
-}
+        // --- ROUTING UTAMA ---
+        function init() {
+            const path = window.location.pathname.slice(1); // Hapus slash depan
+            const reserved = ['', 'login', 'dashboard'];
 
-</script>
+            // 1. Cek apakah ini shortlink?
+            if (path && !reserved.includes(path)) {
+                showView('redirect');
+                handleRedirect(path);
+            } else {
+                // 2. Bukan shortlink -> Masuk area Admin
+                const auth = localStorage.getItem('auth');
+                if (auth === 'true') {
+                    showView('dashboard');
+                    loadDashboardData();
+                } else {
+                    showView('login');
+                }
+            }
+        }
 
+        function showView(name) {
+            Object.values(views).forEach(el => el.style.display = 'none');
+            views[name].style.display = (name === 'dashboard') ? 'flex' : 'flex'; // dashboard flex column
+        }
+
+        // --- LOGIC: REDIRECT ---
+        async function handleRedirect(shortCode) {
+            try {
+                // Ambil IP dulu
+                const ipRes = await fetch("https://ipapi.co/json");
+                const ipData = await ipRes.json();
+                
+                // Kirim ke GAS
+                const gasRes = await fetch(`${API_URL}?link=${shortCode}&country=${ipData.country_name}&ip=${ipData.ip}`);
+                const targetUrl = await gasRes.text();
+
+                if (targetUrl && !targetUrl.startsWith("404")) {
+                    window.location.replace(targetUrl);
+                } else {
+                    document.getElementById('redirect-msg').innerHTML = "❌ <b>Link Tidak Ditemukan (404)</b>";
+                }
+            } catch (err) {
+                document.getElementById('redirect-msg').innerHTML = "⚠️ <b>Gagal mengarahkan.</b>";
+                console.error(err);
+            }
+        }
+
+        // --- LOGIC: AUTH ---
+        function doLogin() {
+            const pass = document.getElementById('login-pass').value;
+            // Password default: admin123 (Sesuaikan di GAS juga jika diubah)
+            if (pass === "admin123") {
+                localStorage.setItem('auth', 'true');
+                window.location.href = DOMAIN; // Refresh ke root
+            } else {
+                const err = document.getElementById('login-error');
+                err.style.display = 'block';
+                document.getElementById('login-pass').value = '';
+            }
+        }
+
+        function doLogout() {
+            localStorage.removeItem('auth');
+            window.location.reload();
+        }
+
+        // --- LOGIC: DASHBOARD ---
+        async function loadDashboardData() {
+            try {
+                const res = await fetch(`${API_URL}?type=links`);
+                const data = await res.json();
+                allData = data.reverse(); // Terbaru di atas
+                renderTable(allData);
+                updateStats(allData);
+            } catch (e) {
+                showToast("Gagal memuat data!");
+            } finally {
+                document.getElementById('table-loading').style.display = 'none';
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('link-table-body');
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#999;">Belum ada link.</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const [id, short, url, clicks, date] = row;
+                const fullLink = DOMAIN + short;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="link-short">${short}</div>
+                        <div style="font-size:11px; color:#999; cursor:pointer;" onclick="copyToClipboard('${fullLink}')">${fullLink}</div>
+                    </td>
+                    <td><a href="${url}" target="_blank" class="link-long" title="${url}">${url}</a></td>
+                    <td>${clicks}</td>
+                    <td>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-outline" style="padding:5px 8px;" onclick="showQR('${fullLink}')" title="QR">QR</button>
+                            <button class="btn btn-outline" style="padding:5px 8px;" onclick="copyToClipboard('${fullLink}')" title="Copy">📋</button>
+                            <button class="btn btn-danger" style="padding:5px 8px;" onclick="deleteLink(${id})" title="Hapus">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStats(data) {
+            document.getElementById('stat-links').innerText = data.length;
+            const totalClicks = data.reduce((sum, item) => sum + (item[3] || 0), 0);
+            document.getElementById('stat-clicks').innerText = totalClicks;
+        }
+
+        async function createLink() {
+            const urlInput = document.getElementById('inp-url');
+            const shortInput = document.getElementById('inp-short');
+            
+            let url = urlInput.value.trim();
+            let short = shortInput.value.trim() || Math.random().toString(36).substring(2, 7);
+
+            if (!url) return showToast("URL tidak boleh kosong!");
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            const btn = document.querySelector('.toolbar .btn-primary');
+            const originalText = btn.innerText;
+            btn.innerText = "Proses...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'add', short, url })
+                });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    showToast("Link berhasil dibuat!");
+                    urlInput.value = '';
+                    shortInput.value = '';
+                    loadDashboardData();
+                } else {
+                    showToast(result.message || "Gagal");
+                }
+            } catch (err) {
+                showToast("Koneksi error");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteLink(id) {
+            if(!confirm("Hapus link ini?")) return;
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'delete', id })
+            });
+            showToast("Link dihapus");
+            loadDashboardData();
+        }
+
+        function filterTable() {
+            const q = document.getElementById('inp-search').value.toLowerCase();
+            const filtered = allData.filter(item => 
+                item[1].toLowerCase().includes(q) || 
+                item[2].toLowerCase().includes(q)
+            );
+            renderTable(filtered);
+        }
+
+        // --- UTILITIES ---
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => showToast("Link disalin!"));
+        }
+
+        function showQR(text) {
+            const container = document.getElementById('qr-container');
+            container.innerHTML = "";
+            new QRCode(container, { text: text, width: 180, height: 180 });
+            document.getElementById('qr-text').innerText = text;
+            document.getElementById('qr-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('qr-modal').style.display = 'none';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Jalankan saat load
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
 </body>
 </html>
