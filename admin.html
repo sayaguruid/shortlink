@@ -141,7 +141,7 @@
     document.getElementById('login-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const pass = document.getElementById('password').value;
-        if (pass === 'admin123') { // Ganti password sesuka hati
+        if (pass === 'admin123') { 
             localStorage.setItem(AUTH_KEY, 'true');
             checkAuth();
         } else {
@@ -154,7 +154,7 @@
         location.reload();
     }
 
-    // Load Data
+    // --- PERBAIKAN: Load Data (Sesuaikan dengan format respons JSON baru) ---
     async function loadLinks() {
         const list = document.getElementById('link-list');
         const loading = document.getElementById('loading');
@@ -163,21 +163,28 @@
 
         try {
             const res = await fetch(SCRIPT_URL + '?action=read');
-            const data = await res.json();
+            const response = await res.json();
             
-            if (Array.isArray(data) && data.length > 0) {
-                data.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)); // Urutkan terbaru
+            // Cek apakah status success dan apakah datanya adalah array
+            let links = [];
+            if (response.status === 'success' && Array.isArray(response.data)) {
+                links = response.data;
+            }
+
+            if (links.length > 0) {
+                // Urutkan dari yang terbaru
+                links.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
-                data.forEach(item => {
+                links.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'link-item';
                     div.innerHTML = `
                         <div>
                             <div class="short-code">go.sayaguru.id/${item.shortCode}</div>
-                            <div class="long-url">${item.longUrl}</div>
+                            <div class="long-url" title="${item.longUrl}">${item.longUrl}</div>
                         </div>
                         <div class="meta">
-                            <span>👁 ${item.clicks} klik</span>
+                            <span>👁 ${item.clicks || 0} klik</span>
                             <span>${new Date(item.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div class="actions">
@@ -189,11 +196,11 @@
                     list.appendChild(div);
                 });
             } else {
-                list.innerHTML = '<p style="text-align:center; color:#999;">Belum ada link.</p>';
+                list.innerHTML = '<p style="text-align:center; color:#999; padding: 20px;">Belum ada link tersimpan.</p>';
             }
         } catch (err) {
-            list.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat data. Cek Console.</p>';
             console.error(err);
+            list.innerHTML = '<p style="text-align:center; color:red; padding: 20px;">Gagal memuat data. Periksa koneksi internet.</p>';
         }
         loading.style.display = 'none';
     }
@@ -222,12 +229,13 @@
             if (result.status === 'success') {
                 alert('Link berhasil dibuat!');
                 document.getElementById('create-form').reset();
-                loadLinks();
+                loadLinks(); // Refresh list
             } else {
                 alert('Error: ' + result.message);
             }
         } catch (err) {
             alert('Terjadi kesalahan koneksi.');
+            console.error(err);
         }
 
         btn.innerText = originalText;
