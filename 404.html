@@ -5,62 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f3f4f6; color: #333; }
-        .container { text-align: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        /* CSS Minimalis agar cepat load */
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f3f4f6; color: #333; text-align: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #error-msg { display: none; color: #ef4444; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="loading">
     <div class="spinner"></div>
-    <h3 id="msg">Sedang mengalihkan...</h3>
-    <p id="sub-msg" style="font-size: 0.9rem; color: #666;">Mohon tunggu sebentar</p>
+    <h3>Mengalihkan...</h3>
+</div>
+
+<div id="error-msg">
+    <h3>404 Link Tidak Ditemukan</h3>
+    <p>Link yang Anda cari tidak terdaftar.</p>
 </div>
 
 <script>
-    // GANTI INI DENGAN URL WEB APP YANG SAMA PADA ADMIN.HTML
+    // GANTI INI DENGAN URL WEB APP YANG SAMA
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5FAs-sXVqrCu-4XvNBJVE6jP4oCndAMhNQAUEADRCJYR3xi4FgxAGgxZI_un9EmbPLg/exec';
 
     async function redirect() {
-        // Ambil path dari URL (contoh: /yt)
         const path = window.location.pathname;
-        
-        // Hapus slash di depan jika ada
         const code = path.startsWith('/') ? path.substring(1) : path;
 
-        // Jika path kosong (hanya /), lempar ke home atau biarkan 404 asli
+        // Cegah infinite loop jika file ini diakses langsung
         if (!code || code === '404.html') {
-            document.getElementById('msg').innerText = "Halaman Tidak Ditemukan";
-            document.querySelector('.spinner').style.display = 'none';
+            showError();
             return;
         }
 
         try {
-            // Tanya ke Google Apps Script: Kemana alamat /code ini?
+            // Fetch data dari Google Script
             const res = await fetch(SCRIPT_URL + '?action=lookup&code=' + encodeURIComponent(code));
             const data = await res.json();
 
-            if (data.found) {
-                // Jika ketemu, redirect segera
+            if (data.status === 'success' && data.found) {
+                // --- PERBAIKAN KECEPATAN ---
+                // Langsung redirect tanpa setTimeout
                 window.location.replace(data.url);
             } else {
-                // Jika tidak ketemu di database
-                document.getElementById('msg').innerText = "404 Link Tidak Ditemukan";
-                document.getElementById('sub-msg').innerText = `Link "/${code}" tidak terdaftar.`;
-                document.querySelector('.spinner').style.display = 'none';
-                document.querySelector('.spinner').style.borderTopColor = '#ef4444';
+                showError();
             }
         } catch (error) {
             console.error(error);
-            document.getElementById('msg').innerText = "Terjadi Kesalahan";
-            document.getElementById('sub-msg').innerText = "Gagal menghubungi server.";
-            document.querySelector('.spinner').style.display = 'none';
+            // Jika error network, tetap tampilkan error agar user tidak bingung
+            showError();
         }
     }
 
-    // Jalankan fungsi
+    function showError() {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error-msg').style.display = 'block';
+    }
+
+    // Jalankan fungsi segera
     redirect();
 </script>
 
