@@ -351,7 +351,7 @@
                 loadLinks();
             } else {
                 showToast("Password salah!");
-                document.getElementById('pass').classList.add('shake'); // Efek getar bisa ditambahkan di CSS
+                document.getElementById('pass').classList.add('shake'); 
                 setTimeout(()=> document.getElementById('pass').classList.remove('shake'), 500);
             }
         }
@@ -372,7 +372,6 @@
         }
 
         async function loadLinks() {
-            // Tampilkan Skeleton Loading
             const container = document.getElementById('list-container');
             container.innerHTML = `
                 <div class="skeleton sk-item"></div>
@@ -440,7 +439,6 @@
 
             let html = '';
             data.forEach((item, idx) => {
-                // Delay animasi staggered
                 const delay = idx * 0.05;
                 html += `
                     <div class="link-item" style="animation-delay: ${delay}s">
@@ -480,22 +478,17 @@
             document.getElementById('btn-save').innerText = "Buat Link";
         }
 
-function copyLink(slug) {
-    // Gabungkan domain + slug
-    const fullShortLink = `https://${DOMAIN_DISPLAY}/${slug}`;
-    
-    // Salin ke clipboard
-    navigator.clipboard.writeText(fullShortLink).then(() => {
-        // Tampilkan notifikasi sukses
-        showToast("Link Pendek Disalin: " + fullShortLink);
-    }).catch(err => {
-        // Fallback jika browser memblokir clipboard
-        console.error('Gagal menyalin', err);
-        prompt("Tekan Ctrl+C untuk menyalin link ini:", fullShortLink);
-    });
-}
+        function copyLink(slug) {
+            const fullShortLink = `https://${DOMAIN_DISPLAY}/${slug}`;
+            navigator.clipboard.writeText(fullShortLink).then(() => {
+                showToast("Link Pendek Disalin: " + fullShortLink);
+            }).catch(err => {
+                console.error('Gagal menyalin', err);
+                prompt("Tekan Ctrl+C untuk menyalin link ini:", fullShortLink);
+            });
+        }
 
-        // --- QR ---
+        // --- QR CODE (FIXED DOWNLOAD) ---
         function openQR(slug) {
             const link = `https://${DOMAIN_DISPLAY}/${slug}`;
             const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}&color=000000&bgcolor=ffffff`;
@@ -508,20 +501,46 @@ function copyLink(slug) {
             document.getElementById('modal-qr').classList.add('active');
         }
 
+        async function downloadQR() {
+            const img = document.getElementById('qr-img');
+            if (!img.src) return;
+            
+            showToast("Mengunduh QR Code...");
+            
+            try {
+                // Fetch gambar sebagai Blob untuk mengatasi masalah CORS
+                const response = await fetch(img.src);
+                const blob = await response.blob();
+                
+                // Buat URL object lokal
+                const url = window.URL.createObjectURL(blob);
+                
+                // Buat elemen anchor virtual
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `qr-${Date.now()}.png`;
+                
+                // Append ke body, klik, lalu hapus
+                document.body.appendChild(a);
+                a.click();
+                
+                // Bersihkan
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast("QR Code tersimpan di penyimpanan!");
+            } catch (e) {
+                console.error(e);
+                showToast("Gagal mengunduh otomatis. Silakan simpan manual.");
+                // Fallback: Buka di tab baru jika gagal
+                window.open(img.src, '_blank');
+            }
+        }
+
         function closeModal() {
             document.getElementById('modal-qr').classList.remove('active');
         }
 
-        function downloadQR() {
-            const img = document.getElementById('qr-img');
-            const a = document.createElement('a');
-            a.href = img.src;
-            a.download = `qr-${Date.now()}.png`;
-            a.click();
-            showToast("QR Code didownload");
-        }
-
-        // --- TOAST UTILS ---
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
