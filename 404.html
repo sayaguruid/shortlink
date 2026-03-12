@@ -5,48 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f7f9fc; color: #666; }
-        .loader { text-align: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f3f4f6; color: #333; }
+        .container { text-align: center; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="loader">
-        <div class="spinner"></div>
-        <p>Sedang mengalihkan...</p>
-    </div>
 
-    <script>
-        // --- PENTING: GANTI DENGAN URL SCRIPT GOOGLE ANDA ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5FAs-sXVqrCu-4XvNBJVE6jP4oCndAMhNQAUEADRCJYR3xi4FgxAGgxZI_un9EmbPLg/exec'; 
+<div class="container">
+    <div class="spinner"></div>
+    <h3 id="msg">Sedang mengalihkan...</h3>
+    <p id="sub-msg" style="font-size: 0.9rem; color: #666;">Mohon tunggu sebentar</p>
+</div>
 
-        // Ambil path URL saat ini (contoh: /kkk)
+<script>
+    // GANTI INI DENGAN URL WEB APP YANG SAMA PADA ADMIN.HTML
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5FAs-sXVqrCu-4XvNBJVE6jP4oCndAMhNQAUEADRCJYR3xi4FgxAGgxZI_un9EmbPLg/exec';
+
+    async function redirect() {
+        // Ambil path dari URL (contoh: /yt)
         const path = window.location.pathname;
+        
+        // Hapus slash di depan jika ada
+        const code = path.startsWith('/') ? path.substring(1) : path;
 
-        // Jika user buka halaman utama (/) atau kosong, lempar ke index.html (Dashboard)
-        if (path === '/' || path === '') {
-            window.location.href = '/';
-        } else {
-            // Bersihkan path (buang garis miring depan) untuk dapat slug "kkk"
-            const slug = path.substring(1); 
-
-            // Panggil Google Script dengan parameter slug
-            // Google Script akan merespon HTML berisi script redirect
-            fetch(`${SCRIPT_URL}?s=${slug}`)
-                .then(response => response.text())
-                .then(htmlContent => {
-                    // Tulis response HTML dari Google Script ke halaman ini
-                    // Ini akan mengeksekusi perintah window.location.href yang ada di script Google
-                    document.open();
-                    document.write(htmlContent);
-                    document.close();
-                })
-                .catch(error => {
-                    document.body.innerHTML = '<h3>Link rusak atau tidak ditemukan.</h3>';
-                    console.error('Error:', error);
-                });
+        // Jika path kosong (hanya /), lempar ke home atau biarkan 404 asli
+        if (!code || code === '404.html') {
+            document.getElementById('msg').innerText = "Halaman Tidak Ditemukan";
+            document.querySelector('.spinner').style.display = 'none';
+            return;
         }
-    </script>
+
+        try {
+            // Tanya ke Google Apps Script: Kemana alamat /code ini?
+            const res = await fetch(SCRIPT_URL + '?action=lookup&code=' + encodeURIComponent(code));
+            const data = await res.json();
+
+            if (data.found) {
+                // Jika ketemu, redirect segera
+                window.location.replace(data.url);
+            } else {
+                // Jika tidak ketemu di database
+                document.getElementById('msg').innerText = "404 Link Tidak Ditemukan";
+                document.getElementById('sub-msg').innerText = `Link "/${code}" tidak terdaftar.`;
+                document.querySelector('.spinner').style.display = 'none';
+                document.querySelector('.spinner').style.borderTopColor = '#ef4444';
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('msg').innerText = "Terjadi Kesalahan";
+            document.getElementById('sub-msg').innerText = "Gagal menghubungi server.";
+            document.querySelector('.spinner').style.display = 'none';
+        }
+    }
+
+    // Jalankan fungsi
+    redirect();
+</script>
+
 </body>
 </html>
