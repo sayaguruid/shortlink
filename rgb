@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruang Guru Bertumbuh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAF7F2;--bg-deep:#F0EBE3;--fg:#2D2A26;--muted:#8A8279;--accent:#C8965A;--accent-glow:rgba(200,150,90,.25);--primary:#1B4332;--primary-light:#2D6A4F;--primary-soft:rgba(27,67,50,.08);--card:#FFFFFF;--border:#E8E2D9;--error:#C0392B;--error-soft:rgba(192,57,43,.08);--success-soft:rgba(27,67,50,.08);--radius:16px;--radius-sm:10px;--shadow:0 4px 24px rgba(45,42,38,.06);--shadow-lg:0 12px 40px rgba(45,42,38,.1);--font-display:'Playfair Display',Georgia,serif;--font-body:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);line-height:1.7;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;opacity:.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+.bg-blobs{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.4;will-change:transform}
+.blob-1{width:400px;height:400px;background:radial-gradient(circle,rgba(200,150,90,.35),transparent 70%);top:-100px;right:-120px;animation:bf1 18s ease-in-out infinite}
+.blob-2{width:350px;height:350px;background:radial-gradient(circle,rgba(27,67,50,.25),transparent 70%);bottom:10%;left:-100px;animation:bf2 22s ease-in-out infinite}
+.blob-3{width:250px;height:250px;background:radial-gradient(circle,rgba(200,150,90,.18),transparent 70%);top:50%;left:40%;animation:bf3 15s ease-in-out infinite}
+@keyframes bf1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-40px,60px) scale(1.1)}66%{transform:translate(30px,-30px) scale(.95)}}
+@keyframes bf2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(50px,-40px) scale(1.05)}66%{transform:translate(-20px,50px) scale(.9)}}
+@keyframes bf3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,30px) scale(1.15)}}
+.container{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:32px 20px 60px}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.3}
+h1{font-size:clamp(26px,6vw,34px);margin-bottom:14px}
+h1 em{font-style:italic;color:var(--primary)}
+h2{font-size:clamp(20px,4.5vw,24px);margin-bottom:16px}
+.subtitle{color:var(--muted);font-size:15px;line-height:1.75;margin-bottom:24px}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 24px;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.1);opacity:0;transition:opacity .3s}
+.btn:hover::after{opacity:1}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 16px rgba(27,67,50,.25)}
+.btn-primary:hover{background:var(--primary-light);box-shadow:0 6px 24px rgba(27,67,50,.35);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0) scale(.97)}
+.btn-outline{background:var(--card);color:var(--fg);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent);color:var(--primary);box-shadow:0 4px 16px var(--accent-glow);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);padding:12px 16px;font-size:14px}
+.btn-ghost:hover{color:var(--primary)}
+.btn-sm{padding:12px 18px;font-size:13px;width:auto;border-radius:8px}
+.btn-glow{animation:btnBreathe 3s ease-in-out infinite}
+@keyframes btnBreathe{0%,100%{box-shadow:0 4px 16px rgba(27,67,50,.25)}50%{box-shadow:0 6px 28px rgba(27,67,50,.4)}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:12px;box-shadow:var(--shadow);transition:all .35s cubic-bezier(.22,1,.36,1)}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.card-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;flex-shrink:0}
+.card-icon svg{width:20px;height:20px}
+.card-icon-green{background:var(--primary-soft);color:var(--primary)}
+.card-icon-gold{background:rgba(200,150,90,.12);color:var(--accent)}
+.card h3{font-size:16px;margin-bottom:6px;font-family:var(--font-body);font-weight:600}
+.card p,.card-body{color:var(--muted);font-size:14px;line-height:1.7}
+.empathy-card{background:linear-gradient(135deg,var(--primary) 0%,#264F3D 100%);color:#fff;border:none}
+.empathy-card p{color:rgba(255,255,255,.85);font-size:15px;line-height:1.85}
+.empathy-card strong{color:#fff}
+.quote-wrapper{min-height:60px;display:flex;align-items:center;margin:20px 0}
+.quote-text{font-family:var(--font-display);font-style:italic;font-size:17px;color:var(--primary);opacity:0;transition:opacity .8s ease;line-height:1.6}
+.quote-text.active{opacity:1}
+.pricing-card{cursor:pointer;position:relative;border:2px solid var(--border);transition:all .35s cubic-bezier(.22,1,.36,1)}
+.pricing-card:hover{border-color:var(--accent)}
+.pricing-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 32px var(--accent-glow)}
+.pricing-check{position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.5);transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.pricing-check svg{width:14px;height:14px;color:#fff}
+.pricing-card.selected .pricing-check{opacity:1;transform:scale(1)}
+.pricing-duration{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.pricing-price{font-size:26px;font-weight:700;color:var(--primary);font-family:var(--font-display)}
+.pricing-price-old{font-size:15px;color:var(--muted);text-decoration:line-through;margin-bottom:2px}
+.pricing-note{font-size:13px;color:var(--muted);margin-top:6px}
+.form-group{margin-bottom:24px;position:relative}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--fg);margin-bottom:7px}
+.form-input{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;color:var(--fg);background:var(--card);transition:all .25s ease;outline:none}
+.form-input::placeholder{color:#c4bdb4}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.form-input.error{border-color:var(--error);box-shadow:0 0 0 3px var(--error-soft)}
+.form-input.success{border-color:var(--primary);box-shadow:0 0 0 3px var(--success-soft)}
+textarea.form-input{resize:none;min-height:80px}
+.form-error{font-size:12px;color:var(--error);margin-top:5px;opacity:0;transform:translateY(-4px);transition:all .25s ease;position:absolute;bottom:-20px;left:0}
+.form-error.show{opacity:1;transform:translateY(0)}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+.kupon-row{display:flex;gap:8px;align-items:flex-start}
+.kupon-row .form-input{flex:1;margin-bottom:0}
+.kupon-result{margin-top:10px;padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;line-height:1.6;display:none}
+.kupon-result.show{display:block}
+.kupon-result.success{background:var(--success-soft);color:var(--primary);border:1px solid rgba(27,67,50,.15)}
+.kupon-result.error{background:var(--error-soft);color:var(--error);border:1px solid rgba(192,57,43,.15)}
+.kupon-result .harga-final{font-size:18px;font-weight:700;color:var(--primary);font-family:var(--font-display)}
+.kupon-result .potongan-label{font-weight:600;color:var(--accent)}
+.qris-img{width:100%;max-width:200px;border-radius:10px;margin:8px auto;display:block;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.payment-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.payment-badge{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:1px solid var(--border);border-radius:12px;background:var(--card);transition:all .25s ease;cursor:pointer;user-select:none}
+.payment-badge:hover{border-color:var(--accent);box-shadow:0 4px 12px var(--accent-glow);transform:translateY(-2px)}
+.payment-badge:active{transform:translateY(0) scale(.97)}
+.payment-badge img{width:36px;height:36px;object-fit:contain;border-radius:6px}
+.payment-badge span{font-size:11px;font-weight:600;color:var(--muted)}
+.payment-badge .tap-hint{font-size:10px;color:var(--accent);font-weight:500;margin-top:-2px}
+.bank-info{background:var(--primary-soft);border-radius:var(--radius-sm);padding:16px;margin-top:14px;cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:14px}
+.bank-info:hover{background:rgba(27,67,50,.13)}
+.bank-info img{width:40px;height:40px;object-fit:contain;border-radius:8px;flex-shrink:0}
+.bank-info .bank-text p{font-size:14px;color:var(--fg);margin-bottom:2px}
+.bank-info .bank-text .bank-name{font-weight:700;color:var(--primary)}
+.bank-info .bank-text .bank-number{font-family:'DM Sans',monospace;font-size:18px;font-weight:700;color:var(--fg);letter-spacing:1px}
+.bank-info .bank-text .bank-copy-hint{font-size:11px;color:var(--accent);font-weight:500;margin-top:2px}
+.modal-overlay{position:fixed;inset:0;background:rgba(45,42,38,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:32px 28px;max-width:340px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);transform:scale(.9) translateY(12px);transition:transform .35s cubic-bezier(.22,1,.36,1);text-align:center;position:relative}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0)}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:20px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;line-height:1}
+.modal-close:hover{background:var(--error-soft);color:var(--error)}
+.modal-icon{width:56px;height:56px;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.modal-icon img{width:40px;height:40px;object-fit:contain;border-radius:8px}
+.modal-wallet-name{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.modal-wallet-label{font-size:13px;color:var(--muted);margin-bottom:18px}
+.modal-number{font-size:22px;font-weight:700;color:var(--fg);letter-spacing:1.5px;padding:14px;background:var(--bg);border-radius:var(--radius-sm);font-family:'DM Sans',monospace;cursor:pointer;transition:all .2s ease;border:1.5px solid var(--border)}
+.modal-number:hover{border-color:var(--accent);background:var(--bg-deep)}
+.modal-copied{font-size:12px;color:var(--primary);font-weight:600;margin-top:8px;opacity:0;transition:opacity .3s ease}
+.modal-copied.show{opacity:1}
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10001;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:14px 22px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.15);opacity:0;transform:translateY(-12px) scale(.95);transition:all .4s cubic-bezier(.22,1,.36,1);pointer-events:auto;white-space:nowrap}
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
+.toast-success{background:var(--primary);color:#fff}
+.toast-error{background:var(--error);color:#fff}
+.sticky-cta{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:560px;padding:12px 20px;background:rgba(250,247,242,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);z-index:100;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.sticky-cta.visible{transform:translateX(-50%) translateY(0)}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.spinner-sm{width:14px;height:14px;border-width:2px;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.section-gap{height:40px}
+.section-divider{width:40px;height:3px;background:var(--accent);border-radius:2px;margin-bottom:18px;opacity:.6}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.disclaimer{font-size:12px;color:var(--muted);text-align:center;line-height:1.7;padding:24px 0 0;border-top:1px solid var(--border);margin-top:40px}
+@media(max-width:400px){.container{padding:24px 16px 60px}h1{font-size:24px}.form-row{flex-direction:column;gap:0}.payment-grid{gap:8px}.payment-badge{padding:10px 4px}.payment-badge img{width:28px;height:28px}.modal-box{padding:24px 20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+
+<body>
+
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<div class="modal-overlay" id="ewalletModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEwalletModal()" aria-label="Tutup">&times;</button>
+    <div class="modal-icon" id="modalIcon"></div>
+    <p class="modal-wallet-name" id="modalName"></p>
+    <p class="modal-wallet-label">Klik nomor untuk menyalin</p>
+    <p class="modal-number" id="modalNumber" onclick="salinEwalletNumber()"></p>
+    <p class="modal-copied" id="modalCopied">Tersalin!</p>
+    <button class="btn btn-primary" onclick="salinEwalletNumber()" style="margin-top:16px;padding:13px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span id="modalBtnText">Salin Nomor</span>
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <header class="reveal" style="padding-top:20px;">
+    <h1>Guru itu kuat...<br>tapi <em>tidak selalu</em> punya tempat untuk cerita</h1>
+    <p class="subtitle">Kamu tetap mengajar, tetap tersenyum — padahal di dalam kepala, penuh sekali.</p>
+    <div class="quote-wrapper" aria-label="Kutipan berputar">
+      <p class="quote-text active" id="quoteText"></p>
+    </div>
+    <a href="#booking" class="btn btn-primary btn-glow" style="margin-bottom:10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Saya Butuh Ruang Cerita
+    </a>
+    <a href="#" class="btn btn-ghost" onclick="event.preventDefault();document.getElementById('values').scrollIntoView({behavior:'smooth'})">Pelajari dulu</a>
+  </header>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal">
+    <div class="card empathy-card">
+      <p>Tidak semua orang mengerti rasanya jadi guru.<br><br><strong>Tuntutan banyak.</strong><br><strong>Apresiasi sedikit.</strong><br><strong>Dan sering kali... harus kuat sendirian.</strong></p>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal">
+    <div class="card">
+      <p style="font-size:15px;line-height:1.85;color:var(--fg);">Di sini, kamu tidak perlu terlihat kuat.<br><br>Kamu boleh lelah.<br>Kamu boleh bingung.<br>Kamu boleh cerita <em>— tanpa takut dihakimi.</em></p>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section id="values" class="reveal">
+    <div class="section-divider"></div>
+    <h2>Apa yang kamu dapat?</h2>
+    <div class="card" style="display:flex;gap:16px;align-items:flex-start;">
+      <div class="card-icon card-icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <div><h3>Didengarkan tanpa dihakimi</h3><p class="card-body">Bukan dikasih nasihat, tapi benar-benar didengar. Kamu yang cerita, kami yang mendengar.</p></div>
+    </div>
+    <div class="card" style="display:flex;gap:16px;align-items:flex-start;">
+      <div class="card-icon card-icon-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div><h3>Ruang aman untuk jujur</h3><p class="card-body">Tidak ada yang akan tahu ceritamu. Privasi dijaga sepenuhnya — ini antara kamu dan ruang cerita.</p></div>
+    </div>
+    <div class="card" style="display:flex;gap:16px;align-items:flex-start;">
+      <div class="card-icon card-icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </div>
+      <div><h3>Perspektif ringan, bukan menggurui</h3><p class="card-body">Kalau kamu mau, kami bisa kasih sudut pandang baru. Tapi tidak pernah memaksa.</p></div>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal">
+    <div class="section-divider"></div>
+    <h2>Caranya sederhana</h2>
+    <div class="card" style="display:flex;gap:14px;align-items:center;">
+      <div class="step-num">1</div>
+      <p style="font-size:14px;color:var(--fg);font-weight:500;">Isi form booking di bawah</p>
+    </div>
+    <div class="card" style="display:flex;gap:14px;align-items:center;">
+      <div class="step-num">2</div>
+      <p style="font-size:14px;color:var(--fg);font-weight:500;">Pilih waktu yang nyaman untukmu</p>
+    </div>
+    <div class="card" style="display:flex;gap:14px;align-items:center;">
+      <div class="step-num">3</div>
+      <p style="font-size:14px;color:var(--fg);font-weight:500;">Kita ngobrol lewat WhatsApp — santai saja</p>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section id="pricing" class="reveal">
+    <div class="section-divider"></div>
+    <h2>Pilih waktu ceritamu</h2>
+    <p class="subtitle" style="margin-bottom:16px;">Klik salah satu untuk melanjutkan ke form.</p>
+    <div class="card pricing-card" data-paket="30 Menit — Rp25.000" data-harga="25000" onclick="selectPaket(this)" tabindex="0" role="radio" aria-checked="false">
+      <div class="pricing-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="pricing-duration">30 Menit</div>
+      <div class="pricing-price" id="price30">Rp25.000</div>
+      <p class="pricing-note">Cocok untuk cerita ringan atau pertama kali</p>
+    </div>
+    <div class="card pricing-card" data-paket="60 Menit — Rp50.000" data-harga="50000" onclick="selectPaket(this)" tabindex="0" role="radio" aria-checked="false">
+      <div class="pricing-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="pricing-duration">60 Menit</div>
+      <div class="pricing-price" id="price60">Rp50.000</div>
+      <p class="pricing-note">Untuk cerita yang lebih dalam dan ruang bernapas</p>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal">
+    <div class="card" style="background:var(--bg-deep);border-color:transparent;">
+      <p style="font-size:15px;line-height:1.85;color:var(--fg);">Kamu mungkin belum pernah coba layanan seperti ini.<br><br>Tidak apa-apa.<br><br>Karena semua orang yang akhirnya merasa lega,<br>juga mulai dari langkah pertama:<br><strong style="color:var(--primary);font-size:17px;">berani untuk cerita.</strong></p>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section id="booking" class="reveal">
+    <div class="section-divider"></div>
+    <h2>Isi Data Sesi</h2>
+    <p class="subtitle" style="margin-bottom:4px;">Data aman. Hanya digunakan untuk menghubungimu.</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-lg);margin-top:16px;">
+
+      <div class="form-group">
+        <label class="form-label" for="nama">Nama Panggilan</label>
+        <input class="form-input" type="text" id="nama" placeholder="Nama kamu" autocomplete="name" aria-required="true">
+        <span class="form-error" id="errNama"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="hp">Nomor WhatsApp</label>
+        <input class="form-input" type="tel" id="hp" placeholder="08xxxxxxxxxx" autocomplete="tel" aria-required="true">
+        <span class="form-error" id="errHp"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="topik">Topik <span style="font-weight:400;color:var(--muted);">(opsional)</span></label>
+        <textarea class="form-input" id="topik" placeholder="Boleh dikosongkan jika belum siap cerita" rows="3"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="hari">Hari</label>
+          <input class="form-input" type="date" id="hari" aria-required="true">
+          <span class="form-error" id="errHari"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="jam">Jam</label>
+          <input class="form-input" type="time" id="jam" aria-required="true">
+          <span class="form-error" id="errJam"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Paket</label>
+        <input class="form-input" type="text" id="paket" placeholder="Pilih paket di atas" readonly style="background:var(--bg);cursor:default;">
+        <span class="form-error" id="errPaket"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="kupon">Kode Kupon <span style="font-weight:400;color:var(--muted);">(opsional)</span></label>
+        <div class="kupon-row">
+          <input class="form-input" type="text" id="kupon" placeholder="Masukkan kode kupon" style="text-transform:uppercase;">
+          <button class="btn btn-outline btn-sm" id="btnCekKupon" onclick="cekKupon()" style="flex-shrink:0;white-space:nowrap;">
+            <span id="kuponBtnText">Cek Kupon</span>
+            <div class="spinner spinner-sm" id="kuponSpinner" style="border-color:var(--primary);border-top-color:var(--primary)"></div>
+          </button>
+        </div>
+        <div class="kupon-result" id="kuponResult"></div>
+      </div>
+
+      <button class="btn btn-primary" id="btnSubmit" onclick="kirimData()">
+        <span id="btnText">Lanjut Booking</span>
+        <div class="spinner" id="btnSpinner"></div>
+      </button>
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal">
+    <div class="section-divider"></div>
+    <h2>Metode Pembayaran</h2>
+    <p class="subtitle" style="margin-bottom:4px;">Pembayaran setelah sesi atau saat itu juga — terserah kamu.</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-top:16px;">
+
+      <p style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">QRIS — Scan untuk bayar</p>
+      <img src="https://i.imgur.com/7OwEBaj.png" alt="QRIS Payment" class="qris-img">
+
+      <p style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;margin-top:22px;">E-Wallet — Klik untuk lihat nomor</p>
+      <div class="payment-grid">
+
+        <div class="payment-badge" data-wallet="DANA" data-number="085793715450" data-img="https://i.imgur.com/Pm3blir.jpeg" onclick="openEwalletModal(this)">
+          <img src="https://i.imgur.com/Pm3blir.jpeg" alt="DANA">
+          <span>DANA</span>
+          <span class="tap-hint">Ketuk</span>
+        </div>
+
+        <div class="payment-badge" data-wallet="ShopeePay" data-number="085793715450" data-img="https://i.imgur.com/VQf0of3.png" onclick="openEwalletModal(this)">
+          <img src="https://i.imgur.com/VQf0of3.png" alt="ShopeePay">
+          <span>ShopeePay</span>
+          <span class="tap-hint">Ketuk</span>
+        </div>
+
+        <div class="payment-badge" data-wallet="LinkAja" data-number="085793715450" data-img="https://i.imgur.com/owe0jnx.png" onclick="openEwalletModal(this)">
+          <img src="https://i.imgur.com/owe0jnx.png" alt="LinkAja">
+          <span>LinkAja</span>
+          <span class="tap-hint">Ketuk</span>
+        </div>
+
+      </div>
+
+      <p style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;margin-top:22px;">Transfer Bank</p>
+      <div class="bank-info" onclick="salinRekening()" title="Klik untuk menyalin">
+        <img src="https://i.imgur.com/T1KhfXh.png" alt="Bank BSI">
+        <div class="bank-text">
+          <p class="bank-name">Bank BSI</p>
+          <p class="bank-number" id="rekNumber">7177561724</p>
+          <p style="font-size:13px;color:var(--muted);">a.n. Usman Firdaus</p>
+          <p class="bank-copy-hint" id="rekHint">Klik untuk menyalin</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-gap"></div>
+
+  <section class="reveal" style="text-align:center;">
+    <h2 style="margin-bottom:8px;">Sudah siap cerita?</h2>
+    <p class="subtitle" style="text-align:center;">Tidak ada jawaban yang salah. Mulai dari mana saja boleh.</p>
+    <a href="#booking" class="btn btn-primary btn-glow" style="margin-bottom:10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Mulai Cerita Sekarang
+    </a>
+    <a href="#" class="btn btn-outline" id="btnTanyaDulu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Tanya Dulu Boleh
+    </a>
+  </section>
+
+  <footer>
+    <p class="disclaimer">Ini bukan layanan psikolog atau konseling profesional.<br>Ini ruang ngobrol santai untuk berbagi cerita dan perspektif.<br><br>Ruang Guru Bertumbuh &copy; 2025</p>
+  </footer>
+
+</div>
+
+<div class="sticky-cta" id="stickyCta">
+  <a href="#booking" class="btn btn-primary" style="font-size:14px;padding:13px;">Booking Ruang Cerita</a>
+</div>
+
+<script>
+var WA_NUMBER = '6285793715450';
+var GAS_URL   = 'https://script.google.com/macros/s/AKfycbxW_OD9HRJcBbDY0aCsvwK-_JxQaHN_ferPJeS73YW-A9rg-FsnvSNgrme1bhzh5jBW1w/exec';
+
+var kuponAktif = null;
+
+var quotes = [
+  '"Guru yang terbaik pun, butuh ruang untuk bernapas."',
+  '"Kamu tidak harus kuat setiap hari."',
+  '"Menjadi guru itu berat. Mengakui itu bukan kelemahan."',
+  '"Ada kalanya mengajar membuatmu lupa mengasih diri sendiri."',
+  '"Lelah itu wajar. Tidak boleh lelah — itu yang tidak wajar."'
+];
+var qi = 0, qEl = document.getElementById('quoteText');
+qEl.textContent = quotes[0];
+setInterval(function(){
+  qEl.classList.remove('active');
+  setTimeout(function(){
+    qi = (qi + 1) % quotes.length;
+    qEl.textContent = quotes[qi];
+    qEl.classList.add('active');
+  }, 500);
+}, 5000);
+
+var rObs = new IntersectionObserver(function(e){
+  e.forEach(function(en){ if(en.isIntersecting) en.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(function(el){ rObs.observe(el); });
+
+var sCta = document.getElementById('stickyCta');
+var sObs = new IntersectionObserver(function(e){
+  e.forEach(function(en){ sCta.classList.toggle('visible', !en.isIntersecting); });
+}, { threshold: 0 });
+sObs.observe(document.querySelector('header'));
+
+var t = new Date(); t.setDate(t.getDate() + 1);
+document.getElementById('hari').setAttribute('min', t.toISOString().split('T')[0]);
+
+var selectedPaket = '';
+var selectedHarga = 0;
+function selectPaket(el){
+  document.querySelectorAll('.pricing-card').forEach(function(c){
+    c.classList.remove('selected'); c.setAttribute('aria-checked','false');
+  });
+  el.classList.add('selected'); el.setAttribute('aria-checked','true');
+  selectedPaket = el.getAttribute('data-paket');
+  selectedHarga = parseInt(el.getAttribute('data-harga'));
+  document.getElementById('paket').value = selectedPaket;
+  clearErr('errPaket','paket');
+  resetKupon();
+  setTimeout(function(){ document.getElementById('booking').scrollIntoView({behavior:'smooth'}); }, 300);
+}
+document.querySelectorAll('.pricing-card').forEach(function(c){
+  c.addEventListener('keydown', function(e){
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectPaket(c); }
+  });
+});
+
+function resetKupon(){
+  kuponAktif = null;
+  var res = document.getElementById('kuponResult');
+  res.className = 'kupon-result';
+  res.innerHTML = '';
+  document.getElementById('kupon').classList.remove('success','error');
+  document.getElementById('price30').innerHTML = 'Rp25.000';
+  document.getElementById('price60').innerHTML = 'Rp50.000';
+  document.querySelectorAll('.pricing-price-old').forEach(function(el){ el.remove(); });
+}
+
+document.getElementById('kupon').addEventListener('input', function(){
+  this.value = this.value.toUpperCase();
+  resetKupon();
+});
+
+function cekKupon(){
+  var kode = document.getElementById('kupon').value.trim().toUpperCase();
+  var res = document.getElementById('kuponResult');
+  var input = document.getElementById('kupon');
+
+  if(!kode){
+    res.className = 'kupon-result show error';
+    res.innerHTML = 'Masukkan kode kupon dulu.';
+    input.classList.add('error'); input.classList.remove('success');
+    return;
+  }
+  if(!selectedPaket){
+    res.className = 'kupon-result show error';
+    res.innerHTML = 'Pilih paket terlebih dahulu sebelum cek kupon.';
+    input.classList.add('error'); input.classList.remove('success');
+    return;
+  }
+
+  var btn = document.getElementById('btnCekKupon');
+  var btnT = document.getElementById('kuponBtnText');
+  var spn = document.getElementById('kuponSpinner');
+  btn.disabled = true; btnT.textContent = 'Cek...'; spn.style.display = 'block';
+  res.className = 'kupon-result';
+  input.classList.remove('error','success');
+
+  fetch(GAS_URL + '?action=cek_kupon&kode=' + encodeURIComponent(kode) + '&harga=' + selectedHarga)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.status === 'success'){
+        kuponAktif = {
+          kode: data.kode,
+          potongan: data.potongan,
+          tipe: data.tipe,
+          hargaAsli: data.harga_asli,
+          hargaFinal: data.harga_final
+        };
+        input.classList.add('success'); input.classList.remove('error');
+        res.className = 'kupon-result show success';
+        res.innerHTML =
+          '<span class="potongan-label">Kupon "' + data.kode + '" berlaku!</span><br>' +
+          'Potongan: ' + data.potongan_text + '<br>' +
+          '<span class="harga-final">Harga akhir: ' + data.harga_final_text + '</span>';
+
+        var priceEl = document.getElementById(selectedHarga === 25000 ? 'price30' : 'price60');
+        priceEl.innerHTML =
+          '<div class="pricing-price-old">' + data.harga_asli_text + '</div>' +
+          data.harga_final_text;
+
+        showToast('Kupon berhasil! Harga jadi ' + data.harga_final_text, 'success');
+      } else {
+        kuponAktif = null;
+        input.classList.add('error'); input.classList.remove('success');
+        res.className = 'kupon-result show error';
+        res.innerHTML = data.message || 'Kode kupon tidak valid atau sudah tidak aktif.';
+      }
+    })
+    .catch(function(){
+      kuponAktif = null;
+      input.classList.add('error');
+      res.className = 'kupon-result show error';
+      res.innerHTML = 'Gagal mengecek kupon. Coba lagi atau lanjut tanpa kupon.';
+    })
+    .finally(function(){
+      btn.disabled = false; btnT.textContent = 'Cek Kupon'; spn.style.display = 'none';
+    });
+}
+
+function showErr(eId,iId,m){
+  var e=document.getElementById(eId),i=document.getElementById(iId);
+  if(e){e.textContent=m;e.classList.add('show');}
+  if(i)i.classList.add('error');
+}
+function clearErr(eId,iId){
+  var e=document.getElementById(eId),i=document.getElementById(iId);
+  if(e){e.textContent='';e.classList.remove('show');}
+  if(i)i.classList.remove('error');
+}
+document.getElementById('nama').addEventListener('input',function(){clearErr('errNama','nama');});
+document.getElementById('hp').addEventListener('input',function(){clearErr('errHp','hp');});
+document.getElementById('hari').addEventListener('input',function(){clearErr('errHari','hari');});
+document.getElementById('jam').addEventListener('input',function(){clearErr('errJam','jam');});
+
+function validate(){
+  var v=true;
+  var n=document.getElementById('nama').value.trim();
+  var h=document.getElementById('hp').value.trim();
+  var hr=document.getElementById('hari').value;
+  var j=document.getElementById('jam').value;
+  if(!n||n.length<2){showErr('errNama','nama','Nama minimal 2 karakter');v=false;}else clearErr('errNama','nama');
+  if(!h.replace(/[\s\-]/g,'').match(/^(\+62|62|08)\d{8,12}$/)){showErr('errHp','hp','Nomor HP tidak valid');v=false;}else clearErr('errHp','hp');
+  if(!hr){showErr('errHari','hari','Pilih hari');v=false;}else clearErr('errHari','hari');
+  if(!j){showErr('errJam','jam','Pilih jam');v=false;}else clearErr('errJam','jam');
+  if(!selectedPaket){showErr('errPaket','paket','Pilih paket di atas');v=false;}else clearErr('errPaket','paket');
+  return v;
+}
+
+function kirimData(){
+  if(!validate()){
+    var fe=document.querySelector('.form-input.error');
+    if(fe)fe.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  var btn=document.getElementById('btnSubmit');
+  var bT=document.getElementById('btnText');
+  var bS=document.getElementById('btnSpinner');
+  btn.disabled=true; bT.textContent='Mengirim...'; bS.style.display='block';
+
+  var nama=document.getElementById('nama').value.trim();
+  var hp=document.getElementById('hp').value.trim();
+  var topik=document.getElementById('topik').value.trim();
+  var hari=document.getElementById('hari').value;
+  var jam=document.getElementById('jam').value;
+  var kuponStr = kuponAktif ? kuponAktif.kode : '-';
+  var hargaStr = kuponAktif ? kuponAktif.hargaFinal : selectedHarga;
+
+  var data={
+    nama:nama, hp:hp, topik:topik||'-', waktu:hari+' '+jam,
+    paket:selectedPaket, kupon:kuponStr, harga_bayar:hargaStr
+  };
+
+  fetch(GAS_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(data)
+  })
+  .then(function(r){return r.json();})
+  .then(function(res){
+    if(res.status==='success'){
+      showToast('Booking berhasil! Mengarahkan ke WhatsApp...','success');
+      setTimeout(function(){ redirectWA(nama,hp,topik,hari,jam); },1200);
+    } else { throw new Error(res.message||'Gagal'); }
+  })
+  .catch(function(){
+    showToast('Mengarahkan ke WhatsApp...','success');
+    setTimeout(function(){ redirectWA(nama,hp,topik,hari,jam); },1000);
+  })
+  .finally(function(){
+    btn.disabled=false; bT.textContent='Lanjut Booking'; bS.style.display='none';
+  });
+}
+
+function redirectWA(nama,hp,topik,hari,jam){
+  var topikStr = topik ? topik : '-';
+  var hargaText = kuponAktif
+    ? formatRupiah(kuponAktif.hargaAsli) + ' → ' + formatRupiah(kuponAktif.hargaFinal) + ' (kupon ' + kuponAktif.kode + ')'
+    : formatRupiah(selectedHarga);
+  var msg =
+    'Nama: '+nama+
+    '%0ANomor WA: '+hp+
+    '%0ATopik: '+topikStr+
+    '%0AWaktu: '+hari+' '+jam+
+    '%0APaket: '+selectedPaket+
+    '%0AHarga: '+hargaText;
+  window.location.href='https://wa.me/'+WA_NUMBER+'?text='+msg;
+}
+
+function formatRupiah(angka){
+  return 'Rp' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function showToast(msg,type){
+  var c=document.getElementById('toastContainer');
+  var t=document.createElement('div');
+  t.className='toast toast-'+type; t.textContent=msg; c.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
+  setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},400);},3500);
+}
+
+var currentEwalletNumber='';
+function openEwalletModal(badge){
+  var name=badge.getAttribute('data-wallet');
+  var number=badge.getAttribute('data-number');
+  var imgSrc=badge.getAttribute('data-img');
+  currentEwalletNumber=number.replace(/\s/g,'');
+  document.getElementById('modalName').textContent=name;
+  document.getElementById('modalNumber').textContent=number;
+  document.getElementById('modalCopied').classList.remove('show');
+  document.getElementById('modalBtnText').textContent='Salin Nomor';
+  var iconEl=document.getElementById('modalIcon');
+  iconEl.innerHTML='<img src="'+imgSrc+'" alt="'+name+'">';
+  document.getElementById('ewalletModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeEwalletModal(e){
+  if(e&&e.target!==e.currentTarget)return;
+  document.getElementById('ewalletModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function salinEwalletNumber(){
+  navigator.clipboard.writeText(currentEwalletNumber).then(function(){
+    document.getElementById('modalCopied').classList.add('show');
+    document.getElementById('modalBtnText').textContent='Tersalin!';
+    showToast('Nomor '+document.getElementById('modalName').textContent+' tersalin!','success');
+    setTimeout(function(){
+      document.getElementById('modalCopied').classList.remove('show');
+      document.getElementById('modalBtnText').textContent='Salin Nomor';
+    },2500);
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=currentEwalletNumber;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    document.getElementById('modalCopied').classList.add('show');
+    document.getElementById('modalBtnText').textContent='Tersalin!';
+    showToast('Nomor tersalin!','success');
+  });
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeEwalletModal();});
+
+function salinRekening(){
+  var el=document.getElementById('rekNumber');
+  var text=el.textContent.replace(/\s/g,'');
+  var hint=document.getElementById('rekHint');
+  navigator.clipboard.writeText(text).then(function(){
+    hint.textContent='Tersalin!';showToast('Nomor rekening tersalin!','success');
+    setTimeout(function(){hint.textContent='Klik untuk menyalin';},2500);
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=text;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    hint.textContent='Tersalin!';showToast('Nomor rekening tersalin!','success');
+    setTimeout(function(){hint.textContent='Klik untuk menyalin';},2500);
+  });
+}
+
+document.getElementById('btnTanyaDulu').addEventListener('click',function(e){
+  e.preventDefault();
+  window.location.href='https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent('Halo, saya mau tanya-tanya dulu tentang Ruang Cerita. Boleh?');
+});
+</script>
+</body>
+</html>
