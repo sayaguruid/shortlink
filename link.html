@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Sayaguru.id</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #111111;
+            --text-sub: #666666;
+            --border-color: #e5e5e5;
+            --radius: 14px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.05);
+            --accent: #111111;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --success: #16a34a;
+            --success-light: #f0fdf4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            background: var(--accent);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 0.7rem; }
+        .topbar-left i { font-size: 1.3rem; }
+        .topbar-left span { font-weight: 600; font-size: 0.95rem; }
+        .topbar-badge {
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-weight: 400;
+        }
+
+        .topbar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .topbar a:hover { opacity: 1; }
+
+        /* CONTAINER */
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* CARD */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-title i { font-size: 1.1rem; color: var(--text-sub); }
+
+        /* FORM */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            color: var(--text-sub);
+        }
+        .form-group label .required { color: var(--danger); }
+
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+        .form-input:focus { border-color: var(--accent); background: #fff; }
+        .form-input::placeholder { color: #bbb; }
+
+        /* ICON PICKER */
+        .icon-search-wrap {
+            position: relative;
+            margin-bottom: 0.8rem;
+        }
+        .icon-search-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+        .icon-search-wrap .form-input { padding-left: 2.2rem; }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 2px;
+        }
+        .icon-grid::-webkit-scrollbar { width: 4px; }
+        .icon-grid::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+        .icon-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: #f5f5f5;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: var(--text-main);
+        }
+        .icon-btn:hover { background: #eee; transform: scale(1.05); }
+        .icon-btn.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .icon-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 1rem;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
+
+        /* PREVIEW */
+        .preview-label {
+            font-size: 0.72rem;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .preview-card {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.9rem 1rem;
+            background: var(--bg-body);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+            min-height: 56px;
+            transition: all 0.2s;
+        }
+        .preview-card.active { border-style: solid; border-color: var(--border-color); background: #fff; }
+        .preview-icon {
+            width: 38px; height: 38px;
+            background: #f2f2f2; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .preview-text { flex: 1; min-width: 0; }
+        .preview-title { font-size: 0.85rem; font-weight: 500; color: #ccc; }
+        .preview-title.active { color: var(--text-main); }
+        .preview-desc { font-size: 0.7rem; color: #ccc; }
+        .preview-desc.active { color: var(--text-sub); }
+        .preview-arrow { color: #ccc; font-size: 1.1rem; }
+        .preview-arrow.active { color: var(--text-sub); }
+
+        /* BUTTON */
+        .btn-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* PRODUCT LIST */
+        .product-count {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 400;
+            margin-left: auto;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .product-item:last-child { border-bottom: none; }
+
+        .product-item-icon {
+            width: 36px; height: 36px;
+            background: #f5f5f5; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .product-item-info { flex: 1; min-width: 0; }
+        .product-item-title { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-item-desc { font-size: 0.7rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .btn-delete {
+            width: 34px; height: 34px;
+            border: 1px solid #fecaca;
+            background: var(--danger-light);
+            color: var(--danger);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .btn-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .btn-delete.confirm {
+            width: auto;
+            padding: 0 10px;
+            font-size: 0.7rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #bbb;
+            font-size: 0.85rem;
+        }
+        .empty-state i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 0.7rem 1.3rem;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            z-index: 9999;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--success); color: #fff; }
+        .toast.error { background: var(--danger); color: #fff; }
+
+        /* LOADING OVERLAY */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 24px; height: 24px;
+            border: 3px solid #eee;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <i class="ri-settings-3-line"></i>
+        <span>Admin Panel</span>
+        <span class="topbar-badge">Sayaguru.id</span>
+    </div>
+    <a href="index.html"><i class="ri-external-link-line"></i> Lihat Halaman</a>
+</div>
+
+<div class="loading-overlay" id="loading"><div class="loading-spinner"></div></div>
+
+<div class="container">
+
+    <!-- FORM TAMBAH -->
+    <div class="card">
+        <div class="card-title"><i class="ri-add-circle-line"></i> Tambah Produk Baru</div>
+
+        <div class="form-group">
+            <label>Nama Produk <span class="required">*</span></label>
+            <input type="text" class="form-input" id="input-title" placeholder="Contoh: Kelas Konten Kreator Guru">
+        </div>
+
+        <div class="form-group">
+            <label>Link Produk <span class="required">*</span></label>
+            <input type="url" class="form-input" id="input-url" placeholder="https://...">
+        </div>
+
+        <div class="form-group">
+            <label>Deskripsi <span style="color:#bbb;font-weight:400">(opsional)</span></label>
+            <input type="text" class="form-input" id="input-desc" placeholder="Contoh: Belajar bikin konten yang menghasilkan">
+        </div>
+
+        <div class="form-group">
+            <label>Pilih Icon <span class="required">*</span></label>
+            <div class="icon-search-wrap">
+                <i class="ri-search-line"></i>
+                <input type="text" class="form-input" id="icon-search" placeholder="Cari icon...">
+            </div>
+            <div class="icon-grid" id="icon-grid"></div>
+        </div>
+
+        <div class="preview-label">Preview</div>
+        <div class="preview-card" id="preview-card">
+            <div class="preview-icon" id="preview-icon"><i class="ri-link"></i></div>
+            <div class="preview-text">
+                <div class="preview-title" id="preview-title">Nama produk</div>
+                <div class="preview-desc" id="preview-desc"></div>
+            </div>
+            <div class="preview-arrow"><i class="ri-arrow-right-s-line"></i></div>
+        </div>
+
+        <button class="btn-submit" id="btn-submit" disabled>
+            <i class="ri-add-line"></i> Tambah Produk
+        </button>
+    </div>
+
+    <!-- DAFTAR PRODUK -->
+    <div class="card">
+        <div class="card-title">
+            <i class="ri-list-check-2"></i> Produk yang Ada
+            <span class="product-count" id="product-count">(0)</span>
+        </div>
+        <div id="product-list">
+            <div class="empty-state"><i class="ri-loader-4-line ri-spin"></i>Memuat...</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ⚠️ GANTI dengan URL deployment terbaru kamu (sama dengan index.html)
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4XAJ857b16cy1fFv1RELgS4ZMQr3pkkWzdq4M961-CuPkSWtYupYk4Sl1B1y0yzZnJQ/exec';
+
+// ============================================================
+// DAFTAR ICON — tambah/kurangi sesuai kebutuhan
+// Format: [nama_icon, kata_kunci_pencarian]
+// ============================================================
+var ICON_DATA = [
+    ['book-open-line','buku buka'],
+    ['book-2-line','buku'],
+    ['graduation-cap-line','wisuda gelar'],
+    ['lightbulb-line','lampu ide'],
+    ['pencil-line','pensil tulis'],
+    ['video-line','video'],
+    ['youtube-line','youtube'],
+    ['play-circle-line','play putar'],
+    ['mic-line','mikrofon mic'],
+    ['camera-line','kamera foto'],
+    ['image-line','gambar foto'],
+    ['headphones-line','headphone musik'],
+    ['music-line','musik lagu'],
+    ['palette-line','palet warna'],
+    ['paint-brush-line','kuas cat'],
+    ['quill-pen-line','pena tulis'],
+    ['magic-line','magic sihir'],
+    ['edit-2-line','edit ubah'],
+    ['scissors-cut-line','gunting potong'],
+    ['money-dollar-circle-line','uang dollar'],
+    ['wallet-line','dompet'],
+    ['coin-line','koin'],
+    ['store-2-line','toko'],
+    ['shopping-bag-line','belanja tas'],
+    ['bar-chart-line','grafik chart'],
+    ['gift-line','hadiah kado'],
+    ['group-line','grup orang'],
+    ['team-line','tim team'],
+    ['chat-check-line','chat obrolan'],
+    ['message-3-line','pesan pesan'],
+    ['links-line','link tautan'],
+    ['hand-heart-line','donasi love'],
+    ['whatsapp-line','wa whatsapp'],
+    ['instagram-line','ig instagram'],
+    ['telegram-line','telegram'],
+    ['tiktok-line','tiktok'],
+    ['facebook-circle-line','fb facebook'],
+    ['twitter-x-line','twitter x'],
+    ['star-line','bintang star'],
+    ['heart-line','hati love'],
+    ['shield-check-line','shield aman'],
+    ['verified-badge-line','verified centang'],
+    ['rocket-line','roket rocket'],
+    ['flash-line','flash kilat'],
+    ['download-line','download unduh'],
+    ['global-line','global dunia'],
+    ['laptop-line','laptop komputer'],
+    ['smartphone-line','hp smartphone'],
+    ['article-line','artikel berita'],
+    ['file-text-line','file dokumen'],
+    ['presentation-line','presentasi slide'],
+    ['bookmark-line','bookmark simpan'],
+    ['qr-code-line','qr code scan'],
+    ['calendar-line','kalender tanggal'],
+    ['map-pin-line','lokasi map peta'],
+    ['coupon-line','kupon diskon'],
+    ['tag-line','tag label'],
+    ['flag-line','bendera flag'],
+    ['lock-line','kunci password'],
+    ['mail-line','email surat'],
+    ['notification-line','notifikasi bell'],
+    ['share-forward-line','share bagikan']
+];
+
+var selectedIcon = '';
+var products = [];
+var deleteTimers = {};
+
+// --- DOM ---
+var iconGrid = document.getElementById('icon-grid');
+var iconSearch = document.getElementById('icon-search');
+var inputTitle = document.getElementById('input-title');
+var inputUrl = document.getElementById('input-url');
+var inputDesc = document.getElementById('input-desc');
+var btnSubmit = document.getElementById('btn-submit');
+var productList = document.getElementById('product-list');
+var productCount = document.getElementById('product-count');
+var previewCard = document.getElementById('preview-card');
+var previewIcon = document.getElementById('preview-icon');
+var previewTitle = document.getElementById('preview-title');
+var previewDesc = document.getElementById('preview-desc');
+var loadingOverlay = document.getElementById('loading');
+var toastEl = document.getElementById('toast');
+
+// --- ICON GRID ---
+function renderIcons(filter) {
+    filter = (filter || '').toLowerCase();
+    iconGrid.innerHTML = '';
+
+    var count = 0;
+    ICON_DATA.forEach(function(item) {
+        var name = item[0];
+        var keywords = item[1].toLowerCase();
+        if (filter && name.indexOf(filter) === -1 && keywords.indexOf(filter) === -1) return;
+
+        count++;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'icon-btn' + (selectedIcon === name ? ' selected' : '');
+        btn.innerHTML = '<i class="ri-' + name + '"></i>';
+        btn.title = name.replace(/-line$/, '').replace(/-/g, ' ');
+        btn.addEventListener('click', function() {
+            selectedIcon = name;
+            renderIcons(iconSearch.value);
+            updatePreview();
+            validateForm();
+        });
+        iconGrid.appendChild(btn);
+    });
+
+    if (count === 0) {
+        iconGrid.innerHTML = '<div class="icon-empty">Icon tidak ditemukan</div>';
+    }
+}
+
+iconSearch.addEventListener('input', function() { renderIcons(this.value); });
+
+// --- PREVIEW ---
+function updatePreview() {
+    var title = inputTitle.value.trim();
+    var desc = inputDesc.value.trim();
+    var hasContent = title || selectedIcon;
+
+    previewCard.className = 'preview-card' + (hasContent ? ' active' : '');
+    previewIcon.innerHTML = '<i class="ri-' + (selectedIcon || 'link') + '"></i>';
+    previewTitle.textContent = title || 'Nama produk';
+    previewTitle.className = 'preview-title' + (title ? ' active' : '');
+    previewDesc.textContent = desc;
+    previewDesc.className = 'preview-desc' + (desc ? ' active' : '');
+    previewCard.querySelector('.preview-arrow').className = 'preview-arrow' + (hasContent ? ' active' : '');
+}
+
+inputTitle.addEventListener('input', function() { updatePreview(); validateForm(); });
+inputUrl.addEventListener('input', validateForm);
+inputDesc.addEventListener('input', updatePreview);
+
+// --- VALIDATE ---
+function validateForm() {
+    var valid = inputTitle.value.trim() && inputUrl.value.trim() && selectedIcon;
+    btnSubmit.disabled = !valid;
+}
+
+// --- TOAST ---
+function showToast(msg, type) {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast ' + type;
+    setTimeout(function() { toastEl.classList.add('show'); }, 10);
+    setTimeout(function() { toastEl.classList.remove('show'); }, 2500);
+}
+
+// --- LOADING ---
+function showLoading() { loadingOverlay.classList.add('active'); }
+function hideLoading() { loadingOverlay.classList.remove('active'); }
+
+// --- SUBMIT ---
+btnSubmit.addEventListener('click', function() {
+    if (btnSubmit.disabled) return;
+
+    var title = inputTitle.value.trim();
+    var url = inputUrl.value.trim();
+    var desc = inputDesc.value.trim();
+
+    showLoading();
+    btnSubmit.disabled = true;
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ title: title, url: url, icon: selectedIcon, desc: desc })
+    })
+    .then(function() { return new Promise(function(r) { setTimeout(r, 800); }); })
+    .then(function() {
+        // Reset form
+        inputTitle.value = '';
+        inputUrl.value = '';
+        inputDesc.value = '';
+        selectedIcon = '';
+        renderIcons('');
+        updatePreview();
+        validateForm();
+
+        showToast('Produk berhasil ditambahkan', 'success');
+        loadProducts(); // refresh list
+    })
+    .catch(function() {
+        showToast('Gagal menambahkan produk', 'error');
+        validateForm();
+    })
+    .finally(hideLoading);
+});
+
+// --- LOAD PRODUCTS ---
+function loadProducts() {
+    productList.innerHTML = '<div class="empty-state"><i class="ri-loader-4-line ri-spin"></i>Memuat...</div>';
+
+    fetch(SCRIPT_URL)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            products = data;
+            renderProducts();
+        })
+        .catch(function() {
+            productList.innerHTML = '<div class="empty-state"><i class="ri-error-warning-line"></i>Gagal memuat</div>';
+        });
+}
+
+function renderProducts() {
+    productCount.textContent = '(' + products.length + ')';
+
+    if (products.length === 0) {
+        productList.innerHTML = '<div class="empty-state"><i class="ri-inbox-line"></i>Belum ada produk</div>';
+        return;
+    }
+
+    productList.innerHTML = '';
+    products.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'product-item';
+        div.setAttribute('data-row', item.row);
+
+        div.innerHTML =
+            '<div class="product-item-icon"><i class="ri-' + (item.icon || 'link') + '"></i></div>' +
+            '<div class="product-item-info">' +
+                '<div class="product-item-title">' + item.title + '</div>' +
+                (item.desc ? '<div class="product-item-desc">' + item.desc + '</div>' : '') +
+            '</div>' +
+            '<button class="btn-delete" data-row="' + item.row + '" title="Hapus"><i class="ri-delete-bin-line"></i></button>';
+
+        // Delete handler
+        var delBtn = div.querySelector('.btn-delete');
+        delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handleDelete(this, item.row, item.title);
+        });
+
+        productList.appendChild(div);
+    });
+}
+
+function handleDelete(btn, row, title) {
+    // Two-step: klik pertama = konfirmasi, klik kedua = hapus
+    if (btn.classList.contains('confirm')) {
+        // Hapus
+        clearTimeout(deleteTimers[row]);
+        showLoading();
+
+        fetch(SCRIPT_URL + '?action=delete&row=' + row)
+            .then(function() { return new Promise(function(r) { setTimeout(r, 600); }); })
+            .then(function() {
+                showToast('"' + title + '" dihapus', 'success');
+                loadProducts();
+            })
+            .catch(function() { showToast('Gagal menghapus', 'error'); })
+            .finally(hideLoading);
+    } else {
+        // Tampilkan konfirmasi
+        btn.classList.add('confirm');
+        btn.innerHTML = 'Hapus?';
+
+        // Reset setelah 3 detik jika tidak diklik
+        deleteTimers[row] = setTimeout(function() {
+            btn.classList.remove('confirm');
+            btn.innerHTML = '<i class="ri-delete-bin-line"></i>';
+        }, 3000);
+    }
+}
+
+// --- INIT ---
+renderIcons('');
+updatePreview();
+loadProducts();
+</script>
+
+</body>
+</html>
