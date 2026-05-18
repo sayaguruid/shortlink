@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV - Usman Firdaus, S.Pd.</title>
+    <title>Profil</title>
+    <!-- Preconnect untuk mempercepat koneksi ke Google Script -->
+    <link rel="preconnect" href="https://script.google.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -77,8 +79,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            color: var(--primary-light);
             cursor: pointer;
             transition: all 0.3s ease;
             overflow: hidden;
@@ -88,7 +88,7 @@
         .profile-photo:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         
         .profile-photo::after {
-            content: 'Upload';
+            content: 'Ganti';
             position: absolute;
             bottom: 0;
             left: 0;
@@ -190,11 +190,13 @@
             padding: 24px;
             border-radius: var(--radius-md);
             border-left: 4px solid var(--accent);
-            white-space: pre-line; /* Memperhitungkan baris baru dari sheet */
+            white-space: pre-line;
         }
 
-        /* Skills */
-        .skill-category { margin-bottom: 24px; }
+        /* =========================================
+           UPDATED SKILLS SECTION (CIRCULAR CHARTS)
+           ========================================= */
+        .skill-category { margin-bottom: 30px; }
         .skill-category-title {
             font-size: 12px;
             font-weight: 700;
@@ -202,23 +204,74 @@
             text-transform: uppercase;
             margin-bottom: 16px;
             letter-spacing: 0.5px;
+            padding-left: 8px;
+            border-left: 3px solid var(--accent);
         }
-        .skill-item { margin-bottom: 16px; }
-        .skill-header {
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            gap: 16px;
+            background: white;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .skill-name { font-size: 13px; font-weight: 600; color: var(--primary); }
-        .skill-percent { font-size: 12px; font-weight: 700; color: var(--accent); }
-        .skill-bar { height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .skill-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            border-radius: 10px;
-            width: 0;
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .skill-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--accent);
+        }
+
+        .circular-chart {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent) var(--degrees, 0deg), #e2e8f0 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .circular-chart::after {
+            content: "";
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .circular-chart .percentage-text {
+            position: relative;
+            z-index: 1;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .skill-info { display: flex; flex-direction: column; justify-content: center; }
+        .skill-name { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--primary); 
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+        .skill-level-text {
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 600;
         }
 
         /* Timeline */
@@ -323,6 +376,8 @@
             font-size: 12px;
             font-weight: 600;
             transition: background 0.2s;
+            cursor: pointer;
+            border: none;
         }
         .cert-link:hover { background: var(--accent-dark); }
 
@@ -361,17 +416,121 @@
             border-top: 1px solid var(--border-light);
         }
 
+        /* MODAL / PREVIEW STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 900px; /* Sedikit lebih lebar agar PDF enak dibaca */
+            max-height: 90vh;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary-light);
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+
+        .close-modal-btn:hover { color: #ef4444; }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            background: #525659;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+            min-height: 400px;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .modal-body iframe {
+            width: 100%;
+            height: 85vh; /* Full height for PDF reading */
+            border: none;
+            display: block;
+        }
+        
+        .fallback-msg {
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
         /* Loading State */
         #loading {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 9999;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
-            transition: opacity 0.5s;
+            transition: opacity 0.2s ease-out; /* Transisi cepat */
         }
         .spinner {
             width: 40px; height: 40px; border: 4px solid #f3f3f3;
             border-top: 4px solid var(--accent); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 10px;
+            animation: spin 0.8s linear infinite; margin-bottom: 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -385,6 +544,9 @@
             .contact-chip { font-size: 11px; padding: 6px 12px; }
             .timeline-header { flex-direction: column; gap: 4px; }
             .timeline-date { align-self: flex-start; margin-top: 4px; }
+            .modal-content { height: 100vh; max-height: 100vh; border-radius: 0; width: 100%; }
+            .modal-body iframe { height: 90vh; }
+            .skills-grid { grid-template-columns: 1fr; }
         }
 
         /* Print */
@@ -394,13 +556,12 @@
             .header { border-bottom: 2px solid #000; }
             .profile-photo { border-color: #fff; box-shadow: none; }
             .section-title { border-bottom-color: #000; }
-            .skill-bar { background: #ddd !important; }
-            .skill-progress { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .cert-content { max-height: none !important; display: block !important; }
             .cert-btn { pointer-events: none; }
             .cert-link { display: none; }
             .profile-photo::after { display: none; }
             #loading { display: none !important; }
+            .modal-overlay { display: none !important; }
         }
     </style>
 </head>
@@ -416,8 +577,8 @@
     <!-- Header -->
     <header class="header">
         <div class="profile-wrapper">
-            <div class="profile-photo" id="profilePhoto" title="Klik untuk upload foto">
-                <i class="fas fa-user"></i>
+            <div class="profile-photo" id="profilePhoto" title="Klik untuk ganti foto">
+                <img src="https://i.imgur.com/9EXzjLY.png" alt="Usman Firdaus">
             </div>
         </div>
         <h1 id="cv-name">Memuat...</h1>
@@ -455,9 +616,7 @@
             </div>
         </section>
 
-        <!-- Leadership Section (Using same structure as experience if needed, or separate) -->
-        <!-- Note: In this code, I will merge Leadership into Experience or create a separate ID if your GS has separate data. 
-             For simplicity, I'll map specific types from the sheet to sections. -->
+        <!-- Leadership Section -->
         <section class="section" id="leadership-section">
             <h3 class="section-title"><i class="fas fa-users-cog"></i> Kepemimpinan & Organisasi</h3>
             <div id="leadership-container">
@@ -481,8 +640,7 @@
             </div>
         </section>
         
-        <!-- Achievements (Optional if in Config or separate sheet) -->
-        <!-- We will hide this if no data found, or fill it manually for now as per previous static content -->
+        <!-- Achievements (Optional) -->
         <section class="section" id="achievements-section" style="display:none;">
             <h3 class="section-title"><i class="fas fa-trophy"></i> Penghargaan</h3>
             <div id="achievements-container"></div>
@@ -491,72 +649,228 @@
     </main>
     
     <footer class="footer">
-        &copy; <span id="year"></span> <span id="footer-name"></span>. Dibuat dengan dedikasi untuk pendidikan Indonesia.
+        &copy; <span id="year"></span> <span id="footer-name"></span>. Sayaguru.id
     </footer>
+</div>
+
+<!-- MODAL PREVIEW -->
+<div class="modal-overlay" id="certModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fas fa-file-alt" style="color: var(--accent);"></i>
+                <span id="modalFileName">Preview Dokumen</span>
+            </div>
+            <button class="close-modal-btn" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Content injected here -->
+        </div>
+    </div>
 </div>
 
 <script>
     // ==========================================
-    // KONFIGURASI PENTING
+    // KONFIGURASI
     // ==========================================
-    // Ganti URL di bawah ini dengan URL Web App dari Google Apps Script Anda
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvPn5Oe00fHO5SHQs2vzEESevByUBrfSX8sOLL_o07dwZwW5Rn63SjudRS6Uf23LEK/exec'; 
 
-    // --- FUNGSI BANTUAN UNTUK MENGHINDARI ERROR (Undefined) ---
-    // Fungsi ini mengambil nilai dari object secara "case-insensitive" 
-    // (Mengabaikan huruf besar/kecil dan spasi)
+    // --- FUNGSI BANTUAN ---
     function getVal(obj, key) {
         if (!obj) return '';
-        // Cari key yang cocok (abaikan case & spasi)
         const foundKey = Object.keys(obj).find(k => k.toLowerCase().trim() === key.toLowerCase().trim());
         return foundKey ? obj[foundKey] : '';
     }
 
-    // Fungsi Utama
+    // --- FUNGSI KONVERSI URL GOOGLE DRIVE (FIX TAMPILAN PDF/IMG) ---
+    // Fungsi ini mengubah link biasa menjadi link yang bisa di-embed
+    function getConvertedUrl(url) {
+        if (!url) return null;
+
+        // Cek apakah ini link Google Drive
+        const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        
+        if (driveMatch) {
+            const id = driveMatch[1];
+            const isImage = url.match(/\.(jpeg|jpg|gif|png|bmp|webp)$/i);
+            
+            if (isImage) {
+                // Untuk Gambar: Gunakan direct link (uc?export=view)
+                return { type: 'image', url: `https://drive.google.com/uc?export=view&id=${id}` };
+            } else {
+                // Untuk PDF / Dokumen lain: Gunakan preview link agar bisa di iframe
+                return { type: 'pdf', url: `https://drive.google.com/file/d/${id}/preview` };
+            }
+        }
+
+        // Jika bukan Google Drive, cek ekstensi file biasa
+        const isDirectImage = url.match(/\.(jpeg|jpg|gif|png|bmp|webp)$/i);
+        const isDirectPDF = url.match(/\.pdf$/i);
+
+        if (isDirectImage) return { type: 'image', url: url };
+        if (isDirectPDF) return { type: 'pdf', url: url };
+
+        return null; // Tidak dikenali
+    }
+
+    // --- MODAL LOGIC ---
+    function openPreview(url, title) {
+        const modal = document.getElementById('certModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalTitle = document.getElementById('modalFileName');
+        
+        modalTitle.textContent = title || "Dokumen";
+        modalBody.innerHTML = ''; 
+
+        const converted = getConvertedUrl(url);
+
+        if (converted && converted.type === 'image') {
+            const img = document.createElement('img');
+            img.src = converted.url;
+            img.alt = title;
+            img.style.maxHeight = "80vh";
+            modalBody.appendChild(img);
+        } 
+        else if (converted && converted.type === 'pdf') {
+            const iframe = document.createElement('iframe');
+            iframe.src = converted.url;
+            // Tambahkan atribut agar browser mengizinkan script di dalam iframe (jika perlu)
+            // untuk Drive preview ini biasanya aman.
+            modalBody.appendChild(iframe);
+        } 
+        else {
+            // Fallback jika link tidak bisa di-preview
+            modalBody.innerHTML = `
+                <div class="fallback-msg">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <p>Pratinjau otomatis tidak tersedia untuk tautan ini.</p>
+                    <a href="${url}" target="_blank" style="color:var(--accent); font-weight:bold; text-decoration:underline;">Buka di Tab Baru</a>
+                </div>
+            `;
+        }
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('certModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('certModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === "Escape") closeModal();
+    });
+
+
+    // --- FUNGSI UTAMA ---
     document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('year').textContent = new Date().getFullYear();
 
         if (SCRIPT_URL.includes('MASUKKAN_URL')) {
-            alert('Mohon atur URL Google Apps Script di dalam kode HTML.');
+            alert('Mohon atur URL Google Apps Script.');
             document.getElementById('loading').style.display = 'none';
             return;
         }
 
         try {
-            // 1. Fetch Data
             const response = await fetch(SCRIPT_URL);
             if (!response.ok) throw new Error('Gagal mengambil data');
             const data = await response.json();
 
-            // Debugging (Buka Console Browser F12 untuk melihat data asli)
-            console.log("Data dari Sheet:", data);
-
-            // 2. Render Data dengan Fungsi getVal yang aman
+            // Render Data
             renderProfile(data.profile);
-            renderSkills(data.skills);
+            renderSkills(data.skills); 
             renderExperienceAndLeadership(data.experience);
             renderEducation(data.education);
             renderCerts(data.certificates);
             renderFooter(data.profile);
 
-            // 3. Hide Loading
+            // Hapus Loading SEGERA setelah data siap (Loading Cepat)
             document.getElementById('loading').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
-                animateSkillBars();
-            }, 500);
+                animateCircles(); 
+            }, 200); // Hanya 200ms untuk efek fade out halus
 
         } catch (error) {
             console.error('Error:', error);
-            document.querySelector('#loading div').textContent = "Gagal memuat data. Cek URL Script.";
+            document.querySelector('#loading div').textContent = "Gagal memuat data. Cek koneksi internet.";
             setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 2000);
         }
     });
 
-    // --- Fungsi Render (Updated dengan getVal) ---
+    // --- FUNGSI RENDER SKILLS ---
+    function renderSkills(skills) {
+        const container = document.getElementById('skills-container');
+        if(!skills || skills.length === 0) {
+            container.innerHTML = '<p style="font-size:13px; color:#999;">Belum ada data skill.</p>';
+            return;
+        }
+
+        const grouped = {};
+        skills.forEach(s => {
+            const cat = getVal(s, 'Category') || 'Umum';
+            if(!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(s);
+        });
+
+        let html = '';
+        for (const [category, items] of Object.entries(grouped)) {
+            html += `
+            <div class="skill-category">
+                <div class="skill-category-title">${category}</div>
+                <div class="skills-grid">
+            `;
+            
+            items.forEach(item => {
+                const skillName = getVal(item, 'Skill');
+                let rawLevel = getVal(item, 'Level');
+                
+                let percentVal = 0;
+                // Cek format desimal (0.95) dari Google Sheets
+                if (typeof rawLevel === 'number' && rawLevel > 0 && rawLevel < 1) {
+                    percentVal = Math.round(rawLevel * 100);
+                } else {
+                    // Cek format string ("95%")
+                    const cleaned = String(rawLevel).replace('%', '').replace(',', '.').trim();
+                    const parsed = parseFloat(cleaned);
+                    if (!isNaN(parsed)) {
+                        percentVal = parsed < 1 ? Math.round(parsed * 100) : Math.round(parsed);
+                    }
+                }
+                
+                if(percentVal > 100) percentVal = 100;
+                if(percentVal < 0) percentVal = 0;
+
+                const degrees = Math.round(percentVal * 3.6);
+
+                html += `
+                <div class="skill-card">
+                    <div class="circular-chart" style="--degrees: ${degrees}deg;">
+                        <span class="percentage-text">${percentVal}%</span>
+                    </div>
+                    <div class="skill-info">
+                        <div class="skill-name">${skillName}</div>
+                        <div class="skill-level-text">Expertise Level</div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div></div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    // --- Fungsi Render Lainnya ---
 
     function renderProfile(profile) {
-        // Gunakan getVal agar aman meski judul kolom beda huruf
         const name = getVal(profile, 'Name');
         const title = getVal(profile, 'Title');
         const about = getVal(profile, 'About');
@@ -570,52 +884,13 @@
 
         const contactContainer = document.getElementById('contact-container');
         let contacts = [];
-        
         if(email) contacts.push({ icon: 'fas fa-envelope', text: email, link: `mailto:${email}` });
         if(phone) contacts.push({ icon: 'fas fa-phone-alt', text: phone, link: `tel:${phone}` });
         if(location) contacts.push({ icon: 'fas fa-map-marker-alt', text: location, link: '#' });
 
         contactContainer.innerHTML = contacts.map(c => `
-            <a href="${c.link}" class="contact-chip">
-                <i class="${c.icon}"></i> ${c.text}
-            </a>
+            <a href="${c.link}" class="contact-chip"><i class="${c.icon}"></i> ${c.text}</a>
         `).join('');
-    }
-
-    function renderSkills(skills) {
-        const container = document.getElementById('skills-container');
-        if(!skills || skills.length === 0) {
-            container.innerHTML = '<p style="font-size:13px; color:#999;">Belum ada data skill.</p>';
-            return;
-        }
-
-        const grouped = {};
-        skills.forEach(s => {
-            // Ambil kategori dengan aman, default 'Umum' jika kosong
-            const cat = getVal(s, 'Category') || 'Umum';
-            if(!grouped[cat]) grouped[cat] = [];
-            grouped[cat].push(s);
-        });
-
-        let html = '';
-        for (const [category, items] of Object.entries(grouped)) {
-            html += `<div class="skill-category"><div class="skill-category-title">${category}</div>`;
-            items.forEach(item => {
-                const skillName = getVal(item, 'Skill');
-                const skillLevel = getVal(item, 'Level') || '0%';
-                
-                html += `
-                <div class="skill-item">
-                    <div class="skill-header">
-                        <span class="skill-name">${skillName}</span>
-                        <span class="skill-percent">${skillLevel}</span>
-                    </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 0" data-width="${skillLevel}"></div></div>
-                </div>`;
-            });
-            html += `</div>`;
-        }
-        container.innerHTML = html;
     }
 
     function renderExperienceAndLeadership(experiences) {
@@ -635,7 +910,6 @@
             const date = getVal(item, 'Date');
             const descRaw = getVal(item, 'Description') || '';
 
-            // Handle Description bullets
             let descHtml = '';
             const points = descRaw.split('|').map(p => p.trim()).filter(p => p);
             if(points.length > 1) {
@@ -655,7 +929,7 @@
                 </div>
             `;
 
-            if (type.includes('lead') || type.includes('org') || type.includes('ketua') || type.includes('ketua')) {
+            if (type.includes('lead') || type.includes('org') || type.includes('ketua')) {
                 leadHtml += htmlBlock;
                 hasLead = true;
             } else {
@@ -689,20 +963,30 @@
             return;
         }
 
-        container.innerHTML = certs.map((cert, index) => `
+        container.innerHTML = certs.map((cert, index) => {
+            const certTitle = getVal(cert, 'Title');
+            const certLink = getVal(cert, 'Link');
+            const linkButton = certLink 
+                ? `<button type="button" class="cert-link" onclick="openPreview('${certLink}', '${certTitle.replace(/'/g, "\\'")}')">
+                     <i class="fas fa-eye"></i> Lihat Sertifikat
+                   </button>` 
+                : '';
+
+            return `
             <div class="cert-item">
                 <button class="cert-btn" onclick="toggleCert(this)">
-                    <span>${getVal(cert, 'Title')}</span>
+                    <span>${certTitle}</span>
                     <span class="cert-arrow"><i class="fas fa-chevron-down"></i></span>
                 </button>
                 <div class="cert-content">
                     <div class="cert-inner">
                         ${renderCertDetails(getVal(cert, 'Details'))}
-                        ${getVal(cert, 'Link') ? `<a href="${getVal(cert, 'Link')}" target="_blank" class="cert-link"><i class="fas fa-file-pdf"></i> Lihat Sertifikat</a>` : ''}
+                        ${linkButton}
                     </div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function renderCertDetails(detailsString) {
@@ -725,11 +1009,16 @@
     }
 
     // --- Animasi & Interaksi ---
-    function animateSkillBars() {
-        const progressBars = document.querySelectorAll('.skill-progress');
-        progressBars.forEach(bar => {
-            const width = bar.getAttribute('data-width');
-            setTimeout(() => { bar.style.width = width; }, 100);
+    function animateCircles() {
+        const circles = document.querySelectorAll('.circular-chart');
+        circles.forEach(circle => {
+            const targetDegrees = circle.style.getPropertyValue('--degrees');
+            circle.style.setProperty('--degrees', '0deg');
+            void circle.offsetWidth; 
+            setTimeout(() => {
+                circle.style.transition = '--degrees 1.5s ease-out';
+                circle.style.setProperty('--degrees', targetDegrees);
+            }, 50);
         });
     }
 
