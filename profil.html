@@ -502,14 +502,23 @@
     // Ganti URL di bawah ini dengan URL Web App dari Google Apps Script Anda
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvPn5Oe00fHO5SHQs2vzEESevByUBrfSX8sOLL_o07dwZwW5Rn63SjudRS6Uf23LEK/exec'; 
 
-    // Fungsi Utama: Ambil Data dan Render
+    // --- FUNGSI BANTUAN UNTUK MENGHINDARI ERROR (Undefined) ---
+    // Fungsi ini mengambil nilai dari object secara "case-insensitive" 
+    // (Mengabaikan huruf besar/kecil dan spasi)
+    function getVal(obj, key) {
+        if (!obj) return '';
+        // Cari key yang cocok (abaikan case & spasi)
+        const foundKey = Object.keys(obj).find(k => k.toLowerCase().trim() === key.toLowerCase().trim());
+        return foundKey ? obj[foundKey] : '';
+    }
+
+    // Fungsi Utama
     document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        if (SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_GOOGLE_SCRIPT_DISINI' || SCRIPT_URL === '') {
-            console.error('URL Script belum diseting!');
+        if (SCRIPT_URL.includes('MASUKKAN_URL')) {
+            alert('Mohon atur URL Google Apps Script di dalam kode HTML.');
             document.getElementById('loading').style.display = 'none';
-            alert('Mohon atur URL Google Apps Script di dalam kode HTML (variabel SCRIPT_URL).');
             return;
         }
 
@@ -519,7 +528,10 @@
             if (!response.ok) throw new Error('Gagal mengambil data');
             const data = await response.json();
 
-            // 2. Render Data
+            // Debugging (Buka Console Browser F12 untuk melihat data asli)
+            console.log("Data dari Sheet:", data);
+
+            // 2. Render Data dengan Fungsi getVal yang aman
             renderProfile(data.profile);
             renderSkills(data.skills);
             renderExperienceAndLeadership(data.experience);
@@ -531,34 +543,37 @@
             document.getElementById('loading').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
-                // Trigger animasi skill bar setelah loading hilang
                 animateSkillBars();
             }, 500);
 
         } catch (error) {
             console.error('Error:', error);
-            document.querySelector('#loading div').textContent = "Gagal memuat data. Periksa koneksi internet.";
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                // Opsional: Tampilkan data statis fallback jika gagal
-            }, 2000);
+            document.querySelector('#loading div').textContent = "Gagal memuat data. Cek URL Script.";
+            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 2000);
         }
     });
 
-    // --- Fungsi Render ---
+    // --- Fungsi Render (Updated dengan getVal) ---
 
     function renderProfile(profile) {
-        if(profile.Name) document.getElementById('cv-name').textContent = profile.Name;
-        if(profile.Title) document.getElementById('cv-title').textContent = profile.Title;
-        if(profile.About) document.getElementById('cv-about').textContent = profile.About;
+        // Gunakan getVal agar aman meski judul kolom beda huruf
+        const name = getVal(profile, 'Name');
+        const title = getVal(profile, 'Title');
+        const about = getVal(profile, 'About');
+        const email = getVal(profile, 'Email');
+        const phone = getVal(profile, 'Phone');
+        const location = getVal(profile, 'Location');
 
-        // Render Contact Chips
+        if(name) document.getElementById('cv-name').textContent = name;
+        if(title) document.getElementById('cv-title').textContent = title;
+        if(about) document.getElementById('cv-about').textContent = about;
+
         const contactContainer = document.getElementById('contact-container');
         let contacts = [];
         
-        if(profile.Email) contacts.push({ icon: 'fas fa-envelope', text: profile.Email, link: `mailto:${profile.Email}` });
-        if(profile.Phone) contacts.push({ icon: 'fas fa-phone-alt', text: profile.Phone, link: `tel:${profile.Phone}` });
-        if(profile.Location) contacts.push({ icon: 'fas fa-map-marker-alt', text: profile.Location, link: '#' });
+        if(email) contacts.push({ icon: 'fas fa-envelope', text: email, link: `mailto:${email}` });
+        if(phone) contacts.push({ icon: 'fas fa-phone-alt', text: phone, link: `tel:${phone}` });
+        if(location) contacts.push({ icon: 'fas fa-map-marker-alt', text: location, link: '#' });
 
         contactContainer.innerHTML = contacts.map(c => `
             <a href="${c.link}" class="contact-chip">
@@ -569,24 +584,33 @@
 
     function renderSkills(skills) {
         const container = document.getElementById('skills-container');
-        // Group skills by Category
+        if(!skills || skills.length === 0) {
+            container.innerHTML = '<p style="font-size:13px; color:#999;">Belum ada data skill.</p>';
+            return;
+        }
+
         const grouped = {};
         skills.forEach(s => {
-            if(!grouped[s.Category]) grouped[s.Category] = [];
-            grouped[s.Category].push(s);
+            // Ambil kategori dengan aman, default 'Umum' jika kosong
+            const cat = getVal(s, 'Category') || 'Umum';
+            if(!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(s);
         });
 
         let html = '';
         for (const [category, items] of Object.entries(grouped)) {
             html += `<div class="skill-category"><div class="skill-category-title">${category}</div>`;
             items.forEach(item => {
+                const skillName = getVal(item, 'Skill');
+                const skillLevel = getVal(item, 'Level') || '0%';
+                
                 html += `
                 <div class="skill-item">
                     <div class="skill-header">
-                        <span class="skill-name">${item.Skill}</span>
-                        <span class="skill-percent">${item.Level}</span>
+                        <span class="skill-name">${skillName}</span>
+                        <span class="skill-percent">${skillLevel}</span>
                     </div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 0" data-width="${item.Level}"></div></div>
+                    <div class="skill-bar"><div class="skill-progress" style="width: 0" data-width="${skillLevel}"></div></div>
                 </div>`;
             });
             html += `</div>`;
@@ -598,42 +622,40 @@
         const expContainer = document.getElementById('experience-container');
         const leadContainer = document.getElementById('leadership-container');
         
+        if(!experiences) return;
+
         let expHtml = '';
         let leadHtml = '';
         let hasLead = false;
 
-        // Asumsi ada kolom 'Type' di sheet untuk memisahkan 'Work' dan 'Leadership'
-        // Jika tidak ada, kita bisa pisahkan berdasarkan kata kunci atau render semua di Experience.
-        // Di sini saya cek kolom Type jika ada.
-
         experiences.forEach(item => {
-            // Handle Description: Ubah pemisah | jadi <li>
-            // Jika deskripsi menggunakan karakter pemisah, misal: "Point 1 | Point 2"
+            const type = (getVal(item, 'Type') || 'Work').toLowerCase();
+            const role = getVal(item, 'Role');
+            const company = getVal(item, 'Company');
+            const date = getVal(item, 'Date');
+            const descRaw = getVal(item, 'Description') || '';
+
+            // Handle Description bullets
             let descHtml = '';
-            if(item.Description) {
-                const points = item.Description.split('|').map(p => p.trim()).filter(p => p);
-                if(points.length > 1) {
-                    descHtml = `<div class="timeline-desc"><ul>${points.map(p => `<li>${p}</li>`).join('')}</ul></div>`;
-                } else {
-                    descHtml = `<div class="timeline-desc">${item.Description}</div>`;
-                }
+            const points = descRaw.split('|').map(p => p.trim()).filter(p => p);
+            if(points.length > 1) {
+                descHtml = `<div class="timeline-desc"><ul>${points.map(p => `<li>${p}</li>`).join('')}</ul></div>`;
+            } else if (points.length === 1) {
+                descHtml = `<div class="timeline-desc">${points[0]}</div>`;
             }
 
             const htmlBlock = `
                 <div class="timeline-item">
                     <div class="timeline-header">
-                        <span class="timeline-title">${item.Role}</span>
-                        <span class="timeline-date">${item.Date}</span>
+                        <span class="timeline-title">${role}</span>
+                        <span class="timeline-date">${date}</span>
                     </div>
-                    <div class="timeline-subtitle">${item.Company}</div>
+                    <div class="timeline-subtitle">${company}</div>
                     ${descHtml}
                 </div>
             `;
 
-            // Logika Pemisahan Section
-            const type = (item.Type || 'Work').toLowerCase();
-            
-            if (type.includes('lead') || type.includes('org') || type.includes('ketua')) {
+            if (type.includes('lead') || type.includes('org') || type.includes('ketua') || type.includes('ketua')) {
                 leadHtml += htmlBlock;
                 hasLead = true;
             } else {
@@ -641,7 +663,7 @@
             }
         });
 
-        expContainer.innerHTML = expHtml;
+        expContainer.innerHTML = expHtml || '<p style="font-size:13px; color:#999;">Belum ada data pengalaman.</p>';
         leadContainer.innerHTML = leadHtml;
         
         if(!hasLead) document.getElementById('leadership-section').style.display = 'none';
@@ -649,43 +671,48 @@
 
     function renderEducation(eduList) {
         const container = document.getElementById('education-container');
+        if(!eduList || eduList.length === 0) return;
+
         container.innerHTML = eduList.map(edu => `
             <div class="edu-card">
-                <span class="edu-year">${edu.Year}</span>
-                <div class="edu-title">${edu.Degree}</div>
-                <div class="edu-school">${edu.School}</div>
+                <span class="edu-year">${getVal(edu, 'Year')}</span>
+                <div class="edu-title">${getVal(edu, 'Degree')}</div>
+                <div class="edu-school">${getVal(edu, 'School')}</div>
             </div>
         `).join('');
     }
 
     function renderCerts(certs) {
         const container = document.getElementById('certs-container');
+        if(!certs || certs.length === 0) {
+            container.innerHTML = '<p style="font-size:13px; color:#999;">Belum ada data sertifikasi.</p>';
+            return;
+        }
+
         container.innerHTML = certs.map((cert, index) => `
             <div class="cert-item">
                 <button class="cert-btn" onclick="toggleCert(this)">
-                    <span>${cert.Title}</span>
+                    <span>${getVal(cert, 'Title')}</span>
                     <span class="cert-arrow"><i class="fas fa-chevron-down"></i></span>
                 </button>
                 <div class="cert-content">
                     <div class="cert-inner">
-                        ${renderCertDetails(cert.Details)}
-                        ${cert.Link ? `<a href="${cert.Link}" target="_blank" class="cert-link"><i class="fas fa-file-pdf"></i> Lihat Sertifikat</a>` : ''}
+                        ${renderCertDetails(getVal(cert, 'Details'))}
+                        ${getVal(cert, 'Link') ? `<a href="${getVal(cert, 'Link')}" target="_blank" class="cert-link"><i class="fas fa-file-pdf"></i> Lihat Sertifikat</a>` : ''}
                     </div>
                 </div>
             </div>
         `).join('');
     }
 
-    // Helper untuk format detail sertifikat (misal: "No: 123 | Lembaga: BNSP")
     function renderCertDetails(detailsString) {
         if(!detailsString) return '';
-        // Pisahkan detail berdasarkan baris baru atau karakter tertentu
-        // Kita asumsikan format di sheet: "Label: Value" per baris
         const lines = detailsString.split('\n');
         return lines.map(line => {
-            const [label, ...valParts] = line.split(':');
-            const val = valParts.join(':').trim();
-            if(label && val) {
+            const parts = line.split(':');
+            if(parts.length > 1) {
+                const label = parts[0].trim();
+                const val = parts.slice(1).join(':').trim();
                 return `<div class="cert-row"><span class="cert-label">${label}:</span> <span>${val}</span></div>`;
             }
             return `<div style="margin-bottom:4px;">${line}</div>`;
@@ -693,22 +720,19 @@
     }
 
     function renderFooter(profile) {
-        if(profile.Name) document.getElementById('footer-name').textContent = profile.Name;
+        const name = getVal(profile, 'Name');
+        if(name) document.getElementById('footer-name').textContent = name;
     }
 
     // --- Animasi & Interaksi ---
-
     function animateSkillBars() {
         const progressBars = document.querySelectorAll('.skill-progress');
         progressBars.forEach(bar => {
             const width = bar.getAttribute('data-width');
-            setTimeout(() => {
-                bar.style.width = width;
-            }, 100);
+            setTimeout(() => { bar.style.width = width; }, 100);
         });
     }
 
-    // Accordion Logic
     function toggleCert(btn) {
         const allBtns = document.querySelectorAll('.cert-btn');
         allBtns.forEach(otherBtn => {
@@ -717,7 +741,6 @@
                 otherBtn.nextElementSibling.style.maxHeight = null;
             }
         });
-
         btn.classList.toggle('active');
         const content = btn.nextElementSibling;
         if (content.style.maxHeight) {
@@ -727,12 +750,11 @@
         }
     }
 
-    // Photo Upload Logic (Local Only)
+    // Photo Upload Logic
     const profilePhoto = document.getElementById('profilePhoto');
     profilePhoto.addEventListener('click', function() {
         const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
+        input.type = 'file'; input.accept = 'image/*';
         input.onchange = e => {
             const file = e.target.files[0];
             if(file){
@@ -741,8 +763,7 @@
                     const img = document.createElement('img');
                     img.src = event.target.result;
                     img.alt = "Profile Photo";
-                    profilePhoto.innerHTML = ''; 
-                    profilePhoto.appendChild(img);
+                    profilePhoto.innerHTML = ''; profilePhoto.appendChild(img);
                     profilePhoto.style.borderColor = "var(--accent)";
                 };
                 reader.readAsDataURL(file);
