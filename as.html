@@ -8,497 +8,292 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    :root {
-      --primary: #0B3D2E;
-      --primary-mid: #14694F;
-      --primary-light: #1A8C65;
-      --primary-pale: #E8F5E9;
-      --gold: #D4A017;
-      --gold-light: #FFF3C4;
-      --gold-dark: #B8860B;
-      --cream: #FAF7F0;
-      --cream-dark: #F0EBE0;
-      --card: #FFFFFF;
-      --text: #1A1A1A;
-      --muted: #6B7280;
-      --border: #E0DCD3;
-      --danger: #DC2626;
+    :root{
+      --primary:#0B3D2E;--primary-mid:#14694F;--primary-light:#1A8C65;
+      --primary-pale:#E8F5E9;--gold:#D4A017;--gold-light:#FFF3C4;
+      --gold-dark:#B8860B;--cream:#FAF7F0;--cream-dark:#F0EBE0;
+      --card:#FFFFFF;--text:#1A1A1A;--muted:#6B7280;
+      --border:#E0DCD3;--danger:#DC2626;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
-    html{scroll-behavior:smooth;}
-    body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
-    .font-display{font-family:'Fredoka',sans-serif;}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+    body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+    .fd{font-family:'Fredoka',sans-serif;}
 
     /* ===== NAVBAR ===== */
-    .navbar{
-      position:fixed;top:0;left:0;right:0;z-index:1000;
-      transition:all .4s cubic-bezier(.22,1,.36,1);
-      padding:16px 0;
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;transition:all .35s ease;padding:14px 0;}
+    .navbar.scrolled{background:rgba(11,61,46,.97);backdrop-filter:blur(14px);padding:10px 0;box-shadow:0 2px 20px rgba(0,0,0,.15);}
+    .nav-inner{max-width:1140px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+    .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;}
+    .nav-brand-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold),#C49312);flex-shrink:0;}
+    .nav-brand-icon i{font-size:14px;color:#1A1A1A;}
+    .nav-brand-text{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;}
+    .nav-links{display:flex;align-items:center;gap:20px;}
+    .nav-link{color:rgba(255,255,255,.7);font-weight:700;font-size:13px;text-decoration:none;padding:6px 0;position:relative;transition:color .25s;}
+    .nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--gold);transition:width .25s;border-radius:1px;}
+    .nav-link:hover{color:#fff;}.nav-link:hover::after{width:100%;}
+    .nav-cta{background:var(--gold);color:#1A1A1A;font-family:'Fredoka',sans-serif;font-weight:700;font-size:12px;padding:8px 18px;border-radius:8px;text-decoration:none;transition:all .25s;white-space:nowrap;}
+    .nav-cta:hover{background:#e8b020;transform:translateY(-1px);}
+    .mobile-toggle{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:8px;-webkit-tap-highlight-color:transparent;}
+
+    /* Mobile menu */
+    .mobile-menu{display:none;position:fixed;inset:0;z-index:999;background:rgba(11,61,46,.98);backdrop-filter:blur(16px);flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .3s ease;pointer-events:none;}
+    .mobile-menu.open{display:flex;opacity:1;pointer-events:all;}
+    .mobile-menu a{color:rgba(255,255,255,.85);font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;text-decoration:none;padding:14px 32px;border-radius:12px;transition:all .2s;width:80%;text-align:center;}
+    .mobile-menu a:hover{background:rgba(255,255,255,.06);color:var(--gold);}
+    .mobile-menu .nav-cta{font-size:16px;padding:16px 32px;margin-top:12px;background:var(--gold);color:#1A1A1A;width:80%;text-align:center;border-radius:14px;display:block;}
+    .mobile-close{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(255,255,255,.6);font-size:24px;cursor:pointer;padding:8px;}
+
+    @media(max-width:860px){
+      .nav-links{display:none;}
+      .mobile-toggle{display:block;}
     }
-    .navbar.scrolled{
-      background:rgba(11,61,46,.95);
-      backdrop-filter:blur(12px);
-      padding:10px 0;
-      box-shadow:0 2px 24px rgba(0,0,0,.15);
-    }
-    .nav-link{
-      color:rgba(255,255,255,.75);font-weight:700;font-size:14px;
-      text-decoration:none;padding:6px 0;position:relative;
-      transition:color .3s ease;
-    }
-    .nav-link::after{
-      content:'';position:absolute;bottom:0;left:0;width:0;height:2px;
-      background:var(--gold);transition:width .3s ease;border-radius:1px;
-    }
-    .nav-link:hover{color:#fff;}
-    .nav-link:hover::after{width:100%;}
-    .nav-cta{
-      background:var(--gold);color:#1A1A1A;font-family:'Fredoka',sans-serif;
-      font-weight:700;font-size:13px;padding:8px 20px;border-radius:8px;
-      text-decoration:none;border:none;cursor:pointer;
-      transition:all .3s ease;display:inline-block;
-    }
-    .nav-cta:hover{background:#e8b020;transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,160,23,.3);}
-    .mobile-toggle{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;}
 
     /* ===== HERO ===== */
-    .hero{
-      position:relative;min-height:100vh;display:flex;align-items:center;
-      background:linear-gradient(160deg,#071F18 0%,var(--primary) 35%,#0D4A38 65%,#0A2F23 100%);
-      overflow:hidden;
-    }
-    .hero::before{
-      content:'';position:absolute;inset:0;
-      background:
-        radial-gradient(ellipse at 15% 85%,rgba(212,160,23,.1) 0%,transparent 50%),
-        radial-gradient(ellipse at 85% 15%,rgba(26,140,101,.08) 0%,transparent 40%),
-        radial-gradient(circle at 50% 50%,rgba(255,255,255,.02) 0%,transparent 60%);
-    }
-    .hero::after{
-      content:'';position:absolute;bottom:-2px;left:0;right:0;height:80px;
-      background:var(--cream);clip-path:ellipse(55% 100% at 50% 100%);
-    }
+    .hero{position:relative;min-height:100dvh;display:flex;align-items:center;background:linear-gradient(160deg,#071F18 0%,var(--primary) 35%,#0D4A38 65%,#0A2F23 100%);overflow:hidden;}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 85%,rgba(212,160,23,.1) 0%,transparent 50%),radial-gradient(ellipse at 85% 15%,rgba(26,140,101,.08) 0%,transparent 40%);}
+    .hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:50px;background:var(--cream);clip-path:ellipse(55% 100% at 50% 100%);}
 
-    /* Atom orbit di hero */
-    .hero-atom{
-      position:absolute;border-radius:50%;pointer-events:none;
-      border:1px solid rgba(255,255,255,.06);
-    }
-    .hero-atom::before,.hero-atom::after{
-      content:'';position:absolute;border-radius:50%;
-      border:1px solid rgba(255,255,255,.04);
-    }
-    .hero-atom-1{width:400px;height:400px;top:10%;right:-80px;animation:atomSpin 30s linear infinite;}
-    .hero-atom-1::before{width:400px;height:400px;top:-1px;left:-1px;transform:rotateY(60deg);}
-    .hero-atom-1::after{width:400px;height:400px;top:-1px;left:-1px;transform:rotateY(-60deg);}
-    .hero-atom-2{width:250px;height:250px;bottom:20%;left:-50px;animation:atomSpin 22s linear infinite reverse;}
-    .hero-atom-2::before{width:250px;height:250px;top:-1px;left:-1px;transform:rotateY(60deg);}
-    .hero-atom-2::after{width:250px;height:250px;top:-1px;left:-1px;transform:rotateY(-60deg);}
-    .hero-atom-3{width:150px;height:150px;top:30%;left:30%;animation:atomSpin 18s linear infinite;}
-    .hero-atom-3::before{width:150px;height:150px;top:-1px;left:-1px;transform:rotateY(60deg);}
-    .hero-atom-3::after{width:150px;height:150px;top:-1px;left:-1px;transform:rotateY(-60deg);}
+    .hero-atom{position:absolute;border-radius:50%;pointer-events:none;border:1px solid rgba(255,255,255,.05);}
+    .hero-atom::before,.hero-atom::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.03);}
+    .ha1{width:350px;height:350px;top:8%;right:-60px;animation:as 28s linear infinite;}
+    .ha1::before,.ha1::after{width:350px;height:350px;top:-1px;left:-1px;}
+    .ha1::before{transform:rotateY(60deg);}.ha1::after{transform:rotateY(-60deg);}
+    .ha2{width:200px;height:200px;bottom:25%;left:-40px;animation:as 20s linear infinite reverse;}
+    .ha2::before,.ha2::after{width:200px;height:200px;top:-1px;left:-1px;}
+    .ha2::before{transform:rotateY(60deg);}.ha2::after{transform:rotateY(-60deg);}
+    @keyframes as{from{transform:rotateZ(0)}to{transform:rotateZ(360deg)}}
 
-    @keyframes atomSpin{from{transform:rotateZ(0)}to{transform:rotateZ(360deg)}}
+    .hero-particle{position:absolute;border-radius:50%;pointer-events:none;animation:fp linear infinite;}
+    @keyframes fp{0%{transform:translateY(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateY(-100vh);opacity:0;}}
 
-    /* Partikel mengambang hero */
-    .hero-particle{
-      position:absolute;border-radius:50%;pointer-events:none;
-      animation:floatParticle linear infinite;
-    }
-    @keyframes floatParticle{
-      0%{transform:translateY(0) translateX(0);opacity:0;}
-      10%{opacity:1;}
-      90%{opacity:1;}
-      100%{transform:translateY(-100vh) translateX(40px);opacity:0;}
-    }
+    .hero-inner{max-width:1140px;margin:0 auto;padding:100px 20px 80px;width:100%;position:relative;z-index:10;}
+    .hero-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center;}
+    @media(min-width:1024px){.hero-grid{grid-template-columns:1fr 1fr;}}
 
-    .hero-badge{
-      display:inline-flex;align-items:center;gap:8px;
-      background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);
-      border-radius:100px;padding:8px 18px;font-size:13px;font-weight:700;
-      color:var(--gold);margin-bottom:24px;
-    }
-    .hero-title{
-      font-size:clamp(2.5rem,6vw,4.2rem);font-weight:700;
-      line-height:1.1;color:#fff;margin-bottom:8px;letter-spacing:-.02em;
-    }
-    .hero-tagline{
-      font-family:'Fredoka',sans-serif;font-size:clamp(1.1rem,2.5vw,1.5rem);
-      color:var(--gold);font-weight:500;margin-bottom:20px;
-    }
-    .hero-desc{
-      font-size:16px;line-height:1.8;color:rgba(255,255,255,.7);
-      max-width:520px;margin-bottom:32px;
-    }
-    .hero-location{
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:14px;color:rgba(255,255,255,.5);margin-bottom:32px;
-    }
-    .btn-gold{
-      display:inline-flex;align-items:center;gap:10px;
-      background:linear-gradient(135deg,var(--gold) 0%,#C49312 100%);
-      color:#1A1A1A;font-family:'Fredoka',sans-serif;font-weight:700;
-      font-size:16px;padding:16px 32px;border-radius:14px;
-      text-decoration:none;border:none;cursor:pointer;
-      transition:all .3s ease;box-shadow:0 4px 20px rgba(212,160,23,.3);
-      position:relative;overflow:hidden;
-    }
-    .btn-gold::before{
-      content:'';position:absolute;inset:0;
-      background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,transparent 50%);
-      opacity:0;transition:opacity .3s ease;
-    }
-    .btn-gold:hover::before{opacity:1;}
-    .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,160,23,.4);}
-    .btn-outline{
-      display:inline-flex;align-items:center;gap:10px;
-      background:transparent;color:#fff;font-family:'Fredoka',sans-serif;
-      font-weight:700;font-size:16px;padding:16px 32px;border-radius:14px;
-      text-decoration:none;border:2px solid rgba(255,255,255,.2);cursor:pointer;
-      transition:all .3s ease;
-    }
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:20px;}
+    .hero-title{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4rem);font-weight:700;line-height:1.05;color:#fff;margin-bottom:8px;letter-spacing:-.02em;}
+    .hero-tagline{font-family:'Fredoka',sans-serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--gold);font-weight:500;margin-bottom:18px;}
+    .hero-desc{font-size:clamp(14px,2.5vw,16px);line-height:1.8;color:rgba(255,255,255,.65);max-width:500px;margin-bottom:24px;}
+    .hero-loc{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;}
+    .hero-btns{display:flex;flex-wrap:wrap;gap:12px;}
+
+    .btn-gold{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold),#C49312);color:#1A1A1A;font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none;border:none;cursor:pointer;transition:all .3s;box-shadow:0 4px 16px rgba(212,160,23,.25);position:relative;overflow:hidden;}
+    .btn-gold::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,transparent 50%);opacity:0;transition:opacity .3s;}
+    .btn-gold:hover::before{opacity:1;}.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,160,23,.35);}
+    @media(max-width:400px){.btn-gold{width:100%;justify-content:center;}}
+
+    .btn-outline{display:inline-flex;align-items:center;gap:8px;background:transparent;color:#fff;font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none;border:2px solid rgba(255,255,255,.15);cursor:pointer;transition:all .3s;}
     .btn-outline:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px);}
+    @media(max-width:400px){.btn-outline{width:100%;justify-content:center;}}
 
-    /* Ilustrasi kanan hero */
-    .hero-visual{
-      position:relative;
-    }
-    .hero-card{
-      background:rgba(255,255,255,.06);backdrop-filter:blur(8px);
-      border:1px solid rgba(255,255,255,.08);border-radius:20px;
-      padding:28px;position:absolute;
-      animation:cardFloat 6s ease-in-out infinite;
-    }
-    .hero-card-1{top:10%;right:0;width:220px;animation-delay:0s;}
-    .hero-card-2{bottom:15%;right:60px;width:200px;animation-delay:2s;}
-    .hero-card-3{top:55%;left:0;width:180px;animation-delay:4s;}
-    @keyframes cardFloat{
-      0%,100%{transform:translateY(0);}
-      50%{transform:translateY(-12px);}
-    }
-    .hero-card-icon{
-      width:44px;height:44px;border-radius:12px;display:flex;
-      align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;
-    }
-    .hero-card-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;}
-    .hero-card-desc{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;}
+    /* Hero visual cards */
+    .hero-visual{position:relative;min-height:300px;}
+    .h-card{background:rgba(255,255,255,.05);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px;position:absolute;animation:cf 6s ease-in-out infinite;}
+    .h-card-1{top:5%;right:0;width:200px;animation-delay:0s;}
+    .h-card-2{bottom:10%;right:40px;width:185px;animation-delay:2s;}
+    .h-card-3{top:50%;left:0;width:170px;animation-delay:4s;}
+    @keyframes cf{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+    .h-card-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
+    .h-card-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:#fff;margin-bottom:3px;}
+    .h-card-desc{font-size:11px;color:rgba(255,255,255,.5);line-height:1.5;}
+    @media(max-width:1023px){.hero-visual{display:none;}}
 
-    /* ===== SECTION UMUM ===== */
-    .section{padding:80px 0;position:relative;}
-    .section-label{
-      display:inline-flex;align-items:center;gap:8px;
-      font-size:13px;font-weight:800;text-transform:uppercase;
-      letter-spacing:.08em;color:var(--primary-mid);margin-bottom:12px;
-    }
-    .section-label i{font-size:10px;}
-    .section-title{
-      font-family:'Fredoka',sans-serif;font-weight:700;
-      font-size:clamp(1.6rem,4vw,2.4rem);color:var(--primary);
-      line-height:1.2;margin-bottom:16px;
-    }
-    .section-desc{
-      font-size:15px;line-height:1.8;color:var(--muted);
-      max-width:600px;
-    }
+    /* ===== SECTIONS UMUM ===== */
+    .sec{padding:60px 0;position:relative;}
+    @media(min-width:768px){.sec{padding:80px 0;}}
+    @media(min-width:1024px){.sec{padding:100px 0;}}
+    .sec-inner{max-width:1140px;margin:0 auto;padding:0 20px;}
+    .sec-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--primary-mid);margin-bottom:10px;}
+    .sec-label i{font-size:6px;}
+    .sec-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.5rem,5vw,2.2rem);color:var(--primary);line-height:1.2;margin-bottom:14px;}
+    .sec-desc{font-size:clamp(13px,2.5vw,15px);line-height:1.8;color:var(--muted);max-width:560px;}
 
-    /* Reveal animation */
-    .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1);}
-    .reveal.visible{opacity:1;transform:translateY(0);}
-    .reveal-delay-1{transition-delay:.1s;}
-    .reveal-delay-2{transition-delay:.2s;}
-    .reveal-delay-3{transition-delay:.3s;}
-    .reveal-delay-4{transition-delay:.4s;}
+    /* Grid helpers */
+    .g1{display:grid;grid-template-columns:1fr;gap:16px;}
+    @media(min-width:640px){.g2{grid-template-columns:1fr 1fr;}}
+    @media(min-width:640px){.g2s{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:768px){.g3{grid-template-columns:repeat(3,1fr);}}
+    @media(min-width:1024px){.g4{grid-template-columns:repeat(4,1fr);}}
+    .g2{display:grid;gap:16px;grid-template-columns:1fr;}
+    .g2s{display:grid;gap:16px;grid-template-columns:1fr;}
+    .g3{display:grid;gap:16px;grid-template-columns:1fr;}
+    .g4{display:grid;gap:16px;grid-template-columns:1fr;}
+    @media(min-width:640px){.g1{grid-template-columns:1fr 1fr;}}
+    @media(min-width:1024px){.g-lg2{grid-template-columns:1fr 1fr;}}
+
+    /* Reveal */
+    .rv{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);}
+    .rv.vis{opacity:1;transform:translateY(0);}
+    .d1{transition-delay:.1s;}.d2{transition-delay:.2s;}.d3{transition-delay:.3s;}.d4{transition-delay:.4s;}
 
     /* ===== MASALAH ===== */
-    .problem-card{
-      display:flex;align-items:flex-start;gap:16px;
-      padding:20px;border-radius:14px;background:var(--card);
-      border:1px solid var(--border);transition:all .3s ease;
-    }
-    .problem-card:hover{
-      border-color:#FCA5A5;box-shadow:0 4px 20px rgba(220,38,38,.06);
-      transform:translateY(-2px);
-    }
-    .problem-icon{
-      width:40px;height:40px;border-radius:10px;
-      background:#FEF2F2;color:var(--danger);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;font-size:16px;
-    }
-    .problem-text{font-weight:700;font-size:15px;color:var(--text);padding-top:8px;}
+    .prob-card{display:flex;align-items:flex-start;gap:14px;padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:all .25s;}
+    .prob-card:hover{border-color:#FCA5A5;box-shadow:0 4px 16px rgba(220,38,38,.05);transform:translateY(-2px);}
+    .prob-icon{width:38px;height:38px;border-radius:10px;background:#FEF2F2;color:var(--danger);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+    .prob-text{font-weight:700;font-size:14px;padding-top:7px;line-height:1.4;}
+    .prob-card.sol{background:var(--primary-pale);border-color:var(--primary-mid);}
+    .prob-card.sol .prob-icon{background:var(--primary-pale);color:var(--primary);}
+    .prob-card.sol .prob-text{color:var(--primary);}
 
     /* ===== SOLUSI ===== */
-    .solusi-section{background:var(--primary);color:#fff;position:relative;overflow:hidden;}
-    .solusi-section::before{
-      content:'';position:absolute;inset:0;
-      background:radial-gradient(ellipse at 80% 20%,rgba(212,160,23,.08) 0%,transparent 50%);
-    }
-    .solusi-section .section-label{color:var(--gold);}
-    .solusi-section .section-title{color:#fff;}
-    .solusi-section .section-desc{color:rgba(255,255,255,.6);}
-    .solusi-card{
-      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-      border-radius:16px;padding:28px;transition:all .3s ease;
-      position:relative;overflow:hidden;
-    }
-    .solusi-card::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,var(--gold),transparent);opacity:0;
-      transition:opacity .3s ease;
-    }
-    .solusi-card:hover{background:rgba(255,255,255,.1);transform:translateY(-4px);}
-    .solusi-card:hover::before{opacity:1;}
-    .solusi-icon{
-      width:48px;height:48px;border-radius:12px;
-      background:rgba(212,160,23,.15);color:var(--gold);
-      display:flex;align-items:center;justify-content:center;
-      font-size:20px;margin-bottom:16px;
-    }
-    .solusi-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:#fff;margin-bottom:8px;}
-    .solusi-desc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.55);}
+    .sol-bg{background:var(--primary);color:#fff;position:relative;overflow:hidden;}
+    .sol-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(212,160,23,.08) 0%,transparent 50%);}
+    .sol-bg .sec-label{color:var(--gold);}.sol-bg .sec-title{color:#fff;}.sol-bg .sec-desc{color:rgba(255,255,255,.55);}
+    .sol-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;transition:all .3s;position:relative;overflow:hidden;}
+    .sol-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity .3s;}
+    .sol-card:hover{background:rgba(255,255,255,.09);transform:translateY(-4px);}
+    .sol-card:hover::before{opacity:1;}
+    .sol-icon{width:44px;height:44px;border-radius:11px;background:rgba(212,160,23,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+    .sol-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:#fff;margin-bottom:6px;}
+    .sol-desc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.5);}
 
     /* ===== FILOSOFI ===== */
-    .filo-section{
-      background:linear-gradient(180deg,var(--cream) 0%,var(--cream-dark) 100%);
-    }
-    .filo-number{
-      font-family:'Fredoka',sans-serif;font-weight:700;
-      font-size:clamp(4rem,10vw,7rem);color:var(--primary);
-      opacity:.08;line-height:1;margin-bottom:-20px;
-    }
-    .filo-quote{
-      font-family:'Fredoka',sans-serif;font-size:clamp(1.1rem,2.5vw,1.4rem);
-      color:var(--primary);line-height:1.7;font-weight:500;
-      padding-left:24px;border-left:4px solid var(--gold);
-    }
+    .filo-bg{background:linear-gradient(180deg,var(--cream),var(--cream-dark));}
+    .filo-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center;}
+    @media(min-width:768px){.filo-grid{grid-template-columns:1fr 1fr;}}
+    .filo-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(3.5rem,12vw,6.5rem);color:var(--primary);opacity:.07;line-height:1;margin-bottom:-16px;}
+    .filo-quote{font-family:'Fredoka',sans-serif;font-size:clamp(1rem,2.5vw,1.25rem);color:var(--primary);line-height:1.7;font-weight:500;padding-left:20px;border-left:3px solid var(--gold);margin-top:20px;}
+    .ring-wrap{display:flex;align-items:center;justify-content:center;min-height:260px;}
+    @media(min-width:768px){.ring-wrap{min-height:320px;}}
+    .ring-svg{width:100%;max-width:280px;height:auto;transform:rotate(-90deg);}
+    .ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
 
     /* ===== ALAMI ===== */
-    .alami-section{background:var(--card);}
-    .alami-letter{
-      width:64px;height:64px;border-radius:16px;display:flex;
-      align-items:center;justify-content:center;
-      font-family:'Fredoka',sans-serif;font-weight:700;font-size:28px;
-      flex-shrink:0;transition:all .3s ease;
-    }
-    .alami-item{transition:all .3s ease;border-radius:16px;padding:20px;}
-    .alami-item:hover{background:var(--primary-pale);transform:translateX(6px);}
-    .alami-item:hover .alami-letter{transform:scale(1.1);}
-    .alami-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;color:var(--primary);margin-bottom:4px;}
-    .alami-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .al-bg{background:var(--card);}
+    .al-item{display:flex;align-items:flex-start;gap:16px;padding:18px;border-radius:14px;transition:all .25s;}
+    .al-item:hover{background:var(--primary-pale);transform:translateX(4px);}
+    .al-letter{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;flex-shrink:0;transition:transform .25s;}
+    .al-item:hover .al-letter{transform:scale(1.08);}
+    .al-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--primary);margin-bottom:3px;}
+    .al-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    @media(max-width:400px){.al-letter{width:46px;height:46px;font-size:20px;}.al-item{gap:12px;padding:14px;}}
 
     /* ===== CARA BELAJAR ===== */
-    .belajar-card{
-      border-radius:20px;overflow:hidden;position:relative;
-      min-height:340px;display:flex;flex-direction:column;justify-content:flex-end;
-      padding:32px;transition:transform .3s ease;
-    }
-    .belajar-card:hover{transform:translateY(-6px);}
-    .belajar-card::before{
-      content:'';position:absolute;inset:0;z-index:1;
-      background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.7) 100%);
-    }
-    .belajar-card>*{position:relative;z-index:2;}
-    .belajar-tag{
-      display:inline-block;background:rgba(255,255,255,.15);
-      backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);
-      padding:4px 14px;border-radius:100px;font-size:11px;font-weight:800;
-      text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:12px;
-    }
-    .belajar-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:22px;color:#fff;margin-bottom:8px;}
-    .belajar-desc{font-size:13px;color:rgba(255,255,255,.75);line-height:1.7;}
+    .bl-card{border-radius:18px;overflow:hidden;position:relative;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;transition:transform .3s;}
+    @media(min-width:640px){.bl-card{min-height:320px;}}
+    .bl-card:hover{transform:translateY(-4px);}
+    .bl-card::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.65) 100%);}
+    .bl-card>*{position:relative;z-index:2;}
+    .bl-tag{display:inline-block;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);padding:4px 12px;border-radius:100px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:10px;}
+    .bl-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(18px,4vw,22px);color:#fff;margin-bottom:6px;}
+    .bl-desc{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7;}
+    .bl-example{margin-top:24px;padding:20px;border-radius:16px;background:var(--gold-light);border:1px solid rgba(212,160,23,.18);}
+    .bl-example-inner{display:flex;align-items:flex-start;gap:14px;}
+    .bl-example-icon{width:38px;height:38px;border-radius:10px;background:var(--gold);color:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+    .bl-example-label{font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;color:var(--gold-dark);margin-bottom:4px;}
+    .bl-example-text{font-size:13px;color:var(--text);line-height:1.7;}
 
     /* ===== GURU ===== */
-    .guru-section{background:var(--cream-dark);}
-    .guru-card{
-      text-align:center;padding:32px 24px;border-radius:16px;
-      background:var(--card);border:1px solid var(--border);
-      transition:all .3s ease;position:relative;overflow:hidden;
-    }
-    .guru-card::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:4px;
-      background:linear-gradient(90deg,var(--primary),var(--gold));
-      transform:scaleX(0);transition:transform .3s ease;transform-origin:left;
-    }
-    .guru-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(11,61,46,.08);}
-    .guru-card:hover::before{transform:scaleX(1);}
-    .guru-icon{
-      width:56px;height:56px;border-radius:14px;
-      background:var(--primary-pale);color:var(--primary);
-      display:flex;align-items:center;justify-content:center;
-      font-size:22px;margin:0 auto 16px;
-    }
-    .guru-role{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;color:var(--primary);margin-bottom:6px;}
+    .guru-bg{background:var(--cream-dark);}
+    .guru-card{text-align:center;padding:28px 20px;border-radius:16px;background:var(--card);border:1px solid var(--border);transition:all .3s;position:relative;overflow:hidden;}
+    .guru-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--gold));transform:scaleX(0);transition:transform .3s;transform-origin:left;}
+    .guru-card:hover{transform:translateY(-4px);box-shadow:0 6px 24px rgba(11,61,46,.06);}.guru-card:hover::before{transform:scaleX(1);}
+    .guru-icon{width:50px;height:50px;border-radius:13px;background:var(--primary-pale);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 14px;}
+    .guru-role{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--primary);margin-bottom:5px;}
     .guru-desc{font-size:13px;color:var(--muted);line-height:1.6;}
 
     /* ===== GURU TAMU ===== */
-    .tamu-section{background:var(--primary);color:#fff;position:relative;overflow:hidden;}
-    .tamu-section::before{
-      content:'';position:absolute;inset:0;
-      background:radial-gradient(circle at 20% 50%,rgba(212,160,23,.06) 0%,transparent 50%);
-    }
-    .tamu-section .section-label{color:var(--gold);}
-    .tamu-section .section-title{color:#fff;}
-    .tamu-section .section-desc{color:rgba(255,255,255,.6);}
-    .tamu-item{
-      display:flex;align-items:center;gap:16px;
-      padding:16px 20px;border-radius:12px;
-      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
-      transition:all .3s ease;
-    }
-    .tamu-item:hover{background:rgba(255,255,255,.08);transform:translateX(6px);}
-    .tamu-icon{
-      width:42px;height:42px;border-radius:10px;
-      background:rgba(212,160,23,.15);color:var(--gold);
-      display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
-    }
-    .tamu-text{font-weight:700;font-size:14px;color:rgba(255,255,255,.85);}
+    .tamu-bg{background:var(--primary);color:#fff;position:relative;overflow:hidden;}
+    .tamu-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(212,160,23,.06) 0%,transparent 50%);}
+    .tamu-bg .sec-label{color:var(--gold);}.tamu-bg .sec-title{color:#fff;}.tamu-bg .sec-desc{color:rgba(255,255,255,.55);}
+    .tamu-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:640px){.tamu-grid{grid-template-columns:1fr 1fr;}}
+    .tamu-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);transition:all .25s;}
+    .tamu-item:hover{background:rgba(255,255,255,.08);transform:translateX(4px);}
+    .tamu-icon{width:40px;height:40px;border-radius:10px;background:rgba(212,160,23,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+    .tamu-text{font-weight:700;font-size:14px;color:rgba(255,255,255,.8);}
+    .tamu-badge{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;border-radius:12px;background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.12);margin-top:24px;}
+    .tamu-badge i{color:var(--gold);font-size:18px;}
+    .tamu-badge span{color:rgba(255,255,255,.75);font-weight:700;font-size:13px;}
 
     /* ===== JADWAL ===== */
-    .jadwal-section{background:var(--card);}
-    .timeline{position:relative;padding-left:32px;}
-    .timeline::before{
-      content:'';position:absolute;left:11px;top:8px;bottom:8px;
-      width:2px;background:linear-gradient(180deg,var(--primary),var(--gold),var(--primary));
-      border-radius:1px;
-    }
-    .timeline-item{position:relative;margin-bottom:32px;}
-    .timeline-item:last-child{margin-bottom:0;}
-    .timeline-dot{
-      position:absolute;left:-32px;top:6px;
-      width:24px;height:24px;border-radius:50%;
-      background:var(--card);border:3px solid var(--primary);
-      display:flex;align-items:center;justify-content:center;z-index:1;
-    }
-    .timeline-dot-inner{
-      width:8px;height:8px;border-radius:50%;background:var(--primary);
-    }
-    .timeline-item:nth-child(even) .timeline-dot{border-color:var(--gold);}
-    .timeline-item:nth-child(even) .timeline-dot-inner{background:var(--gold);}
-    .timeline-time{
-      font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;
-      color:var(--primary);margin-bottom:4px;
-    }
-    .timeline-title{font-weight:800;font-size:16px;color:var(--text);margin-bottom:4px;}
-    .timeline-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+    .jad-bg{background:var(--card);}
+    .jad-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:start;}
+    @media(min-width:768px){.jad-grid{grid-template-columns:1fr 1fr;}}
+    .tl{position:relative;padding-left:28px;}
+    .tl::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--primary),var(--gold),var(--primary));border-radius:1px;}
+    .tl-item{position:relative;margin-bottom:28px;}.tl-item:last-child{margin-bottom:0;}
+    .tl-dot{position:absolute;left:-28px;top:5px;width:20px;height:20px;border-radius:50%;background:var(--card);border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;z-index:1;}
+    .tl-dot-in{width:6px;height:6px;border-radius:50%;background:var(--primary);}
+    .tl-item:nth-child(even) .tl-dot{border-color:var(--gold);}.tl-item:nth-child(even) .tl-dot-in{background:var(--gold);}
+    .tl-time{font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;color:var(--primary);margin-bottom:3px;}
+    .tl-title{font-weight:800;font-size:15px;color:var(--text);margin-bottom:3px;}
+    .tl-desc{font-size:13px;color:var(--muted);line-height:1.6;}
 
     /* ===== KEUNGGULAN ===== */
-    .keunggulan-section{
-      background:linear-gradient(180deg,var(--cream) 0%,var(--cream-dark) 100%);
-    }
-    .unggul-card{
-      display:flex;align-items:flex-start;gap:14px;
-      padding:20px;border-radius:14px;background:var(--card);
-      border:1px solid var(--border);transition:all .3s ease;
-    }
-    .unggul-card:hover{border-color:var(--primary-mid);box-shadow:0 4px 20px rgba(11,61,46,.06);transform:translateY(-2px);}
-    .unggul-check{
-      width:28px;height:28px;border-radius:8px;
-      background:var(--primary-pale);color:var(--primary);
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;font-size:12px;margin-top:2px;
-    }
-    .unggul-text{font-weight:700;font-size:14px;color:var(--text);padding-top:2px;}
+    .ung-bg{background:linear-gradient(180deg,var(--cream),var(--cream-dark));}
+    .ung-card{display:flex;align-items:flex-start;gap:12px;padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:all .25s;}
+    .ung-card:hover{border-color:var(--primary-mid);box-shadow:0 4px 16px rgba(11,61,46,.05);transform:translateY(-2px);}
+    .ung-check{width:26px;height:26px;border-radius:7px;background:var(--primary-pale);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;margin-top:1px;}
+    .ung-text{font-weight:700;font-size:14px;padding-top:2px;line-height:1.4;}
 
     /* ===== TESTIMONI ===== */
-    .testi-section{background:var(--card);}
-    .testi-card{
-      padding:32px;border-radius:20px;
-      background:var(--cream);border:1px solid var(--border);
-      position:relative;transition:all .3s ease;
-    }
-    .testi-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(11,61,46,.06);}
-    .testi-quote-mark{
-      font-family:'Fredoka',sans-serif;font-size:60px;font-weight:700;
-      color:var(--gold);opacity:.2;line-height:1;margin-bottom:-16px;
-    }
-    .testi-text{font-size:15px;line-height:1.8;color:var(--text);font-style:italic;margin-bottom:20px;}
-    .testi-author{display:flex;align-items:center;gap:12px;}
-    .testi-avatar{
-      width:44px;height:44px;border-radius:12px;
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;color:#fff;
-    }
-    .testi-name{font-weight:800;font-size:14px;color:var(--primary);}
-    .testi-role{font-size:12px;color:var(--muted);}
+    .tes-bg{background:var(--card);}
+    .tes-card{padding:28px;border-radius:18px;background:var(--cream);border:1px solid var(--border);transition:all .3s;}
+    .tes-card:hover{transform:translateY(-4px);box-shadow:0 6px 24px rgba(11,61,46,.05);}
+    .tes-mark{font-family:'Fredoka',sans-serif;font-size:50px;font-weight:700;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-12px;}
+    .tes-text{font-size:14px;line-height:1.8;color:var(--text);font-style:italic;margin-bottom:18px;}
+    .tes-author{display:flex;align-items:center;gap:12px;}
+    .tes-avatar{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+    .tes-name{font-weight:800;font-size:13px;color:var(--primary);}
+    .tes-role{font-size:11px;color:var(--muted);}
 
     /* ===== LOKASI ===== */
-    .lokasi-section{background:var(--cream-dark);}
-    .lokasi-card{
-      background:var(--card);border-radius:20px;overflow:hidden;
-      border:1px solid var(--border);box-shadow:0 4px 24px rgba(11,61,46,.06);
-    }
-    .lokasi-map{
-      width:100%;height:280px;background:var(--cream-dark);
-      display:flex;align-items:center;justify-content:center;
-      position:relative;overflow:hidden;
-    }
-    .lokasi-map-placeholder{
-      text-align:center;color:var(--muted);
-    }
-    .lokasi-map-placeholder i{font-size:40px;color:var(--primary);opacity:.2;margin-bottom:8px;display:block;}
+    .lok-bg{background:var(--cream-dark);}
+    .lok-card{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 20px rgba(11,61,46,.04);}
+    .lok-map{width:100%;height:220px;}@media(min-width:640px){.lok-map{height:280px;}}
+    .lok-map iframe{width:100%;height:100%;display:block;border:0;}
+    .lok-info{padding:24px;}
+    @media(min-width:640px){.lok-info{padding:32px;}}
+    .lok-info-inner{display:flex;align-items:flex-start;gap:16px;}
+    .lok-icon{width:48px;height:48px;border-radius:13px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+    .lok-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;color:var(--primary);margin-bottom:4px;}
+    .lok-addr{color:var(--muted);font-size:13px;line-height:1.7;}
 
     /* ===== CTA ===== */
-    .cta-section{
-      background:linear-gradient(160deg,#071F18 0%,var(--primary) 40%,#0D4A38 100%);
-      position:relative;overflow:hidden;
-    }
-    .cta-section::before{
-      content:'';position:absolute;inset:0;
-      background:radial-gradient(ellipse at 70% 80%,rgba(212,160,23,.1) 0%,transparent 50%);
-    }
+    .cta-bg{background:linear-gradient(160deg,#071F18 0%,var(--primary) 40%,#0D4A38 100%);position:relative;overflow:hidden;}
+    .cta-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 80%,rgba(212,160,23,.1) 0%,transparent 50%);}
+    .cta-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:28px;}
+    .cta-contacts{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
+    .cta-contact{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .25s;-webkit-tap-highlight-color:transparent;}
+    .cta-contact:hover{color:var(--gold);}
 
     /* ===== FOOTER ===== */
-    .footer{background:#06150F;color:rgba(255,255,255,.5);}
-    .footer a{color:rgba(255,255,255,.5);text-decoration:none;transition:color .3s ease;}
-    .footer a:hover{color:var(--gold);}
-    .footer-link{font-size:14px;padding:4px 0;display:block;}
+    .footer{background:#06150F;color:rgba(255,255,255,.45);padding:48px 0 32px;}
+    .footer a{color:rgba(255,255,255,.45);text-decoration:none;transition:color .25s;}.footer a:hover{color:var(--gold);}
+    .footer-grid{display:grid;grid-template-columns:1fr;gap:32px;margin-bottom:32px;}
+    @media(min-width:640px){.footer-grid{grid-template-columns:1fr 1fr;}}
+    @media(min-width:768px){.footer-grid{grid-template-columns:2fr 1fr 1fr;}}
+    .footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .footer-brand-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(212,160,23,.12);}
+    .footer-brand-icon i{color:var(--gold);font-size:13px;}
+    .footer-brand-text{font-family:'Fredoka',sans-serif;font-weight:700;color:#fff;font-size:16px;}
+    .footer-desc{font-size:13px;line-height:1.8;max-width:320px;}
+    .footer-heading{font-family:'Fredoka',sans-serif;font-weight:700;color:#fff;font-size:12px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em;}
+    .footer-link{font-size:13px;padding:4px 0;display:block;}
+    .footer-contact-item{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:10px;}
+    .footer-contact-item i{width:16px;text-align:center;flex-shrink:0;}
+    .footer-socials{display:flex;gap:10px;margin-top:16px;}
+    .footer-social{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);transition:all .25s;font-size:14px;}
+    .footer-social:hover{background:rgba(212,160,23,.15);color:var(--gold);}
+    .footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.05);text-align:center;}
+    .footer-copy{font-size:11px;color:rgba(255,255,255,.25);}
 
-    /* ===== ANIMASI KHUSUS ===== */
-    @keyframes pulse-ring{
-      0%{transform:scale(1);opacity:.4;}
-      100%{transform:scale(1.6);opacity:0;}
-    }
-    .pulse-dot{position:relative;}
-    .pulse-dot::after{
-      content:'';position:absolute;inset:-4px;border-radius:50%;
-      border:2px solid var(--gold);animation:pulse-ring 2s ease-out infinite;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media(max-width:768px){
-      .mobile-toggle{display:block;}
-      .nav-links{
-        display:none;position:absolute;top:100%;left:0;right:0;
-        background:rgba(11,61,46,.98);backdrop-filter:blur(12px);
-        padding:20px 24px;flex-direction:column;gap:12px;
-        border-top:1px solid rgba(255,255,255,.08);
-      }
-      .nav-links.open{display:flex;}
-      .hero-visual{display:none;}
-      .hero-atom{display:none;}
-      .section{padding:56px 0;}
-    }
-
-    @media(prefers-reduced-motion:reduce){
-      *,*::before,*::after{
-        animation-duration:.01ms !important;
-        transition-duration:.01ms !important;
-      }
-    }
+    /* ===== ANIMATIONS ===== */
+    @keyframes pr{0%{transform:scale(1);opacity:.4;}100%{transform:scale(1.5);opacity:0;}}
   </style>
 </head>
 <body>
 
-  <!-- ===== NAVBAR ===== -->
+  <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
-    <div class="max-w-6xl mx-auto px-5 flex items-center justify-between">
-      <a href="#hero" class="flex items-center gap-3 text-white no-underline">
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,var(--gold),#C49312);">
-          <i class="fa-solid fa-atom text-base" style="color:#1A1A1A;"></i>
-        </div>
-        <span class="font-display font-bold text-lg hidden sm:inline">Atomic School</span>
+    <div class="nav-inner">
+      <a href="#hero" class="nav-brand">
+        <div class="nav-brand-icon"><i class="fa-solid fa-atom"></i></div>
+        <span class="nav-brand-text">Atomic School</span>
       </a>
-      <div class="nav-links flex items-center gap-6" id="navLinks">
+      <div class="nav-links" id="navLinks">
         <a href="#masalah" class="nav-link">Masalah</a>
         <a href="#solusi" class="nav-link">Solusi</a>
         <a href="#metode" class="nav-link">Metode</a>
@@ -506,181 +301,157 @@
         <a href="#jadwal" class="nav-link">Jadwal</a>
         <a href="#daftar" class="nav-cta">Daftar Sekarang</a>
       </div>
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Buka menu">
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
   </nav>
 
-  <!-- ===== HERO ===== -->
+  <!-- MOBILE MENU OVERLAY -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-close" id="mobileClose" aria-label="Tutup menu"><i class="fa-solid fa-xmark"></i></button>
+    <a href="#masalah" class="mm-link">Masalah</a>
+    <a href="#solusi" class="mm-link">Solusi</a>
+    <a href="#metode" class="mm-link">Metode A.L.A.M.I</a>
+    <a href="#program" class="mm-link">Program</a>
+    <a href="#jadwal" class="mm-link">Jadwal</a>
+    <a href="#lokasi" class="mm-link">Lokasi</a>
+    <a href="#daftar" class="nav-cta mm-link">Daftar Sekarang</a>
+  </div>
+
+  <!-- HERO -->
   <section class="hero" id="hero">
-    <!-- Atom orbits -->
-    <div class="hero-atom hero-atom-1"></div>
-    <div class="hero-atom hero-atom-2"></div>
-    <div class="hero-atom hero-atom-3"></div>
-    <!-- Particles (dibuat via JS) -->
+    <div class="hero-atom ha1"></div>
+    <div class="hero-atom ha2"></div>
     <div id="heroParticles"></div>
-
-    <div class="max-w-6xl mx-auto px-5 w-full relative z-10 pt-28 pb-32">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="hero-inner">
+      <div class="hero-grid">
         <div>
-          <div class="hero-badge reveal">
-            <i class="fa-solid fa-seedling"></i>
-            Pendaftaran Tahun Ajaran 2025/2026
-          </div>
-          <h1 class="hero-title reveal reveal-delay-1">Atomic School</h1>
-          <p class="hero-tagline reveal reveal-delay-2">Small Habits, Infinite Potential</p>
-          <p class="hero-desc reveal reveal-delay-3">
-            Kebiasaan Kecil, Karakter Unggul, Kebaikan Semesta. Sekolah berbasis alam, karakter, dan teknologi yang membentuk anak menjadi mandiri, cerdas, dan berakhlak mulia melalui kebiasaan kecil yang konsisten setiap hari.
-          </p>
-          <div class="hero-location reveal reveal-delay-3">
-            <i class="fa-solid fa-location-dot"></i> Garut – Wanaraja
-          </div>
-          <div class="flex flex-wrap gap-4 reveal reveal-delay-4">
-            <a href="#daftar" class="btn-gold">
-              <i class="fa-solid fa-pen-to-square"></i> Daftarkan Anak Anda
-            </a>
-            <a href="#metode" class="btn-outline">
-              <i class="fa-solid fa-play"></i> Trial Class Gratis
-            </a>
+          <div class="hero-badge rv"><i class="fa-solid fa-seedling"></i> Pendaftaran 2025/2026</div>
+          <h1 class="hero-title rv d1">Atomic School</h1>
+          <p class="hero-tagline rv d2">Small Habits, Infinite Potential</p>
+          <p class="hero-desc rv d3">Kebiasaan Kecil, Karakter Unggul, Kebaikan Semesta. Sekolah berbasis alam, karakter, dan teknologi yang membentuk anak menjadi mandiri, cerdas, dan berakhlak mulia.</p>
+          <div class="hero-loc rv d3"><i class="fa-solid fa-location-dot"></i> Garut – Wanaraja</div>
+          <div class="hero-btns rv d4">
+            <a href="#daftar" class="btn-gold"><i class="fa-solid fa-pen-to-square"></i> Daftarkan Anak Anda</a>
+            <a href="#metode" class="btn-outline"><i class="fa-solid fa-play"></i> Trial Class Gratis</a>
           </div>
         </div>
-
-        <!-- Visual kanan -->
-        <div class="hero-visual hidden lg:block" style="min-height:420px;">
-          <div class="hero-card hero-card-1">
-            <div class="hero-card-icon" style="background:rgba(26,140,101,.2);color:var(--primary-light);">
-              <i class="fa-solid fa-leaf"></i>
-            </div>
-            <div class="hero-card-title">Sekolah Alam</div>
-            <div class="hero-card-desc">Belajar langsung dari alam sekitar sebagai laboratorium hidup</div>
+        <div class="hero-visual">
+          <div class="h-card h-card-1">
+            <div class="h-card-icon" style="background:rgba(26,140,101,.18);color:var(--primary-light);"><i class="fa-solid fa-leaf"></i></div>
+            <div class="h-card-title">Sekolah Alam</div>
+            <div class="h-card-desc">Belajar langsung dari alam sebagai laboratorium hidup</div>
           </div>
-          <div class="hero-card hero-card-2">
-            <div class="hero-card-icon" style="background:rgba(212,160,23,.15);color:var(--gold);">
-              <i class="fa-solid fa-microchip"></i>
-            </div>
-            <div class="hero-card-title">Digital Mastery</div>
-            <div class="hero-card-desc">Menguasai teknologi sebagai alat, bukan sekadar konsumsi</div>
+          <div class="h-card h-card-2">
+            <div class="h-card-icon" style="background:rgba(212,160,23,.12);color:var(--gold);"><i class="fa-solid fa-microchip"></i></div>
+            <div class="h-card-title">Digital Mastery</div>
+            <div class="h-card-desc">Menguasai teknologi sebagai alat belajar</div>
           </div>
-          <div class="hero-card hero-card-3">
-            <div class="hero-card-icon" style="background:rgba(255,255,255,.1);color:#fff;">
-              <i class="fa-solid fa-heart"></i>
-            </div>
-            <div class="hero-card-title">Karakter Utama</div>
-            <div class="hero-card-desc">Akhlak mulia sebagai fondasi semua pembelajaran</div>
+          <div class="h-card h-card-3">
+            <div class="h-card-icon" style="background:rgba(255,255,255,.08);color:#fff;"><i class="fa-solid fa-heart"></i></div>
+            <div class="h-card-title">Karakter Utama</div>
+            <div class="h-card-desc">Akhlak mulia sebagai fondasi pembelajaran</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== MASALAH ORANG TUA ===== -->
-  <section class="section" id="masalah">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Masalah Umum</div>
-        <h2 class="section-title reveal reveal-delay-1">Apakah Anda Mengalami Ini?</h2>
+  <!-- MASALAH -->
+  <section class="sec" id="masalah">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Masalah Umum</div>
+        <h2 class="sec-title rv d1">Apakah Anda Mengalami Ini?</h2>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
-        <div class="problem-card reveal reveal-delay-1">
-          <div class="problem-icon"><i class="fa-solid fa-face-frown-open"></i></div>
-          <div class="problem-text">Anak cepat bosan belajar</div>
+      <div class="g1 g2 g3" style="max-width:860px;margin:0 auto;">
+        <div class="prob-card rv d1">
+          <div class="prob-icon"><i class="fa-solid fa-face-frown-open"></i></div>
+          <div class="prob-text">Anak cepat bosan belajar</div>
         </div>
-        <div class="problem-card reveal reveal-delay-2">
-          <div class="problem-icon"><i class="fa-solid fa-chart-line"></i></div>
-          <div class="problem-text">Fokus hanya nilai, bukan karakter</div>
+        <div class="prob-card rv d2">
+          <div class="prob-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="prob-text">Fokus hanya nilai, bukan karakter</div>
         </div>
-        <div class="problem-card reveal reveal-delay-3">
-          <div class="problem-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-          <div class="problem-text">Ketergantungan gadget tanpa arah</div>
+        <div class="prob-card rv d3">
+          <div class="prob-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+          <div class="prob-text">Ketergantungan gadget tanpa arah</div>
         </div>
-        <div class="problem-card reveal reveal-delay-1">
-          <div class="problem-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
-          <div class="problem-text">Kurang mandiri dan disiplin</div>
+        <div class="prob-card rv d1">
+          <div class="prob-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+          <div class="prob-text">Kurang mandiri dan disiplin</div>
         </div>
-        <div class="problem-card reveal reveal-delay-2">
-          <div class="problem-icon"><i class="fa-solid fa-compass"></i></div>
-          <div class="problem-text">Tidak tahu potensi dirinya</div>
+        <div class="prob-card rv d2">
+          <div class="prob-icon"><i class="fa-solid fa-compass"></i></div>
+          <div class="prob-text">Tidak tahu potensi dirinya</div>
         </div>
-        <div class="problem-card reveal reveal-delay-3" style="background:var(--primary-pale);border-color:var(--primary-mid);">
-          <div class="problem-icon" style="background:var(--primary-pale);color:var(--primary);"><i class="fa-solid fa-lightbulb"></i></div>
-          <div class="problem-text" style="color:var(--primary);">Atomic School hadir sebagai solusi</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== SOLUSI ===== -->
-  <section class="section solusi-section" id="solusi">
-    <div class="max-w-6xl mx-auto px-5 relative z-10">
-      <div class="max-w-xl mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Solusi Kami</div>
-        <h2 class="section-title reveal reveal-delay-1">Pendidikan Masa Depan Berbasis Karakter & Sistem</h2>
-        <p class="section-desc reveal reveal-delay-2">
-          Di Atomic School, kami tidak hanya mengajar. Kami membangun <strong style="color:#fff;">SISTEM KEBIASAAN ANAK</strong> yang membentuk mereka secara holistik.
-        </p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="solusi-card reveal reveal-delay-1">
-          <div class="solusi-icon"><i class="fa-solid fa-repeat"></i></div>
-          <div class="solusi-title">Habit-Based Learning</div>
-          <div class="solusi-desc">Belajar berbasis kebiasaan (Atomic Habits) yang terukur dan konsisten setiap hari</div>
-        </div>
-        <div class="solusi-card reveal reveal-delay-2">
-          <div class="solusi-icon"><i class="fa-solid fa-tree"></i></div>
-          <div class="solusi-title">Alam + STEM + Digital</div>
-          <div class="solusi-desc">Integrasi tiga pilar pendidikan: sekolah alam, sains terapan, dan literasi digital</div>
-        </div>
-        <div class="solusi-card reveal reveal-delay-3">
-          <div class="solusi-icon"><i class="fa-solid fa-star"></i></div>
-          <div class="solusi-title">Akhlak & Kemandirian</div>
-          <div class="solusi-desc">Fokus utama bukan hanya akademik, tapi pembentukan karakter dan kemandirian anak</div>
-        </div>
-        <div class="solusi-card reveal reveal-delay-4">
-          <div class="solusi-icon"><i class="fa-solid fa-flask-vial"></i></div>
-          <div class="solusi-title">Active & Real Experience</div>
-          <div class="solusi-desc">Pembelajaran aktif berbasis pengalaman nyata, bukan sekadar duduk dan mendengar</div>
+        <div class="prob-card sol rv d3">
+          <div class="prob-icon"><i class="fa-solid fa-lightbulb"></i></div>
+          <div class="prob-text">Atomic School hadir sebagai solusi</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== FILOSOFI 1% ===== -->
-  <section class="section filo-section" id="filosofi">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+  <!-- SOLUSI -->
+  <section class="sec sol-bg" id="solusi">
+    <div class="sec-inner" style="position:relative;z-index:1;">
+      <div style="max-width:480px;margin-bottom:40px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Solusi Kami</div>
+        <h2 class="sec-title rv d1">Pendidikan Masa Depan Berbasis Karakter & Sistem</h2>
+        <p class="sec-desc rv d2">Di Atomic School, kami tidak hanya mengajar. Kami membangun <strong style="color:#fff;">SISTEM KEBIASAAN ANAK</strong> yang membentuk mereka secara holistik.</p>
+      </div>
+      <div class="g1 g2 g4">
+        <div class="sol-card rv d1">
+          <div class="sol-icon"><i class="fa-solid fa-repeat"></i></div>
+          <div class="sol-title">Habit-Based Learning</div>
+          <div class="sol-desc">Belajar berbasis kebiasaan (Atomic Habits) yang terukur dan konsisten setiap hari</div>
+        </div>
+        <div class="sol-card rv d2">
+          <div class="sol-icon"><i class="fa-solid fa-tree"></i></div>
+          <div class="sol-title">Alam + STEM + Digital</div>
+          <div class="sol-desc">Integrasi tiga pilar: sekolah alam, sains terapan, dan literasi digital</div>
+        </div>
+        <div class="sol-card rv d3">
+          <div class="sol-icon"><i class="fa-solid fa-star"></i></div>
+          <div class="sol-title">Akhlak & Kemandirian</div>
+          <div class="sol-desc">Fokus utama pada pembentukan karakter dan kemandirian anak</div>
+        </div>
+        <div class="sol-card rv d4">
+          <div class="sol-icon"><i class="fa-solid fa-flask-vial"></i></div>
+          <div class="sol-title">Active & Real Experience</div>
+          <div class="sol-desc">Pembelajaran aktif berbasis pengalaman nyata, bukan sekadar mendengar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILOSOFI -->
+  <section class="sec filo-bg" id="filosofi">
+    <div class="sec-inner">
+      <div class="filo-grid">
         <div>
-          <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Filosofi Kami</div>
-          <div class="filo-number reveal reveal-delay-1">1%</div>
-          <h2 class="section-title reveal reveal-delay-2">Lebih Baik Setiap Hari</h2>
-          <p class="section-desc reveal reveal-delay-3" style="margin-bottom:24px;">
-            Anak tidak perlu langsung hebat. Cukup <strong>lebih baik 1% setiap hari</strong>. Seperti ulat menjadi kupu-kupu — perubahan besar lahir dari proses kecil yang konsisten.
-          </p>
-          <div class="filo-quote reveal reveal-delay-4">
-            "Amalan terbaik adalah yang dilakukan terus-menerus walau sedikit."
-          </div>
+          <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Filosofi Kami</div>
+          <div class="filo-num rv d1">1%</div>
+          <h2 class="sec-title rv d2">Lebih Baik Setiap Hari</h2>
+          <p class="sec-desc rv d3" style="margin-bottom:20px;">Anak tidak perlu langsung hebat. Cukup <strong>lebih baik 1% setiap hari</strong>. Perubahan besar lahir dari proses kecil yang konsisten.</p>
+          <div class="filo-quote rv d4">"Amalan terbaik adalah yang dilakukan terus-menerus walau sedikit."</div>
         </div>
-        <div class="reveal reveal-delay-2">
-          <!-- Visual 1% - Progress rings -->
-          <div class="flex items-center justify-center" style="min-height:320px;">
-            <div style="position:relative;width:280px;height:280px;">
-              <svg viewBox="0 0 280 280" style="width:100%;height:100%;transform:rotate(-90deg);">
-                <circle cx="140" cy="140" r="120" fill="none" stroke="#E0DCD3" stroke-width="8"/>
-                <circle cx="140" cy="140" r="120" fill="none" stroke="var(--primary)" stroke-width="8"
-                  stroke-dasharray="754" stroke-dashoffset="746" stroke-linecap="round"
-                  class="ring-anim" style="transition:stroke-dashoffset 2s ease;"/>
-                <circle cx="140" cy="140" r="95" fill="none" stroke="#E0DCD3" stroke-width="6"/>
-                <circle cx="140" cy="140" r="95" fill="none" stroke="var(--gold)" stroke-width="6"
-                  stroke-dasharray="597" stroke-dashoffset="591" stroke-linecap="round"
-                  class="ring-anim-2" style="transition:stroke-dashoffset 2.5s ease;"/>
-                <circle cx="140" cy="140" r="70" fill="none" stroke="#E0DCD3" stroke-width="5"/>
-                <circle cx="140" cy="140" r="70" fill="none" stroke="var(--primary-light)" stroke-width="5"
-                  stroke-dasharray="440" stroke-dashoffset="436" stroke-linecap="round"
-                  class="ring-anim-3" style="transition:stroke-dashoffset 3s ease;"/>
+        <div class="rv d2">
+          <div class="ring-wrap">
+            <div style="position:relative;width:100%;max-width:280px;">
+              <svg viewBox="0 0 280 280" class="ring-svg">
+                <circle cx="140" cy="140" r="120" fill="none" stroke="#E0DCD3" stroke-width="7"/>
+                <circle cx="140" cy="140" r="120" fill="none" stroke="var(--primary)" stroke-width="7" stroke-dasharray="754" stroke-dashoffset="754" stroke-linecap="round" class="r1" style="transition:stroke-dashoffset 2s ease;"/>
+                <circle cx="140" cy="140" r="95" fill="none" stroke="#E0DCD3" stroke-width="5"/>
+                <circle cx="140" cy="140" r="95" fill="none" stroke="var(--gold)" stroke-width="5" stroke-dasharray="597" stroke-dashoffset="597" stroke-linecap="round" class="r2" style="transition:stroke-dashoffset 2.5s ease;"/>
+                <circle cx="140" cy="140" r="70" fill="none" stroke="#E0DCD3" stroke-width="4"/>
+                <circle cx="140" cy="140" r="70" fill="none" stroke="var(--primary-light)" stroke-width="4" stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" class="r3" style="transition:stroke-dashoffset 3s ease;"/>
               </svg>
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;transform:rotate(0deg);">
-                <span class="font-display" style="font-size:48px;font-weight:700;color:var(--primary);">1%</span>
-                <span style="font-size:13px;color:var(--muted);font-weight:700;">lebih baik</span>
+              <div class="ring-center">
+                <span class="fd" style="font-size:clamp(36px,10vw,48px);font-weight:700;color:var(--primary);">1%</span>
+                <span style="font-size:12px;color:var(--muted);font-weight:700;">lebih baik</span>
               </div>
             </div>
           </div>
@@ -689,150 +460,125 @@
     </div>
   </section>
 
-  <!-- ===== METODE A.L.A.M.I ===== -->
-  <section class="section alami-section" id="metode">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Metode Pembelajaran</div>
-        <h2 class="section-title reveal reveal-delay-1">Metode A.L.A.M.I</h2>
-        <p class="section-desc reveal reveal-delay-2 mx-auto text-center">
-          Metode pembelajaran unggulan Atomic School yang dirancang untuk membentuk anak secara menyeluruh.
-        </p>
+  <!-- METODE A.L.A.M.I -->
+  <section class="sec al-bg" id="metode">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Metode Pembelajaran</div>
+        <h2 class="sec-title rv d1">Metode A.L.A.M.I</h2>
+        <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Metode pembelajaran unggulan yang dirancang untuk membentuk anak secara menyeluruh.</p>
       </div>
-      <div class="max-w-2xl mx-auto">
-        <div class="alami-item reveal reveal-delay-1">
-          <div class="alami-letter" style="background:#FEF2F2;color:#DC2626;">A</div>
-          <div>
-            <div class="alami-title">Akhlaqul Karimah</div>
-            <div class="alami-desc">Pembentukan karakter & adab sebagai fondasi utama dalam setiap aktivitas pembelajaran</div>
-          </div>
+      <div style="max-width:600px;margin:0 auto;">
+        <div class="al-item rv d1">
+          <div class="al-letter" style="background:#FEF2F2;color:#DC2626;">A</div>
+          <div><div class="al-title">Akhlaqul Karimah</div><div class="al-desc">Pembentukan karakter & adab sebagai fondasi utama setiap aktivitas</div></div>
         </div>
-        <div class="alami-item reveal reveal-delay-2">
-          <div class="alami-letter" style="background:#EFF6FF;color:#2563EB;">L</div>
-          <div>
-            <div class="alami-title">Literacy & Logic</div>
-            <div class="alami-desc">Kemampuan dasar membaca, menulis, dan berpikir logis yang menjadi bekal utama belajar</div>
-          </div>
+        <div class="al-item rv d2">
+          <div class="al-letter" style="background:#EFF6FF;color:#2563EB;">L</div>
+          <div><div class="al-title">Literacy & Logic</div><div class="al-desc">Kemampuan dasar membaca, menulis, dan berpikir logis</div></div>
         </div>
-        <div class="alami-item reveal reveal-delay-3">
-          <div class="alami-letter" style="background:var(--primary-pale);color:var(--primary);">A</div>
-          <div>
-            <div class="alami-title">Active Discovery</div>
-            <div class="alami-desc">Belajar aktif melalui eksplorasi sesuai minat dan bakat masing-masing anak</div>
-          </div>
+        <div class="al-item rv d3">
+          <div class="al-letter" style="background:var(--primary-pale);color:var(--primary);">A</div>
+          <div><div class="al-title">Active Discovery</div><div class="al-desc">Belajar aktif melalui eksplorasi sesuai minat dan bakat</div></div>
         </div>
-        <div class="alami-item reveal reveal-delay-4">
-          <div class="alami-letter" style="background:var(--gold-light);color:var(--gold-dark);">M</div>
-          <div>
-            <div class="alami-title">Master of STEM</div>
-            <div class="alami-desc">Sains, teknologi, engineering, dan matematika berbasis praktik dan eksperimen nyata</div>
-          </div>
+        <div class="al-item rv d4">
+          <div class="al-letter" style="background:var(--gold-light);color:var(--gold-dark);">M</div>
+          <div><div class="al-title">Master of STEM</div><div class="al-desc">Sains & teknologi berbasis praktik dan eksperimen nyata</div></div>
         </div>
-        <div class="alami-item reveal">
-          <div class="alami-letter" style="background:#F3E8FF;color:#9333EA;">I</div>
+        <div class="al-item rv">
+          <div class="al-letter" style="background:#F3E8FF;color:#9333EA;">I</div>
+          <div><div class="al-title">Inovasi Berkelanjutan</div><div class="al-desc">Menciptakan solusi kreatif dan pola pikir inovatif sejak dini</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARA BELAJAR -->
+  <section class="sec" id="belajar" style="background:var(--cream);">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Cara Belajar</div>
+        <h2 class="sec-title rv d1">Belajar Tidak Hanya di Kelas</h2>
+      </div>
+      <div class="g2" style="gap:16px;margin-bottom:24px;">
+        <div class="bl-card rv d1" style="background:linear-gradient(135deg,#0B3D2E,#0D4A38);">
+          <div class="bl-tag"><i class="fa-solid fa-laptop-code" style="margin-right:4px;"></i> Indoor</div>
+          <div class="bl-title">Digital Mastery</div>
+          <div class="bl-desc">Belajar mandiri dengan platform digital terpilih. Anak dibimbing menggunakan teknologi sebagai alat, bukan sekadar hiburan.</div>
+        </div>
+        <div class="bl-card rv d2" style="background:linear-gradient(135deg,#1A5C3A,#2D8B5E);">
+          <div class="bl-tag"><i class="fa-solid fa-leaf" style="margin-right:4px;"></i> Outdoor</div>
+          <div class="bl-title">Nature STEM</div>
+          <div class="bl-desc">Belajar langsung di alam. Mengamati, menyentuh, dan bereksperimen dengan lingkungan sebagai laboratorium hidup.</div>
+        </div>
+      </div>
+      <div class="bl-example rv d3" style="max-width:600px;margin:0 auto;">
+        <div class="bl-example-inner">
+          <div class="bl-example-icon"><i class="fa-solid fa-flask"></i></div>
           <div>
-            <div class="alami-title">Inovasi Berkelanjutan</div>
-            <div class="alami-desc">Menciptakan solusi kreatif dan mengembangkan pola pikir inovatif sejak dini</div>
+            <div class="bl-example-label">Contoh Nyata</div>
+            <div class="bl-example-text">Belajar volume → mengukur bak air di sekolah. Belajar tanaman → menanam kebun sendiri. Belajar matematika → menghitung hasil panen.</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== CARA BELAJAR ===== -->
-  <section class="section" id="belajar" style="background:var(--cream);">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Cara Belajar</div>
-        <h2 class="section-title reveal reveal-delay-1">Belajar Tidak Hanya di Kelas</h2>
+  <!-- PERAN GURU -->
+  <section class="sec guru-bg" id="guru">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Peran Guru</div>
+        <h2 class="sec-title rv d1">Guru Bukan Hanya Pengajar</h2>
+        <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Tiga peran penting guru di Atomic School yang berbeda dari sekolah konvensional.</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="belajar-card reveal reveal-delay-1" style="background:linear-gradient(135deg,#0B3D2E,#0D4A38);">
-          <div class="belajar-tag"><i class="fa-solid fa-laptop-code mr-1"></i> Indoor</div>
-          <div class="belajar-title">Digital Mastery</div>
-          <div class="belajar-desc">Belajar mandiri dengan platform digital terpilih. Anak dibimbing menggunakan teknologi sebagai alat belajar, bukan sekadar hiburan.</div>
-        </div>
-        <div class="belajar-card reveal reveal-delay-2" style="background:linear-gradient(135deg,#1A5C3A,#2D8B5E);">
-          <div class="belajar-tag"><i class="fa-solid fa-leaf mr-1"></i> Outdoor</div>
-          <div class="belajar-title">Nature STEM</div>
-          <div class="belajar-desc">Belajar langsung di alam. Mengamati, menyentuh, dan bereksperimen dengan lingkungan sekitar sebagai laboratorium hidup.</div>
-        </div>
-      </div>
-      <div class="mt-8 p-6 rounded-2xl reveal reveal-delay-3" style="background:var(--gold-light);border:1px solid rgba(212,160,23,.2);max-width:640px;margin-left:auto;margin-right:auto;">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--gold);color:#1A1A1A;">
-            <i class="fa-solid fa-flask"></i>
-          </div>
-          <div>
-            <div class="font-display font-bold text-sm mb-1" style="color:var(--gold-dark);">Contoh Nyata</div>
-            <div class="text-sm" style="color:var(--text);line-height:1.7;">
-              Belajar volume → anak langsung mengukur bak air di sekolah. Belajar tanaman → menanam dan merawat kebun sendiri. Belajar matematika → menghitung hasil panen.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== PERAN GURU ===== -->
-  <section class="section guru-section" id="guru">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Peran Guru</div>
-        <h2 class="section-title reveal reveal-delay-1">Guru Bukan Hanya Pengajar</h2>
-        <p class="section-desc reveal reveal-delay-2 mx-auto text-center">
-          Di Atomic School, guru memainkan tiga peran penting yang berbeda dari sekolah konvensional.
-        </p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-        <div class="guru-card reveal reveal-delay-1">
+      <div class="g1 g3" style="max-width:720px;margin:0 auto;">
+        <div class="guru-card rv d1">
           <div class="guru-icon"><i class="fa-solid fa-fire"></i></div>
           <div class="guru-role">Motivator</div>
-          <div class="guru-desc">Menjaga semangat belajar anak agar tetap menyala dan tidak pernah merasa gagal</div>
+          <div class="guru-desc">Menjaga semangat belajar anak agar tetap menyala</div>
         </div>
-        <div class="guru-card reveal reveal-delay-2">
+        <div class="guru-card rv d2">
           <div class="guru-icon"><i class="fa-solid fa-eye"></i></div>
           <div class="guru-role">Observer</div>
-          <div class="guru-desc">Mengamati perkembangan karakter dan potensi unik setiap anak secara mendalam</div>
+          <div class="guru-desc">Mengamati perkembangan karakter & potensi unik anak</div>
         </div>
-        <div class="guru-card reveal reveal-delay-3">
+        <div class="guru-card rv d3">
           <div class="guru-icon"><i class="fa-solid fa-link"></i></div>
           <div class="guru-role">Konektor</div>
-          <div class="guru-desc">Menghubungkan teori pembelajaran dengan realita kehidupan sehari-hari</div>
+          <div class="guru-desc">Menghubungkan teori pembelajaran dengan kehidupan nyata</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== GURU TAMU ===== -->
-  <section class="section tamu-section" id="program">
-    <div class="max-w-6xl mx-auto px-5 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+  <!-- GURU TAMU -->
+  <section class="sec tamu-bg" id="program">
+    <div class="sec-inner" style="position:relative;z-index:1;">
+      <div class="jad-grid">
         <div>
-          <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Program Unggulan</div>
-          <h2 class="section-title reveal reveal-delay-1">Guru Tamu Profesional</h2>
-          <p class="section-desc reveal reveal-delay-2" style="margin-bottom:28px;">
-            Anak belajar langsung dari praktisi nyata. Mereka mendengar cerita, melihat keterampilan, dan terinspirasi dari orang-orang yang benar-benar menjalani profesi tersebut.
-          </p>
-          <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl reveal reveal-delay-3" style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.15);">
-            <i class="fa-solid fa-graduation-cap" style="color:var(--gold);font-size:20px;"></i>
-            <span style="color:rgba(255,255,255,.8);font-weight:700;font-size:14px;">Life Skill & Dunia Nyata</span>
+          <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Program Unggulan</div>
+          <h2 class="sec-title rv d1">Guru Tamu Profesional</h2>
+          <p class="sec-desc rv d2" style="margin-bottom:24px;">Anak belajar langsung dari praktisi nyata — mendengar cerita, melihat keterampilan, dan terinspirasi dari yang menjalani profesi tersebut.</p>
+          <div class="tamu-badge rv d3">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Life Skill & Dunia Nyata</span>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="tamu-item reveal reveal-delay-1">
+        <div class="tamu-grid">
+          <div class="tamu-item rv d1">
             <div class="tamu-icon"><i class="fa-solid fa-wheat-awn"></i></div>
             <div class="tamu-text">Petani Modern</div>
           </div>
-          <div class="tamu-item reveal reveal-delay-2">
+          <div class="tamu-item rv d2">
             <div class="tamu-icon"><i class="fa-solid fa-briefcase"></i></div>
             <div class="tamu-text">Pengusaha</div>
           </div>
-          <div class="tamu-item reveal reveal-delay-3">
+          <div class="tamu-item rv d3">
             <div class="tamu-icon"><i class="fa-solid fa-gear"></i></div>
             <div class="tamu-text">Insinyur</div>
           </div>
-          <div class="tamu-item reveal reveal-delay-4">
+          <div class="tamu-item rv d4">
             <div class="tamu-icon"><i class="fa-solid fa-user-tie"></i></div>
             <div class="tamu-text">Orang Tua Ahli</div>
           </div>
@@ -841,42 +587,40 @@
     </div>
   </section>
 
-  <!-- ===== JADWAL HARIAN ===== -->
-  <section class="section jadwal-section" id="jadwal">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+  <!-- JADWAL HARIAN -->
+  <section class="sec jad-bg" id="jadwal">
+    <div class="sec-inner">
+      <div class="jad-grid">
         <div>
-          <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Rutinitas Harian</div>
-          <h2 class="section-title reveal reveal-delay-1">Jadwal Sehari di Atomic School</h2>
-          <p class="section-desc reveal reveal-delay-2">
-            Setiap hari dirancang dengan ritme yang seimbang antara pembentukan karakter, akademik digital, eksplorasi alam, dan pengembangan minat bakat.
-          </p>
+          <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Rutinitas Harian</div>
+          <h2 class="sec-title rv d1">Jadwal Sehari di Atomic School</h2>
+          <p class="sec-desc rv d2">Ritme seimbang antara karakter, akademik digital, eksplorasi alam, dan minat bakat.</p>
         </div>
         <div>
-          <div class="timeline">
-            <div class="timeline-item reveal reveal-delay-1">
-              <div class="timeline-dot"><div class="timeline-dot-inner"></div></div>
-              <div class="timeline-time">07.30</div>
-              <div class="timeline-title">Circle of Faith</div>
-              <div class="timeline-desc">Doa bersama, pembentukan karakter pagi, dan motivasi untuk memulai hari</div>
+          <div class="tl">
+            <div class="tl-item rv d1">
+              <div class="tl-dot"><div class="tl-dot-in"></div></div>
+              <div class="tl-time">07.30</div>
+              <div class="tl-title">Circle of Faith</div>
+              <div class="tl-desc">Doa bersama, pembentukan karakter pagi, dan motivasi memulai hari</div>
             </div>
-            <div class="timeline-item reveal reveal-delay-2">
-              <div class="timeline-dot"><div class="timeline-dot-inner"></div></div>
-              <div class="timeline-time">08.15</div>
-              <div class="timeline-title">Digital Mastery</div>
-              <div class="timeline-desc">Belajar akademik mandiri dengan bimbingan melalui platform digital terpilih</div>
+            <div class="tl-item rv d2">
+              <div class="tl-dot"><div class="tl-dot-in"></div></div>
+              <div class="tl-time">08.15</div>
+              <div class="tl-title">Digital Mastery</div>
+              <div class="tl-desc">Belajar akademik mandiri dengan bimbingan platform digital terpilih</div>
             </div>
-            <div class="timeline-item reveal reveal-delay-3">
-              <div class="timeline-dot"><div class="timeline-dot-inner"></div></div>
-              <div class="timeline-time">10.00</div>
-              <div class="timeline-title">Nature STEM</div>
-              <div class="timeline-desc">Eksplorasi alam, eksperimen sains, dan belajar langsung dari lingkungan sekitar</div>
+            <div class="tl-item rv d3">
+              <div class="tl-dot"><div class="tl-dot-in"></div></div>
+              <div class="tl-time">10.00</div>
+              <div class="tl-title">Nature STEM</div>
+              <div class="tl-desc">Eksplorasi alam, eksperimen sains, dan belajar dari lingkungan sekitar</div>
             </div>
-            <div class="timeline-item reveal reveal-delay-4">
-              <div class="timeline-dot"><div class="timeline-dot-inner"></div></div>
-              <div class="timeline-time">12.30</div>
-              <div class="timeline-title">Discovery</div>
-              <div class="timeline-desc">Pengembangan minat bakat, sesi guru tamu, dan proyek kreatif siswa</div>
+            <div class="tl-item rv d4">
+              <div class="tl-dot"><div class="tl-dot-in"></div></div>
+              <div class="tl-time">12.30</div>
+              <div class="tl-title">Discovery</div>
+              <div class="tl-desc">Pengembangan minat bakat, sesi guru tamu, dan proyek kreatif</div>
             </div>
           </div>
         </div>
@@ -884,69 +628,87 @@
     </div>
   </section>
 
-  <!-- ===== KEUNGGULAN ===== -->
-  <section class="section keunggulan-section" id="keunggulan">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Keunggulan</div>
-        <h2 class="section-title reveal reveal-delay-1">Kenapa Harus Atomic School?</h2>
+  <!-- KEUNGGULAN -->
+  <section class="sec ung-bg" id="keunggulan">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Keunggulan</div>
+        <h2 class="sec-title rv d1">Kenapa Harus Atomic School?</h2>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
-        <div class="unggul-card reveal reveal-delay-1">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Sekolah Alam + Teknologi dalam satu ekosistem</div>
+      <div class="g1 g2 g3" style="max-width:860px;margin:0 auto;">
+        <div class="ung-card rv d1">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Sekolah Alam + Teknologi dalam satu ekosistem</div>
         </div>
-        <div class="unggul-card reveal reveal-delay-2">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Fokus Karakter & Kemandirian anak</div>
+        <div class="ung-card rv d2">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Fokus Karakter & Kemandirian anak</div>
         </div>
-        <div class="unggul-card reveal reveal-delay-3">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Sistem kebiasaan, bukan sekadar kurikulum</div>
+        <div class="ung-card rv d3">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Sistem kebiasaan, bukan sekadar kurikulum</div>
         </div>
-        <div class="unggul-card reveal reveal-delay-1">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Belajar aktif, menyenangkan, dan bermakna</div>
+        <div class="ung-card rv d1">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Belajar aktif, menyenangkan, dan bermakna</div>
         </div>
-        <div class="unggul-card reveal reveal-delay-2">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Membentuk anak siap menghadapi masa depan</div>
+        <div class="ung-card rv d2">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Membentuk anak siap menghadapi masa depan</div>
         </div>
-        <div class="unggul-card reveal reveal-delay-3">
-          <div class="unggul-check"><i class="fa-solid fa-check"></i></div>
-          <div class="unggul-text">Lingkungan belajar yang aman dan kondusif</div>
+        <div class="ung-card rv d3">
+          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ung-text">Lingkungan belajar aman dan kondusif</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== TESTIMONI ===== -->
-  <section class="section testi-section" id="testimoni">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Testimoni</div>
-        <h2 class="section-title reveal reveal-delay-1">Kata Mereka tentang Atomic School</h2>
+  <!-- TESTIMONI -->
+  <section class="sec tes-bg" id="testimoni">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Testimoni</div>
+        <h2 class="sec-title rv d1">Kata Mereka tentang Atomic School</h2>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div class="testi-card reveal reveal-delay-1">
-          <div class="testi-quote-mark">"</div>
-          <div class="testi-text">Anak saya jadi lebih mandiri dan semangat belajar. Dulu susah bangun pagi, sekarang sudah otomatis. Perubahan kecil yang luar biasa.</div>
-          <div class="testi-author">
-            <div class="testi-avatar" style="background:var(--primary);">I</div>
+      <div class="g1 g2" style="max-width:760px;margin:0 auto;">
+        <div class="tes-card rv d1">
+          <div class="tes-mark">"</div>
+          <div class="tes-text">Anak saya jadi lebih mandiri dan semangat belajar. Dulu susah bangun pagi, sekarang sudah otomatis. Perubahan kecil yang luar biasa.</div>
+          <div class="tes-author">
+            <div class="tes-avatar" style="background:var(--primary);">S</div>
+            <div><div class="tes-name">Ibu Siti Nurhaliza</div><div class="tes-role">Orang Tua Murid</div></div>
+          </div>
+        </div>
+        <div class="tes-card rv d2">
+          <div class="tes-mark">"</div>
+          <div class="tes-text">Belajarnya beda banget. Anak jadi suka eksplorasi dan selalu cerita tentang apa yang dipelajari di sekolah. Kami sangat bersyukur.</div>
+          <div class="tes-author">
+            <div class="tes-avatar" style="background:var(--gold);">A</div>
+            <div><div class="tes-name">Bapak Ahmad Ramadhani</div><div class="tes-role">Wali Murid</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOKASI -->
+  <section class="sec lok-bg" id="lokasi">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Lokasi</div>
+        <h2 class="sec-title rv d1">Temukan Kami</h2>
+      </div>
+      <div class="lok-card rv d2" style="max-width:760px;margin:0 auto;">
+        <div class="lok-map">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63347.99344955687!2d107.85!3d-7.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68b1234567890%3A0xabcdef1234567890!2sWanaraja%2C%20Garut%20Regency%2C%20West%20Java!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Lokasi Atomic School"></iframe>
+        </div>
+        <div class="lok-info">
+          <div class="lok-info-inner">
+            <div class="lok-icon"><i class="fa-solid fa-school"></i></div>
             <div>
-              <div class="testi-name">Ibu Siti Nurhaliza</div>
-              <div class="testi-role">Orang Tua Murid</div>
-            </div>
-          </div>
-        </div>
-        <div class="testi-card reveal reveal-delay-2">
-          <div class="testi-quote-mark">"</div>
-          <div class="testi-text">Belajarnya beda banget. Anak jadi suka eksplorasi dan selalu cerita tentang apa yang dia pelajari di sekolah. Kami sangat bersyukur.</div>
-          <div class="testi-author">
-            <div class="testi-avatar" style="background:var(--gold);">A</div>
-            <div>
-              <div class="testi-name">Bapak Ahmad Ramadhani</div>
-              <div class="testi-role">Wali Murid</div>
+              <div class="lok-name">Atomic School</div>
+              <div class="lok-addr">Jl. Cinunuk, Desa Wanaraja<br>Kec. Wanaraja, Kab. Garut<br>Jawa Barat, Indonesia</div>
             </div>
           </div>
         </div>
@@ -954,92 +716,48 @@
     </div>
   </section>
 
-  <!-- ===== LOKASI ===== -->
-  <section class="section lokasi-section" id="lokasi">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center mb-12">
-        <div class="section-label reveal"><i class="fa-solid fa-circle"></i> Lokasi</div>
-        <h2 class="section-title reveal reveal-delay-1">Temukan Kami</h2>
-      </div>
-      <div class="lokasi-card max-w-4xl mx-auto reveal reveal-delay-2">
-        <div class="lokasi-map">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63347.99344955687!2d107.85!3d-7.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68b1234567890%3A0xabcdef1234567890!2sWanaraja%2C%20Garut%20Regency%2C%20West%20Java!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
-            width="100%" height="280" style="border:0;display:block;" allowfullscreen="" loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        </div>
-        <div class="p-6 sm:p-8">
-          <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--primary);color:#fff;">
-              <i class="fa-solid fa-school text-lg"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-lg mb-1" style="color:var(--primary);">Atomic School</h3>
-              <p style="color:var(--muted);font-size:14px;line-height:1.7;">
-                Jl. Cinunuk, Desa Wanaraja<br>
-                Kec. Wanaraja, Kab. Garut<br>
-                Jawa Barat, Indonesia
-              </p>
-            </div>
-          </div>
+  <!-- CTA -->
+  <section class="sec cta-bg" id="daftar" style="padding-bottom:80px;">
+    <div class="sec-inner" style="position:relative;z-index:1;text-align:center;">
+      <div class="rv" style="margin-bottom:20px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:rgba(212,160,23,.12);">
+          <i class="fa-solid fa-atom" style="font-size:22px;color:var(--gold);"></i>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== CTA ===== -->
-  <section class="section cta-section" id="daftar">
-    <div class="max-w-3xl mx-auto px-5 text-center relative z-10">
-      <div class="reveal">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6" style="background:rgba(212,160,23,.15);">
-          <i class="fa-solid fa-atom text-2xl" style="color:var(--gold);"></i>
-        </div>
-      </div>
-      <h2 class="font-display font-bold text-white reveal reveal-delay-1" style="font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.2;margin-bottom:16px;">
+      <h2 class="fd rv d1" style="font-weight:700;color:#fff;font-size:clamp(1.5rem,5vw,2.2rem);line-height:1.2;margin-bottom:14px;">
         Siap Membentuk Masa Depan Anak Anda?
       </h2>
-      <p class="reveal reveal-delay-2" style="color:rgba(255,255,255,.6);font-size:15px;line-height:1.8;max-width:500px;margin:0 auto 32px;">
+      <p class="rv d2" style="color:rgba(255,255,255,.55);font-size:clamp(13px,2.5vw,15px);line-height:1.8;max-width:460px;margin:0 auto 28px;">
         Jangan tunggu sampai terlambat. Mulai dari kebiasaan kecil hari ini. Slot terbatas untuk tahun ajaran 2025/2026.
       </p>
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 reveal reveal-delay-3">
-        <a href="https://username.github.io/nama-repo/" target="_blank" class="btn-gold" style="font-size:17px;padding:18px 40px;">
+      <div class="cta-btns rv d3">
+        <a href="https://username.github.io/nama-repo/" target="_blank" class="btn-gold" style="font-size:15px;padding:16px 36px;">
           <i class="fa-solid fa-pen-to-square"></i> Daftar Sekarang
         </a>
-        <a href="https://wa.me/62xxxxxxxxxx" target="_blank" class="btn-outline" style="font-size:15px;padding:16px 32px;">
+        <a href="https://wa.me/62xxxxxxxxxx" target="_blank" class="btn-outline" style="font-size:14px;padding:14px 28px;">
           <i class="fa-brands fa-whatsapp"></i> Konsultasi Gratis
         </a>
       </div>
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-6 reveal reveal-delay-4">
-        <a href="tel:+628xxxxxxxxxx" class="flex items-center gap-2 text-sm" style="color:rgba(255,255,255,.5);text-decoration:none;transition:color .3s;" onmouseover="this.style.color='#D4A017'" onmouseout="this.style.color='rgba(255,255,255,.5)'">
-          <i class="fa-solid fa-phone"></i> 08xx-xxxx-xxxx
-        </a>
-        <a href="mailto:info@atomicschool.id" class="flex items-center gap-2 text-sm" style="color:rgba(255,255,255,.5);text-decoration:none;transition:color .3s;" onmouseover="this.style.color='#D4A017'" onmouseout="this.style.color='rgba(255,255,255,.5)'">
-          <i class="fa-solid fa-envelope"></i> info@atomicschool.id
-        </a>
+      <div class="cta-contacts rv d4">
+        <a href="tel:+628xxxxxxxxxx" class="cta-contact"><i class="fa-solid fa-phone"></i> 08xx-xxxx-xxxx</a>
+        <a href="mailto:info@atomicschool.id" class="cta-contact"><i class="fa-solid fa-envelope"></i> info@atomicschool.id</a>
       </div>
     </div>
   </section>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="footer py-12 px-5">
-    <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
-        <!-- Kolom 1 -->
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="sec-inner">
+      <div class="footer-grid">
         <div>
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:rgba(212,160,23,.15);">
-              <i class="fa-solid fa-atom" style="color:var(--gold);"></i>
-            </div>
-            <span class="font-display font-bold text-white text-lg">Atomic School</span>
+          <div class="footer-brand">
+            <div class="footer-brand-icon"><i class="fa-solid fa-atom"></i></div>
+            <span class="footer-brand-text">Atomic School</span>
           </div>
-          <p class="text-sm" style="line-height:1.8;">
-            Pendidikan Masa Depan Berbasis Karakter. Membentuk generasi yang mandiri, cerdas, dan berakhlak mulia melalui kebiasaan kecil yang konsisten.
-          </p>
+          <p class="footer-desc">Pendidikan Masa Depan Berbasis Karakter. Membentuk generasi mandiri, cerdas, dan berakhlak mulia melalui kebiasaan kecil yang konsisten.</p>
         </div>
-        <!-- Kolom 2 -->
         <div>
-          <h4 class="font-display font-bold text-white text-sm mb-4 uppercase tracking-wider">Navigasi</h4>
+          <div class="footer-heading">Navigasi</div>
           <a href="#masalah" class="footer-link">Masalah</a>
           <a href="#solusi" class="footer-link">Solusi</a>
           <a href="#metode" class="footer-link">Metode A.L.A.M.I</a>
@@ -1047,181 +765,108 @@
           <a href="#jadwal" class="footer-link">Jadwal Harian</a>
           <a href="#daftar" class="footer-link">Pendaftaran</a>
         </div>
-        <!-- Kolom 3 -->
         <div>
-          <h4 class="font-display font-bold text-white text-sm mb-4 uppercase tracking-wider">Hubungi Kami</h4>
-          <div class="flex items-center gap-2 text-sm mb-3" style="color:rgba(255,255,255,.5);">
-            <i class="fa-solid fa-location-dot" style="width:16px;"></i>
-            Jl. Cinunuk, Wanaraja, Garut
-          </div>
-          <div class="flex items-center gap-2 text-sm mb-3" style="color:rgba(255,255,255,.5);">
-            <i class="fa-solid fa-phone" style="width:16px;"></i>
-            08xx-xxxx-xxxx
-          </div>
-          <div class="flex items-center gap-2 text-sm mb-5" style="color:rgba(255,255,255,.5);">
-            <i class="fa-solid fa-envelope" style="width:16px;"></i>
-            info@atomicschool.id
-          </div>
-          <div class="flex gap-3">
-            <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);transition:all .3s;"
-               onmouseover="this.style.background='rgba(212,160,23,.2)';this.style.color='#D4A017'"
-               onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"
-               aria-label="Instagram">
-              <i class="fa-brands fa-instagram"></i>
-            </a>
-            <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);transition:all .3s;"
-               onmouseover="this.style.background='rgba(212,160,23,.2)';this.style.color='#D4A017'"
-               onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"
-               aria-label="Facebook">
-              <i class="fa-brands fa-facebook-f"></i>
-            </a>
-            <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);transition:all .3s;"
-               onmouseover="this.style.background='rgba(212,160,23,.2)';this.style.color='#D4A017'"
-               onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"
-               aria-label="YouTube">
-              <i class="fa-brands fa-youtube"></i>
-            </a>
-            <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);transition:all .3s;"
-               onmouseover="this.style.background='rgba(212,160,23,.2)';this.style.color='#D4A017'"
-               onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.color='rgba(255,255,255,.4)'"
-               aria-label="WhatsApp">
-              <i class="fa-brands fa-whatsapp"></i>
-            </a>
+          <div class="footer-heading">Hubungi Kami</div>
+          <div class="footer-contact-item"><i class="fa-solid fa-location-dot"></i> Jl. Cinunuk, Wanaraja, Garut</div>
+          <div class="footer-contact-item"><i class="fa-solid fa-phone"></i> 08xx-xxxx-xxxx</div>
+          <div class="footer-contact-item"><i class="fa-solid fa-envelope"></i> info@atomicschool.id</div>
+          <div class="footer-socials">
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="footer-social" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            <a href="#" class="footer-social" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
           </div>
         </div>
       </div>
-      <div class="pt-8" style="border-top:1px solid rgba(255,255,255,.06);">
-        <p class="text-center text-xs" style="color:rgba(255,255,255,.3);">
-          &copy; 2025 Atomic School. Seluruh hak cipta dilindungi. Pendidikan Masa Depan Berbasis Karakter.
-        </p>
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; 2025 Atomic School. Seluruh hak cipta dilindungi.</p>
       </div>
     </div>
   </footer>
 
   <script>
-    // ============================================================
-    // NAVBAR SCROLL EFFECT
-    // ============================================================
-    var navbar = document.getElementById("navbar");
-    window.addEventListener("scroll", function() {
-      if (window.scrollY > 60) {
-        navbar.classList.add("scrolled");
-      } else {
-        navbar.classList.remove("scrolled");
-      }
+    /* ===== NAVBAR SCROLL ===== */
+    var nb=document.getElementById("navbar");
+    var lastScroll=0;
+    window.addEventListener("scroll",function(){
+      var st=window.pageYOffset;
+      if(st>50){nb.classList.add("scrolled");}else{nb.classList.remove("scrolled");}
+      lastScroll=st;
+    },{passive:true});
+
+    /* ===== MOBILE MENU ===== */
+    var mm=document.getElementById("mobileMenu");
+    var mt=document.getElementById("mobileToggle");
+    var mc=document.getElementById("mobileClose");
+    function openMenu(){mm.classList.add("open");document.body.style.overflow="hidden";}
+    function closeMenu(){mm.classList.remove("open");document.body.style.overflow="";}
+    mt.addEventListener("click",openMenu);
+    mc.addEventListener("click",closeMenu);
+    // Tutup saat klik link
+    mm.querySelectorAll("a").forEach(function(a){
+      a.addEventListener("click",closeMenu);
+    });
+    // Tutup dengan Escape
+    document.addEventListener("keydown",function(e){
+      if(e.key==="Escape"&&mm.classList.contains("open"))closeMenu();
     });
 
-    // ============================================================
-    // MOBILE MENU TOGGLE
-    // ============================================================
-    var mobileToggle = document.getElementById("mobileToggle");
-    var navLinks = document.getElementById("navLinks");
-    mobileToggle.addEventListener("click", function() {
-      navLinks.classList.toggle("open");
-      var icon = this.querySelector("i");
-      if (navLinks.classList.contains("open")) {
-        icon.className = "fa-solid fa-xmark";
-      } else {
-        icon.className = "fa-solid fa-bars";
-      }
-    });
-    // Tutup menu saat klik link
-    navLinks.querySelectorAll("a").forEach(function(link) {
-      link.addEventListener("click", function() {
-        navLinks.classList.remove("open");
-        mobileToggle.querySelector("i").className = "fa-solid fa-bars";
+    /* ===== SCROLL REVEAL ===== */
+    var rvEls=document.querySelectorAll(".rv");
+    var rvObs=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){en.target.classList.add("vis");rvObs.unobserve(en.target);}
       });
-    });
+    },{threshold:0.06,rootMargin:"0px 0px -30px 0px"});
+    rvEls.forEach(function(el){rvObs.observe(el);});
 
-    // ============================================================
-    // SCROLL REVEAL (IntersectionObserver)
-    // ============================================================
-    var revealElements = document.querySelectorAll(".reveal");
-    var revealObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
-
-    revealElements.forEach(function(el) {
-      revealObserver.observe(el);
-    });
-
-    // ============================================================
-    // ANIMASI RING FILOSOFI (1%)
-    // ============================================================
-    var ringAnimated = false;
-    var filoSection = document.getElementById("filosofi");
-    var ringObserver = new IntersectionObserver(function(entries) {
-      if (entries[0].isIntersecting && !ringAnimated) {
-        ringAnimated = true;
-        // Animasi ring SVG dari 0 ke nilai target
-        var ring1 = document.querySelector(".ring-anim");
-        var ring2 = document.querySelector(".ring-anim-2");
-        var ring3 = document.querySelector(".ring-anim-3");
-        if (ring1) ring1.style.strokeDashoffset = "746"; // ~1% dari 754
-        if (ring2) ring2.style.strokeDashoffset = "591"; // ~1% dari 597
-        if (ring3) ring3.style.strokeDashoffset = "436"; // ~1% dari 440
+    /* ===== RING ANIMATION ===== */
+    var ringDone=false;
+    var filoEl=document.getElementById("filosofi");
+    var ringObs=new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting&&!ringDone){
+        ringDone=true;
+        var r1=document.querySelector(".r1");
+        var r2=document.querySelector(".r2");
+        var r3=document.querySelector(".r3");
+        if(r1)r1.style.strokeDashoffset="746";
+        if(r2)r2.style.strokeDashoffset="591";
+        if(r3)r3.style.strokeDashoffset="436";
       }
-    }, { threshold: 0.3 });
-    if (filoSection) ringObserver.observe(filoSection);
+    },{threshold:0.25});
+    if(filoEl)ringObs.observe(filoEl);
 
-    // ============================================================
-    // HERO PARTICLES
-    // ============================================================
-    var particlesContainer = document.getElementById("heroParticles");
-    if (particlesContainer) {
-      for (var i = 0; i < 20; i++) {
-        var p = document.createElement("div");
-        p.className = "hero-particle";
-        var size = Math.random() * 4 + 2;
-        var isGold = Math.random() > 0.6;
-        p.style.width = size + "px";
-        p.style.height = size + "px";
-        p.style.background = isGold ? "rgba(212,160,23,0.4)" : "rgba(255,255,255,0.15)";
-        p.style.left = Math.random() * 100 + "%";
-        p.style.top = (60 + Math.random() * 40) + "%";
-        p.style.animationDuration = (8 + Math.random() * 12) + "s";
-        p.style.animationDelay = (Math.random() * 10) + "s";
-        particlesContainer.appendChild(p);
+    /* ===== HERO PARTICLES ===== */
+    var pc=document.getElementById("heroParticles");
+    if(pc){
+      for(var i=0;i<16;i++){
+        var p=document.createElement("div");
+        p.className="hero-particle";
+        var sz=Math.random()*3+1.5;
+        p.style.width=sz+"px";p.style.height=sz+"px";
+        p.style.background=Math.random()>.6?"rgba(212,160,23,0.35)":"rgba(255,255,255,0.12)";
+        p.style.left=Math.random()*100+"%";
+        p.style.top=(55+Math.random()*45)+"%";
+        p.style.animationDuration=(10+Math.random()*14)+"s";
+        p.style.animationDelay=(Math.random()*12)+"s";
+        pc.appendChild(p);
       }
     }
 
-    // ============================================================
-    // SMOOTH SCROLL UNTUK SEMUA ANCHOR LINK
-    // ============================================================
-    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-      anchor.addEventListener("click", function(e) {
-        var targetId = this.getAttribute("href");
-        if (targetId === "#") return;
-        var targetEl = document.querySelector(targetId);
-        if (targetEl) {
+    /* ===== SMOOTH SCROLL ===== */
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener("click",function(e){
+        var t=this.getAttribute("href");
+        if(t==="#")return;
+        var el=document.querySelector(t);
+        if(el){
           e.preventDefault();
-          var offset = 80; // tinggi navbar
-          var top = targetEl.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: top, behavior: "smooth" });
+          var off=70;
+          var top=el.getBoundingClientRect().top+window.pageYOffset-off;
+          window.scrollTo({top:top,behavior:"smooth"});
         }
       });
     });
-
-    // ============================================================
-    // COUNTER ANIMASI (opsional untuk statistik jika ditambahkan)
-    // ============================================================
-    function animateCounter(el, target, duration) {
-      var start = 0;
-      var startTime = null;
-      function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        var progress = Math.min((timestamp - startTime) / duration, 1);
-        var eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-        el.textContent = Math.floor(eased * target);
-        if (progress < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
   </script>
 </body>
 </html>
