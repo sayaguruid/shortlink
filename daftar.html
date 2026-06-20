@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pendaftaran Siswa Baru - Atomic School</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* === CSS Variables === */
+    :root {
+      --primary: #0B3D2E;
+      --primary-light: #14694F;
+      --primary-pale: #E8F5E9;
+      --gold: #D4A017;
+      --gold-light: #FFF3C4;
+      --cream: #FAF7F0;
+      --card: #FFFFFF;
+      --text: #1A1A1A;
+      --muted: #6B7280;
+      --border: #E0DCD3;
+      --danger: #DC2626;
+      --success: #16A34A;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--cream);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-display { font-family: 'Fredoka', sans-serif; }
+
+    /* === Background Pattern === */
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(11,61,46,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(212,160,23,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(11,61,46,0.02) 0%, transparent 70%);
+    }
+
+    /* === Atom Decoration (CSS Only) === */
+    .atom-deco {
+      position: fixed;
+      border-radius: 50%;
+      border: 1.5px solid rgba(11,61,46,0.08);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .atom-deco::before,
+    .atom-deco::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid rgba(11,61,46,0.06);
+    }
+    .atom-1 {
+      width: 180px; height: 180px;
+      top: 8%; right: 5%;
+      animation: atomSpin 20s linear infinite;
+    }
+    .atom-1::before {
+      width: 180px; height: 180px;
+      top: -1px; left: -1px;
+      transform: rotateY(60deg);
+    }
+    .atom-1::after {
+      width: 180px; height: 180px;
+      top: -1px; left: -1px;
+      transform: rotateY(-60deg);
+    }
+    .atom-2 {
+      width: 120px; height: 120px;
+      bottom: 15%; left: 3%;
+      animation: atomSpin 15s linear infinite reverse;
+    }
+    .atom-2::before {
+      width: 120px; height: 120px;
+      top: -1px; left: -1px;
+      transform: rotateY(60deg);
+    }
+    .atom-2::after {
+      width: 120px; height: 120px;
+      top: -1px; left: -1px;
+      transform: rotateY(-60deg);
+    }
+    .atom-nucleus {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: rgba(212,160,23,0.2);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes atomSpin {
+      from { transform: rotateZ(0deg); }
+      to { transform: rotateZ(360deg); }
+    }
+
+    /* === Floating Dots === */
+    .float-dot {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.15;
+    }
+    .float-dot:nth-child(1) {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      top: 25%; left: 12%;
+      animation: floatY 4s ease-in-out infinite;
+    }
+    .float-dot:nth-child(2) {
+      width: 4px; height: 4px;
+      background: var(--primary);
+      top: 60%; right: 8%;
+      animation: floatY 5s ease-in-out infinite 1s;
+    }
+    .float-dot:nth-child(3) {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      bottom: 30%; left: 25%;
+      animation: floatY 6s ease-in-out infinite 0.5s;
+    }
+    .float-dot:nth-child(4) {
+      width: 5px; height: 5px;
+      background: var(--primary);
+      top: 40%; right: 20%;
+      animation: floatY 4.5s ease-in-out infinite 2s;
+    }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    /* === Header === */
+    .header-bg {
+      background: linear-gradient(135deg, var(--primary) 0%, #0A2F23 50%, #0D4A38 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .header-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(212,160,23,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);
+    }
+    .header-bg::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 40px;
+      background: var(--cream);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    .gold-line {
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+
+    /* === Form Card === */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow:
+        0 1px 3px rgba(0,0,0,0.04),
+        0 8px 32px rgba(11,61,46,0.06);
+      transition: box-shadow 0.3s ease;
+    }
+    .form-card:hover {
+      box-shadow:
+        0 1px 3px rgba(0,0,0,0.04),
+        0 12px 40px rgba(11,61,46,0.1);
+    }
+
+    /* === Section Header === */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--primary-pale);
+    }
+    .section-number {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    /* === Input Styles === */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-label .required {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: #FEFEFE;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(11,61,46,0.1);
+      background: #fff;
+    }
+    .form-input::placeholder {
+      color: #B0ACA3;
+    }
+    .form-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+    }
+    .error-msg {
+      color: var(--danger);
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    /* === Radio Buttons === */
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .radio-option {
+      position: relative;
+      cursor: pointer;
+    }
+    .radio-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.25s ease;
+      background: #FEFEFE;
+    }
+    .radio-label:hover {
+      border-color: var(--primary-light);
+      background: var(--primary-pale);
+    }
+    .radio-option input:checked + .radio-label {
+      border-color: var(--primary);
+      background: var(--primary-pale);
+      color: var(--primary);
+    }
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+    .radio-option input:checked + .radio-label .radio-dot {
+      border-color: var(--primary);
+    }
+    .radio-option input:checked + .radio-label .radio-dot::after {
+      content: '';
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* === Photo Upload === */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #FEFEFE;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-area:hover {
+      border-color: var(--primary-light);
+      background: var(--primary-pale);
+    }
+    .upload-area.dragover {
+      border-color: var(--gold);
+      background: var(--gold-light);
+      transform: scale(1.01);
+    }
+    .upload-area.has-photo {
+      padding: 0;
+      border-style: solid;
+      border-color: var(--primary);
+    }
+    .upload-icon {
+      font-size: 40px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      transition: color 0.3s ease;
+    }
+    .upload-area:hover .upload-icon { color: var(--primary); }
+    .upload-preview {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: 12px;
+      display: block;
+    }
+    .upload-remove {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(220,38,38,0.9);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: transform 0.2s ease;
+      z-index: 2;
+    }
+    .upload-remove:hover { transform: scale(1.1); }
+
+    /* === Submit Button === */
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 48px;
+      background: linear-gradient(135deg, var(--gold) 0%, #C49312 100%);
+      color: #1A1A1A;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(212,160,23,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .btn-submit:hover::before { opacity: 1; }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(212,160,23,0.4);
+    }
+    .btn-submit:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(212,160,23,0.3);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* === Spinner === */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(26,26,26,0.2);
+      border-top-color: #1A1A1A;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* === Toast === */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      max-width: 380px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.success {
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+    }
+    .toast.error {
+      background: #FEF2F2;
+      color: #991B1B;
+      border: 1px solid #FECACA;
+    }
+
+    /* === Success Modal === */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11,61,46,0.5);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      transform: scale(0.85) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+    }
+    .modal-overlay.show .modal-box {
+      transform: scale(1) translateY(0);
+    }
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--primary-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+      color: var(--primary);
+    }
+    .modal-check {
+      animation: checkPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+    @keyframes checkPop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* === Reveal Animation === */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* === Footer === */
+    .footer-bg {
+      background: var(--primary);
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* === Responsive === */
+    @media (max-width: 640px) {
+      .section-title { font-size: 16px; }
+      .radio-group { flex-direction: column; }
+      .btn-submit { width: 100%; padding: 14px 24px; }
+      .toast { max-width: calc(100vw - 48px); }
+      .modal-box { padding: 32px 24px; }
+      .atom-deco { display: none; }
+    }
+
+    /* === Reduced Motion === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Decorations -->
+  <div class="bg-pattern"></div>
+  <div class="atom-deco atom-1"><div class="atom-nucleus"></div></div>
+  <div class="atom-deco atom-2"><div class="atom-nucleus"></div></div>
+  <div class="float-dot"></div>
+  <div class="float-dot"></div>
+  <div class="float-dot"></div>
+  <div class="float-dot"></div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <i class="fa-solid fa-check modal-check"></i>
+      </div>
+      <h2 class="font-display text-2xl font-bold mb-3" style="color: var(--primary);">Pendaftaran Berhasil</h2>
+      <p class="text-sm mb-6" style="color: var(--muted); line-height: 1.7;">
+        Data pendaftaran siswa baru telah berhasil dikirim dan tersimpan. Tim Atomic School akan melakukan verifikasi data.
+      </p>
+      <button onclick="closeModal()" class="btn-submit" style="font-size: 15px; padding: 12px 36px;">
+        <i class="fa-solid fa-arrow-rotate-left"></i> Daftar Siswa Lain
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header-bg relative z-10 pb-16 pt-10 px-4">
+    <div class="max-w-2xl mx-auto text-center relative z-10">
+      <!-- Logo / Icon -->
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-5"
+           style="background: linear-gradient(135deg, var(--gold) 0%, #C49312 100%); box-shadow: 0 4px 20px rgba(212,160,23,0.3);">
+        <i class="fa-solid fa-atom text-3xl" style="color: #1A1A1A;"></i>
+      </div>
+      <h1 class="font-display text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
+        Atomic School
+      </h1>
+      <div class="gold-line mb-3"></div>
+      <p class="text-sm mb-1" style="color: rgba(255,255,255,0.7);">
+        <i class="fa-solid fa-location-dot mr-1"></i>
+        Jl. Cinunuk Wanaraja, Kec. Wanaraja, Kab. Garut
+      </p>
+      <p class="font-display text-lg sm:text-xl font-600 mt-5 mb-1" style="color: var(--gold);">
+        Pendaftaran Siswa Baru
+      </p>
+      <p class="text-sm" style="color: rgba(255,255,255,0.55);">
+        Tahun Ajaran 2025/2026
+      </p>
+    </div>
+  </header>
+
+  <!-- ===== MAIN FORM ===== -->
+  <main class="relative z-10 px-4 -mt-6 pb-16">
+    <form id="formPendaftaran" class="max-w-2xl mx-auto" novalidate>
+
+      <!-- Section 1: Data Pribadi Siswa -->
+      <section class="form-card p-6 sm:p-8 mb-6 reveal" aria-labelledby="sec1-title">
+        <div class="section-header">
+          <div class="section-number">1</div>
+          <h2 class="section-title" id="sec1-title">Data Pribadi Siswa</h2>
+        </div>
+
+        <!-- Nama Lengkap -->
+        <div class="form-group">
+          <label class="form-label" for="namaLengkap">Nama Lengkap <span class="required">*</span></label>
+          <input type="text" id="namaLengkap" class="form-input" placeholder="Masukkan nama lengkap siswa" required>
+          <div class="error-msg" id="errNamaLengkap">Nama lengkap wajib diisi</div>
+        </div>
+
+        <!-- Jenis Kelamin -->
+        <div class="form-group">
+          <label class="form-label">Jenis Kelamin <span class="required">*</span></label>
+          <div class="radio-group" role="radiogroup" aria-label="Jenis Kelamin">
+            <label class="radio-option">
+              <input type="radio" name="jenisKelamin" value="Laki-laki" required>
+              <span class="radio-label">
+                <span class="radio-dot"></span>
+                <i class="fa-solid fa-mars" style="color: var(--primary-light);"></i> Laki-laki
+              </span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="jenisKelamin" value="Perempuan">
+              <span class="radio-label">
+                <span class="radio-dot"></span>
+                <i class="fa-solid fa-venus" style="color: var(--gold);"></i> Perempuan
+              </span>
+            </label>
+          </div>
+          <div class="error-msg" id="errJenisKelamin">Pilih jenis kelamin</div>
+        </div>
+
+        <!-- Tempat & Tanggal Lahir -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="tempatLahir">Tempat Lahir <span class="required">*</span></label>
+            <input type="text" id="tempatLahir" class="form-input" placeholder="Contoh: Garut" required>
+            <div class="error-msg" id="errTempatLahir">Tempat lahir wajib diisi</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tanggalLahir">Tanggal Lahir <span class="required">*</span></label>
+            <input type="date" id="tanggalLahir" class="form-input" required>
+            <div class="error-msg" id="errTanggalLahir">Tanggal lahir wajib diisi</div>
+          </div>
+        </div>
+
+        <!-- Anak Ke & Jumlah Saudara -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="anakKe">Anak Ke <span class="required">*</span></label>
+            <input type="number" id="anakKe" class="form-input" placeholder="Contoh: 2" min="1" max="20" required>
+            <div class="error-msg" id="errAnakKe">Isi anak ke berapa</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="jumlahSaudara">Jumlah Saudara Kandung <span class="required">*</span></label>
+            <input type="number" id="jumlahSaudara" class="form-input" placeholder="Contoh: 3" min="0" max="20" required>
+            <div class="error-msg" id="errJumlahSaudara">Isi jumlah saudara</div>
+          </div>
+        </div>
+
+        <!-- Alamat -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="alamat">Alamat Lengkap <span class="required">*</span></label>
+          <textarea id="alamat" class="form-input" placeholder="Tulis alamat lengkap tempat tinggal siswa" rows="3" required></textarea>
+          <div class="error-msg" id="errAlamat">Alamat wajib diisi</div>
+        </div>
+      </section>
+
+      <!-- Section 2: Data Orang Tua -->
+      <section class="form-card p-6 sm:p-8 mb-6 reveal" aria-labelledby="sec2-title">
+        <div class="section-header">
+          <div class="section-number">2</div>
+          <h2 class="section-title" id="sec2-title">Data Orang Tua</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="namaAyah">Nama Ayah <span class="required">*</span></label>
+            <input type="text" id="namaAyah" class="form-input" placeholder="Nama lengkap ayah" required>
+            <div class="error-msg" id="errNamaAyah">Nama ayah wajib diisi</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="namaIbu">Nama Ibu <span class="required">*</span></label>
+            <input type="text" id="namaIbu" class="form-input" placeholder="Nama lengkap ibu" required>
+            <div class="error-msg" id="errNamaIbu">Nama ibu wajib diisi</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Foto Siswa -->
+      <section class="form-card p-6 sm:p-8 mb-6 reveal" aria-labelledby="sec3-title">
+        <div class="section-header">
+          <div class="section-number">3</div>
+          <h2 class="section-title" id="sec3-title">Foto Siswa</h2>
+        </div>
+
+        <div class="upload-area" id="uploadArea" tabindex="0" role="button" aria-label="Upload foto siswa">
+          <input type="file" id="fotoInput" accept="image/*" class="hidden" aria-hidden="true">
+          <div id="uploadPlaceholder">
+            <div class="upload-icon">
+              <i class="fa-solid fa-camera-retro"></i>
+            </div>
+            <p class="font-bold text-sm mb-1" style="color: var(--text);">Klik atau seret foto ke sini</p>
+            <p class="text-xs" style="color: var(--muted);">Format: JPG, JPEG, PNG. Maks 5MB.</p>
+          </div>
+          <img id="fotoPreview" class="upload-preview" style="display:none;" alt="Preview foto siswa">
+          <button type="button" id="removeFoto" class="upload-remove" style="display:none;" aria-label="Hapus foto">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="error-msg" id="errFoto">Unggah pas foto siswa</div>
+      </section>
+
+      <!-- Section 4: Informasi Tambahan -->
+      <section class="form-card p-6 sm:p-8 mb-8 reveal" aria-labelledby="sec4-title">
+        <div class="section-header">
+          <div class="section-number">4</div>
+          <h2 class="section-title" id="sec4-title">Informasi Tambahan</h2>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="alasan">Alasan Menyekolahkan Anak di Atomic School <span class="required">*</span></label>
+          <textarea id="alasan" class="form-input" placeholder="Ceritakan alasan Anda memilih Atomic School untuk pendidikan anak..." rows="4" required></textarea>
+          <div class="error-msg" id="errAlasan">Alasan wajib diisi</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="kontribusi">Kontribusi yang Dapat Diberikan kepada Sekolah <span class="required">*</span></label>
+          <textarea id="kontribusi" class="form-input" placeholder="Sebutkan kontribusi atau dukungan yang dapat Anda berikan kepada sekolah..." rows="4" required></textarea>
+          <div class="error-msg" id="errKontribusi">Kontribusi wajib diisi</div>
+        </div>
+      </section>
+
+      <!-- Submit -->
+      <div class="text-center reveal">
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          <i class="fa-solid fa-paper-plane"></i>
+          Kirim Pendaftaran
+        </button>
+        <p class="text-xs mt-4" style="color: var(--muted);">
+          <i class="fa-solid fa-lock mr-1"></i>
+          Data Anda aman dan hanya digunakan untuk keperluan pendaftaran
+        </p>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer-bg py-10 px-4 relative z-10">
+    <div class="max-w-2xl mx-auto text-center">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
+           style="background: rgba(212,160,23,0.15);">
+        <i class="fa-solid fa-atom text-lg" style="color: var(--gold);"></i>
+      </div>
+      <h3 class="font-display text-xl font-bold text-white mb-1">Atomic School</h3>
+      <p class="text-sm mb-4" style="color: rgba(255,255,255,0.6);">
+        Jl. Cinunuk Wanaraja, Kec. Wanaraja, Kab. Garut
+      </p>
+      <div class="flex justify-center gap-4 mb-4">
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+           style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);"
+           onmouseover="this.style.background='rgba(212,160,23,0.3)';this.style.color='#D4A017'"
+           onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'"
+           aria-label="Instagram">
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+           style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);"
+           onmouseover="this.style.background='rgba(212,160,23,0.3)';this.style.color='#D4A017'"
+           onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'"
+           aria-label="Facebook">
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+        <a href="#" class="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+           style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);"
+           onmouseover="this.style.background='rgba(212,160,23,0.3)';this.style.color='#D4A017'"
+           onmouseout="this.style.background='rgba(255,255,255,0.1)';this.style.color='rgba(255,255,255,0.7)'"
+           aria-label="WhatsApp">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+      </div>
+      <p class="text-xs" style="color: rgba(255,255,255,0.35);">
+        &copy; 2025 Atomic School. Seluruh hak cipta dilindungi.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ============================================================
+    // KONFIGURASI - GANTI URL DI BAWAH INI DENGAN URL WEB APP GAS
+    // ============================================================
+    var GAS_URL = "https://script.google.com/macros/s/AKfycbx3c3TRhD7bchdG3AK0LXgkLtBGP3_NRQH0dDNk8HAIeYo4L0lSTI_PM2DRnPSJZRWD0A/exec";
+
+    // ============================================================
+    // ELEMEN DOM
+    // ============================================================
+    var form = document.getElementById("formPendaftaran");
+    var btnSubmit = document.getElementById("btnSubmit");
+    var uploadArea = document.getElementById("uploadArea");
+    var fotoInput = document.getElementById("fotoInput");
+    var fotoPreview = document.getElementById("fotoPreview");
+    var uploadPlaceholder = document.getElementById("uploadPlaceholder");
+    var removeFotoBtn = document.getElementById("removeFoto");
+    var successModal = document.getElementById("successModal");
+    var toastContainer = document.getElementById("toastContainer");
+
+    // Variabel penyimpan file foto asli
+    var selectedFotoFile = null;
+
+    // ============================================================
+    // SCROLL REVEAL (IntersectionObserver)
+    // ============================================================
+    var revealEls = document.querySelectorAll(".reveal");
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry, idx) {
+        if (entry.isIntersecting) {
+          // Delay bertahap agar efeknya rapi
+          setTimeout(function() {
+            entry.target.classList.add("visible");
+          }, idx * 80);
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    revealEls.forEach(function(el) {
+      revealObserver.observe(el);
+    });
+
+    // ============================================================
+    // UPLOAD FOTO - Klik, Drag & Drop, Preview
+    // ============================================================
+
+    // Klik area untuk buka file picker
+    uploadArea.addEventListener("click", function(e) {
+      if (e.target === removeFotoBtn || removeFotoBtn.contains(e.target)) return;
+      fotoInput.click();
+    });
+
+    // Keyboard accessibility
+    uploadArea.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fotoInput.click();
+      }
+    });
+
+    // Saat file dipilih
+    fotoInput.addEventListener("change", function() {
+      if (this.files && this.files[0]) {
+        handleFotoFile(this.files[0]);
+      }
+    });
+
+    // Drag & Drop
+    uploadArea.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      this.classList.add("dragover");
+    });
+    uploadArea.addEventListener("dragleave", function(e) {
+      e.preventDefault();
+      this.classList.remove("dragover");
+    });
+    uploadArea.addEventListener("drop", function(e) {
+      e.preventDefault();
+      this.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFotoFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Hapus foto
+    removeFotoBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      clearFoto();
+    });
+
+    // Proses file foto yang dipilih
+    function handleFotoFile(file) {
+      // Validasi tipe
+      if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+        showToast("Format file harus JPG, JPEG, atau PNG.", "error");
+        return;
+      }
+      // Validasi ukuran (maks 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("Ukuran file maksimal 5MB.", "error");
+        return;
+      }
+
+      selectedFotoFile = file;
+
+      // Tampilkan preview
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        fotoPreview.src = e.target.result;
+        fotoPreview.style.display = "block";
+        uploadPlaceholder.style.display = "none";
+        removeFotoBtn.style.display = "flex";
+        uploadArea.classList.add("has-photo");
+      };
+      reader.readAsDataURL(file);
+
+      // Hapus error state jika ada
+      hideError("errFoto");
+    }
+
+    // Reset foto
+    function clearFoto() {
+      selectedFotoFile = null;
+      fotoInput.value = "";
+      fotoPreview.src = "";
+      fotoPreview.style.display = "none";
+      uploadPlaceholder.style.display = "block";
+      removeFotoBtn.style.display = "none";
+      uploadArea.classList.remove("has-photo");
+    }
+
+    // ============================================================
+    // KOMPRESI FOTO SEBELUM KIRIM
+    // ============================================================
+    function compressFoto(file, maxWidth, quality, callback) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement("canvas");
+          var w = img.width;
+          var h = img.height;
+
+          // Scale down jika melebihi maxWidth
+          if (w > maxWidth) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          }
+
+          canvas.width = w;
+          canvas.height = h;
+
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // Export sebagai JPEG
+          var base64 = canvas.toDataURL("image/jpeg", quality);
+          callback(base64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ============================================================
+    // VALIDASI FORM
+    // ============================================================
+    function validateForm() {
+      var valid = true;
+
+      // Nama Lengkap
+      if (!val("namaLengkap")) { showError("namaLengkap", "errNamaLengkap"); valid = false; }
+      else { hideError("errNamaLengkap"); clearInputError("namaLengkap"); }
+
+      // Jenis Kelamin
+      var jk = document.querySelector('input[name="jenisKelamin"]:checked');
+      if (!jk) { showError(null, "errJenisKelamin"); valid = false; }
+      else { hideError("errJenisKelamin"); }
+
+      // Tempat Lahir
+      if (!val("tempatLahir")) { showError("tempatLahir", "errTempatLahir"); valid = false; }
+      else { hideError("errTempatLahir"); clearInputError("tempatLahir"); }
+
+      // Tanggal Lahir
+      if (!val("tanggalLahir")) { showError("tanggalLahir", "errTanggalLahir"); valid = false; }
+      else { hideError("errTanggalLahir"); clearInputError("tanggalLahir"); }
+
+      // Anak Ke
+      if (!val("anakKe")) { showError("anakKe", "errAnakKe"); valid = false; }
+      else { hideError("errAnakKe"); clearInputError("anakKe"); }
+
+      // Jumlah Saudara
+      if (!val("jumlahSaudara")) { showError("jumlahSaudara", "errJumlahSaudara"); valid = false; }
+      else { hideError("errJumlahSaudara"); clearInputError("jumlahSaudara"); }
+
+      // Alamat
+      if (!val("alamat")) { showError("alamat", "errAlamat"); valid = false; }
+      else { hideError("errAlamat"); clearInputError("alamat"); }
+
+      // Nama Ayah
+      if (!val("namaAyah")) { showError("namaAyah", "errNamaAyah"); valid = false; }
+      else { hideError("errNamaAyah"); clearInputError("namaAyah"); }
+
+      // Nama Ibu
+      if (!val("namaIbu")) { showError("namaIbu", "errNamaIbu"); valid = false; }
+      else { hideError("errNamaIbu"); clearInputError("namaIbu"); }
+
+      // Foto
+      if (!selectedFotoFile) { showError(null, "errFoto"); valid = false; }
+      else { hideError("errFoto"); }
+
+      // Alasan
+      if (!val("alasan")) { showError("alasan", "errAlasan"); valid = false; }
+      else { hideError("errAlasan"); clearInputError("alasan"); }
+
+      // Kontribusi
+      if (!val("kontribusi")) { showError("kontribusi", "errKontribusi"); valid = false; }
+      else { hideError("errKontribusi"); clearInputError("kontribusi"); }
+
+      return valid;
+    }
+
+    // Helper: cek value input
+    function val(id) {
+      var el = document.getElementById(id);
+      return el && el.value.trim() !== "";
+    }
+
+    // Helper: tampilkan error
+    function showError(inputId, msgId) {
+      if (inputId) {
+        document.getElementById(inputId).classList.add("error");
+      }
+      document.getElementById(msgId).classList.add("show");
+    }
+
+    // Helper: sembunyikan error
+    function hideError(msgId) {
+      document.getElementById(msgId).classList.remove("show");
+    }
+
+    // Helper: hapus class error dari input
+    function clearInputError(inputId) {
+      document.getElementById(inputId).classList.remove("error");
+    }
+
+    // Hapus error saat user mulai mengetik
+    var allInputs = document.querySelectorAll(".form-input");
+    allInputs.forEach(function(input) {
+      input.addEventListener("input", function() {
+        this.classList.remove("error");
+        // Cari error msg saudara kandung terdekat
+        var errMsg = this.parentElement.querySelector(".error-msg");
+        if (errMsg) errMsg.classList.remove("show");
+      });
+    });
+
+    // Hapus error radio saat dipilih
+    document.querySelectorAll('input[name="jenisKelamin"]').forEach(function(radio) {
+      radio.addEventListener("change", function() {
+        hideError("errJenisKelamin");
+      });
+    });
+
+    // ============================================================
+    // SUBMIT FORM
+    // ============================================================
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      // Validasi
+      if (!validateForm()) {
+        // Scroll ke error pertama
+        var firstError = form.querySelector(".error-msg.show");
+        if (firstError) {
+          firstError.closest("section").scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        showToast("Mohon lengkapi semua data yang wajib diisi.", "error");
+        return;
+      }
+
+      // Disable tombol & tampilkan loading
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<div class="spinner"></div> Mengirim...';
+
+      // Kompresi foto lalu kirim
+      compressFoto(selectedFotoFile, 800, 0.6, function(base64Foto) {
+        // Susun data
+        var jkRadio = document.querySelector('input[name="jenisKelamin"]:checked');
+        var payload = {
+          namaLengkap: document.getElementById("namaLengkap").value.trim(),
+          jenisKelamin: jkRadio ? jkRadio.value : "",
+          tempatLahir: document.getElementById("tempatLahir").value.trim(),
+          tanggalLahir: document.getElementById("tanggalLahir").value,
+          anakKe: document.getElementById("anakKe").value,
+          jumlahSaudara: document.getElementById("jumlahSaudara").value,
+          alamat: document.getElementById("alamat").value.trim(),
+          namaAyah: document.getElementById("namaAyah").value.trim(),
+          namaIbu: document.getElementById("namaIbu").value.trim(),
+          foto: base64Foto,
+          alasan: document.getElementById("alasan").value.trim(),
+          kontribusi: document.getElementById("kontribusi").value.trim()
+        };
+
+        // Kirim ke Google Apps Script
+        fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          if (data.status === "success") {
+            // Tampilkan modal sukses
+            successModal.classList.add("show");
+          } else {
+            showToast(data.message || "Terjadi kesalahan saat mengirim data.", "error");
+            resetButton();
+          }
+        })
+        .catch(function(err) {
+          console.error("Fetch error:", err);
+          showToast("Gagal mengirim data. Periksa koneksi internet Anda.", "error");
+          resetButton();
+        });
+      });
+    });
+
+    // Reset tombol ke keadaan awal
+    function resetButton() {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pendaftaran';
+    }
+
+    // ============================================================
+    // MODAL - Tutup & Reset Form
+    // ============================================================
+    function closeModal() {
+      successModal.classList.remove("show");
+      form.reset();
+      clearFoto();
+      resetButton();
+      // Scroll ke atas
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Tutup modal dengan klik overlay
+    successModal.addEventListener("click", function(e) {
+      if (e.target === successModal) closeModal();
+    });
+
+    // Tutup modal dengan Escape
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && successModal.classList.contains("show")) {
+        closeModal();
+      }
+    });
+
+    // ============================================================
+    // TOAST NOTIFICATION
+    // ============================================================
+    function showToast(message, type) {
+      var toast = document.createElement("div");
+      toast.className = "toast " + type;
+      var icon = type === "success" ? "fa-circle-check" : "fa-circle-exclamation";
+      toast.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + message + '</span>';
+      toastContainer.appendChild(toast);
+
+      // Trigger animasi masuk
+      requestAnimationFrame(function() {
+        toast.classList.add("show");
+      });
+
+      // Hapus setelah 4 detik
+      setTimeout(function() {
+        toast.classList.remove("show");
+        setTimeout(function() {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 400);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
