@@ -36,58 +36,47 @@
     .nav-cta:hover{background:#e8b020;transform:translateY(-1px);}
     .mobile-toggle{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:8px;-webkit-tap-highlight-color:transparent;}
 
-    /* Mobile menu */
-    .mobile-menu{display:none;position:fixed;inset:0;z-index:999;background:rgba(11,61,46,.98);backdrop-filter:blur(16px);flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .3s ease;pointer-events:none;}
+    .mobile-menu{display:none;position:fixed;inset:0;z-index:999;background:rgba(7,31,24,.97);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;gap:6px;opacity:0;transition:opacity .3s ease;pointer-events:none;}
     .mobile-menu.open{display:flex;opacity:1;pointer-events:all;}
-    .mobile-menu a{color:rgba(255,255,255,.85);font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;text-decoration:none;padding:14px 32px;border-radius:12px;transition:all .2s;width:80%;text-align:center;}
+    .mobile-menu a{color:rgba(255,255,255,.8);font-family:'Fredoka',sans-serif;font-weight:600;font-size:19px;text-decoration:none;padding:14px 32px;border-radius:12px;transition:all .2s;width:80%;text-align:center;-webkit-tap-highlight-color:transparent;}
     .mobile-menu a:hover{background:rgba(255,255,255,.06);color:var(--gold);}
-    .mobile-menu .nav-cta{font-size:16px;padding:16px 32px;margin-top:12px;background:var(--gold);color:#1A1A1A;width:80%;text-align:center;border-radius:14px;display:block;}
-    .mobile-close{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(255,255,255,.6);font-size:24px;cursor:pointer;padding:8px;}
-
-    @media(max-width:860px){
-      .nav-links{display:none;}
-      .mobile-toggle{display:block;}
-    }
+    .mobile-menu .m-cta{font-size:16px;padding:16px 32px;margin-top:16px;background:var(--gold);color:#1A1A1A;width:80%;text-align:center;border-radius:14px;display:block;font-family:'Fredoka',sans-serif;font-weight:700;}
+    .mobile-close{position:absolute;top:18px;right:18px;background:none;border:none;color:rgba(255,255,255,.5);font-size:24px;cursor:pointer;padding:10px;-webkit-tap-highlight-color:transparent;}
+    .mobile-close:hover{color:#fff;}
+    @media(max-width:860px){.nav-links{display:none;}.mobile-toggle{display:block;}}
 
     /* ===== HERO ===== */
     .hero{position:relative;min-height:100dvh;display:flex;align-items:center;background:linear-gradient(160deg,#071F18 0%,var(--primary) 35%,#0D4A38 65%,#0A2F23 100%);overflow:hidden;}
     .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 85%,rgba(212,160,23,.1) 0%,transparent 50%),radial-gradient(ellipse at 85% 15%,rgba(26,140,101,.08) 0%,transparent 40%);}
     .hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:50px;background:var(--cream);clip-path:ellipse(55% 100% at 50% 100%);}
-
     .hero-atom{position:absolute;border-radius:50%;pointer-events:none;border:1px solid rgba(255,255,255,.05);}
     .hero-atom::before,.hero-atom::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.03);}
-    .ha1{width:350px;height:350px;top:8%;right:-60px;animation:as 28s linear infinite;}
+    .ha1{width:350px;height:350px;top:8%;right:-60px;animation:aspin 28s linear infinite;}
     .ha1::before,.ha1::after{width:350px;height:350px;top:-1px;left:-1px;}
     .ha1::before{transform:rotateY(60deg);}.ha1::after{transform:rotateY(-60deg);}
-    .ha2{width:200px;height:200px;bottom:25%;left:-40px;animation:as 20s linear infinite reverse;}
+    .ha2{width:200px;height:200px;bottom:25%;left:-40px;animation:aspin 20s linear infinite reverse;}
     .ha2::before,.ha2::after{width:200px;height:200px;top:-1px;left:-1px;}
     .ha2::before{transform:rotateY(60deg);}.ha2::after{transform:rotateY(-60deg);}
-    @keyframes as{from{transform:rotateZ(0)}to{transform:rotateZ(360deg)}}
-
+    @keyframes aspin{from{transform:rotateZ(0)}to{transform:rotateZ(360deg)}}
     .hero-particle{position:absolute;border-radius:50%;pointer-events:none;animation:fp linear infinite;}
     @keyframes fp{0%{transform:translateY(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateY(-100vh);opacity:0;}}
 
     .hero-inner{max-width:1140px;margin:0 auto;padding:100px 20px 80px;width:100%;position:relative;z-index:10;}
     .hero-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center;}
     @media(min-width:1024px){.hero-grid{grid-template-columns:1fr 1fr;}}
-
     .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:20px;}
     .hero-title{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4rem);font-weight:700;line-height:1.05;color:#fff;margin-bottom:8px;letter-spacing:-.02em;}
     .hero-tagline{font-family:'Fredoka',sans-serif;font-size:clamp(1rem,3vw,1.4rem);color:var(--gold);font-weight:500;margin-bottom:18px;}
     .hero-desc{font-size:clamp(14px,2.5vw,16px);line-height:1.8;color:rgba(255,255,255,.65);max-width:500px;margin-bottom:24px;}
     .hero-loc{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;}
     .hero-btns{display:flex;flex-wrap:wrap;gap:12px;}
-
     .btn-gold{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold),#C49312);color:#1A1A1A;font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none;border:none;cursor:pointer;transition:all .3s;box-shadow:0 4px 16px rgba(212,160,23,.25);position:relative;overflow:hidden;}
     .btn-gold::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,transparent 50%);opacity:0;transition:opacity .3s;}
     .btn-gold:hover::before{opacity:1;}.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,160,23,.35);}
-    @media(max-width:400px){.btn-gold{width:100%;justify-content:center;}}
-
     .btn-outline{display:inline-flex;align-items:center;gap:8px;background:transparent;color:#fff;font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none;border:2px solid rgba(255,255,255,.15);cursor:pointer;transition:all .3s;}
     .btn-outline:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px);}
-    @media(max-width:400px){.btn-outline{width:100%;justify-content:center;}}
+    @media(max-width:400px){.btn-gold,.btn-outline{width:100%;justify-content:center;}}
 
-    /* Hero visual cards */
     .hero-visual{position:relative;min-height:300px;}
     .h-card{background:rgba(255,255,255,.05);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px;position:absolute;animation:cf 6s ease-in-out infinite;}
     .h-card-1{top:5%;right:0;width:200px;animation-delay:0s;}
@@ -99,8 +88,8 @@
     .h-card-desc{font-size:11px;color:rgba(255,255,255,.5);line-height:1.5;}
     @media(max-width:1023px){.hero-visual{display:none;}}
 
-    /* ===== SECTIONS UMUM ===== */
-    .sec{padding:60px 0;position:relative;}
+    /* ===== SECTIONS ===== */
+    .sec{padding:56px 0;position:relative;}
     @media(min-width:768px){.sec{padding:80px 0;}}
     @media(min-width:1024px){.sec{padding:100px 0;}}
     .sec-inner{max-width:1140px;margin:0 auto;padding:0 20px;}
@@ -109,20 +98,18 @@
     .sec-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.5rem,5vw,2.2rem);color:var(--primary);line-height:1.2;margin-bottom:14px;}
     .sec-desc{font-size:clamp(13px,2.5vw,15px);line-height:1.8;color:var(--muted);max-width:560px;}
 
-    /* Grid helpers */
-    .g1{display:grid;grid-template-columns:1fr;gap:16px;}
-    @media(min-width:640px){.g2{grid-template-columns:1fr 1fr;}}
-    @media(min-width:640px){.g2s{grid-template-columns:repeat(2,1fr);}}
-    @media(min-width:768px){.g3{grid-template-columns:repeat(3,1fr);}}
-    @media(min-width:1024px){.g4{grid-template-columns:repeat(4,1fr);}}
-    .g2{display:grid;gap:16px;grid-template-columns:1fr;}
-    .g2s{display:grid;gap:16px;grid-template-columns:1fr;}
-    .g3{display:grid;gap:16px;grid-template-columns:1fr;}
-    .g4{display:grid;gap:16px;grid-template-columns:1fr;}
+    .g1{display:grid;grid-template-columns:1fr;gap:14px;}
     @media(min-width:640px){.g1{grid-template-columns:1fr 1fr;}}
-    @media(min-width:1024px){.g-lg2{grid-template-columns:1fr 1fr;}}
+    .g2{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:640px){.g2{grid-template-columns:1fr 1fr;}}
+    .g3{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:640px){.g3{grid-template-columns:repeat(3,1fr);}}
+    .g4{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:640px){.g4{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:1024px){.g4{grid-template-columns:repeat(4,1fr);}}
+    .split{display:grid;grid-template-columns:1fr;gap:36px;align-items:start;}
+    @media(min-width:768px){.split{grid-template-columns:1fr 1fr;}}
 
-    /* Reveal */
     .rv{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1);}
     .rv.vis{opacity:1;transform:translateY(0);}
     .d1{transition-delay:.1s;}.d2{transition-delay:.2s;}.d3{transition-delay:.3s;}.d4{transition-delay:.4s;}
@@ -150,11 +137,9 @@
 
     /* ===== FILOSOFI ===== */
     .filo-bg{background:linear-gradient(180deg,var(--cream),var(--cream-dark));}
-    .filo-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center;}
-    @media(min-width:768px){.filo-grid{grid-template-columns:1fr 1fr;}}
     .filo-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(3.5rem,12vw,6.5rem);color:var(--primary);opacity:.07;line-height:1;margin-bottom:-16px;}
     .filo-quote{font-family:'Fredoka',sans-serif;font-size:clamp(1rem,2.5vw,1.25rem);color:var(--primary);line-height:1.7;font-weight:500;padding-left:20px;border-left:3px solid var(--gold);margin-top:20px;}
-    .ring-wrap{display:flex;align-items:center;justify-content:center;min-height:260px;}
+    .ring-wrap{display:flex;align-items:center;justify-content:center;min-height:240px;}
     @media(min-width:768px){.ring-wrap{min-height:320px;}}
     .ring-svg{width:100%;max-width:280px;height:auto;transform:rotate(-90deg);}
     .ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
@@ -163,15 +148,15 @@
     .al-bg{background:var(--card);}
     .al-item{display:flex;align-items:flex-start;gap:16px;padding:18px;border-radius:14px;transition:all .25s;}
     .al-item:hover{background:var(--primary-pale);transform:translateX(4px);}
-    .al-letter{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;flex-shrink:0;transition:transform .25s;}
+    .al-letter{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;flex-shrink:0;transition:transform .25s;}
     .al-item:hover .al-letter{transform:scale(1.08);}
     .al-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--primary);margin-bottom:3px;}
     .al-desc{font-size:13px;color:var(--muted);line-height:1.6;}
-    @media(max-width:400px){.al-letter{width:46px;height:46px;font-size:20px;}.al-item{gap:12px;padding:14px;}}
+    @media(max-width:380px){.al-letter{width:44px;height:44px;font-size:20px;border-radius:11px;}.al-item{gap:12px;padding:14px;}}
 
     /* ===== CARA BELAJAR ===== */
-    .bl-card{border-radius:18px;overflow:hidden;position:relative;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;transition:transform .3s;}
-    @media(min-width:640px){.bl-card{min-height:320px;}}
+    .bl-card{border-radius:18px;overflow:hidden;position:relative;min-height:260px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;transition:transform .3s;}
+    @media(min-width:640px){.bl-card{min-height:320px;padding:28px;}}
     .bl-card:hover{transform:translateY(-4px);}
     .bl-card::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.65) 100%);}
     .bl-card>*{position:relative;z-index:2;}
@@ -183,6 +168,16 @@
     .bl-example-icon{width:38px;height:38px;border-radius:10px;background:var(--gold);color:#1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
     .bl-example-label{font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;color:var(--gold-dark);margin-bottom:4px;}
     .bl-example-text{font-size:13px;color:var(--text);line-height:1.7;}
+
+    /* ===== GALERI FASILITAS ===== */
+    .gal-bg{background:var(--card);}
+    .gal-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:640px){.gal-grid{grid-template-columns:1fr 1fr;gap:16px;}}
+    .gal-item{position:relative;border-radius:16px;overflow:hidden;background:var(--cream-dark);aspect-ratio:4/3;}
+    .gal-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.22,1,.36,1);}
+    .gal-item:hover .gal-img{transform:scale(1.04);}
+    .gal-label{position:absolute;bottom:0;left:0;right:0;padding:36px 16px 14px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;pointer-events:none;line-height:1.4;}
+    .gal-label i{font-size:11px;color:var(--gold);flex-shrink:0;}
 
     /* ===== GURU ===== */
     .guru-bg{background:var(--cream-dark);}
@@ -209,15 +204,12 @@
 
     /* ===== JADWAL ===== */
     .jad-bg{background:var(--card);}
-    .jad-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:start;}
-    @media(min-width:768px){.jad-grid{grid-template-columns:1fr 1fr;}}
     .tl{position:relative;padding-left:28px;}
     .tl::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--primary),var(--gold),var(--primary));border-radius:1px;}
     .tl-item{position:relative;margin-bottom:28px;}.tl-item:last-child{margin-bottom:0;}
     .tl-dot{position:absolute;left:-28px;top:5px;width:20px;height:20px;border-radius:50%;background:var(--card);border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;z-index:1;}
     .tl-dot-in{width:6px;height:6px;border-radius:50%;background:var(--primary);}
     .tl-item:nth-child(even) .tl-dot{border-color:var(--gold);}.tl-item:nth-child(even) .tl-dot-in{background:var(--gold);}
-    .tl-time{font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;color:var(--primary);margin-bottom:3px;}
     .tl-title{font-weight:800;font-size:15px;color:var(--text);margin-bottom:3px;}
     .tl-desc{font-size:13px;color:var(--muted);line-height:1.6;}
 
@@ -228,27 +220,34 @@
     .ung-check{width:26px;height:26px;border-radius:7px;background:var(--primary-pale);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;margin-top:1px;}
     .ung-text{font-weight:700;font-size:14px;padding-top:2px;line-height:1.4;}
 
-    /* ===== TESTIMONI ===== */
-    .tes-bg{background:var(--card);}
-    .tes-card{padding:28px;border-radius:18px;background:var(--cream);border:1px solid var(--border);transition:all .3s;}
-    .tes-card:hover{transform:translateY(-4px);box-shadow:0 6px 24px rgba(11,61,46,.05);}
-    .tes-mark{font-family:'Fredoka',sans-serif;font-size:50px;font-weight:700;color:var(--gold);opacity:.2;line-height:1;margin-bottom:-12px;}
-    .tes-text{font-size:14px;line-height:1.8;color:var(--text);font-style:italic;margin-bottom:18px;}
-    .tes-author{display:flex;align-items:center;gap:12px;}
-    .tes-avatar{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
-    .tes-name{font-weight:800;font-size:13px;color:var(--primary);}
-    .tes-role{font-size:11px;color:var(--muted);}
-
     /* ===== LOKASI ===== */
     .lok-bg{background:var(--cream-dark);}
     .lok-card{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 20px rgba(11,61,46,.04);}
-    .lok-map{width:100%;height:220px;}@media(min-width:640px){.lok-map{height:280px;}}
-    .lok-map iframe{width:100%;height:100%;display:block;border:0;}
+    .lok-galeri{display:grid;grid-template-columns:1fr;gap:10px;}
+    @media(min-width:640px){.lok-galeri{grid-template-columns:1fr 1fr;gap:12px;}}
+    .lok-galeri-item{position:relative;overflow:hidden;background:var(--cream-dark);}
+    .lok-galeri-img{width:100%;height:180px;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.22,1,.36,1);}
+    @media(min-width:640px){.lok-galeri-img{height:220px;}}
+    .lok-galeri-item:hover .lok-galeri-img{transform:scale(1.04);}
+    .lok-galeri-label{position:absolute;bottom:0;left:0;right:0;padding:28px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;pointer-events:none;}
+
+    /* Peta link */
+    .lok-map-link{display:block;position:relative;height:200px;background:linear-gradient(135deg,#e8e4dc,#d6d0c6);overflow:hidden;transition:all .3s;text-decoration:none;}
+    @media(min-width:640px){.lok-map-link{height:240px;}}
+    .lok-map-link:hover{background:linear-gradient(135deg,#ddd8ce,#ccc6bb);}
+    .lok-map-link:hover .lok-map-arrow{transform:translate(-50%,-50%) scale(1.15);}
+    .lok-map-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;}
+    .lok-map-pin{width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(11,61,46,.25);transition:transform .3s;}
+    .lok-map-link:hover .lok-map-pin{transform:scale(1.08);}
+    .lok-map-text{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--primary);text-align:center;}
+    .lok-map-sub{font-size:12px;color:var(--muted);text-align:center;}
+    .lok-map-arrow{position:absolute;bottom:16px;right:16px;width:36px;height:36px;border-radius:50%;background:var(--gold);color:#1A1A1A;display:flex;align-items:center;justify-content:center;font-size:14px;transform:translate(-50%,-50%) scale(1);transition:transform .3s;box-shadow:0 2px 10px rgba(212,160,23,.3);}
+
     .lok-info{padding:24px;}
-    @media(min-width:640px){.lok-info{padding:32px;}}
+    @media(min-width:640px){.lok-info{padding:28px 32px;}}
     .lok-info-inner{display:flex;align-items:flex-start;gap:16px;}
-    .lok-icon{width:48px;height:48px;border-radius:13px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
-    .lok-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;color:var(--primary);margin-bottom:4px;}
+    .lok-icon{width:46px;height:46px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+    .lok-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--primary);margin-bottom:4px;}
     .lok-addr{color:var(--muted);font-size:13px;line-height:1.7;}
 
     /* ===== CTA ===== */
@@ -280,46 +279,43 @@
     .footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.05);text-align:center;}
     .footer-copy{font-size:11px;color:rgba(255,255,255,.25);}
 
-    /* ===== ANIMATIONS ===== */
-    @keyframes pr{0%{transform:scale(1);opacity:.4;}100%{transform:scale(1.5);opacity:0;}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
+  <!-- ===== NAVBAR ===== -->
   <nav class="navbar" id="navbar">
     <div class="nav-inner">
       <a href="#hero" class="nav-brand">
         <div class="nav-brand-icon"><i class="fa-solid fa-atom"></i></div>
         <span class="nav-brand-text">Atomic School</span>
       </a>
-      <div class="nav-links" id="navLinks">
+      <div class="nav-links">
         <a href="#masalah" class="nav-link">Masalah</a>
         <a href="#solusi" class="nav-link">Solusi</a>
         <a href="#metode" class="nav-link">Metode</a>
+        <a href="#galeri" class="nav-link">Fasilitas</a>
         <a href="#program" class="nav-link">Program</a>
-        <a href="#jadwal" class="nav-link">Jadwal</a>
         <a href="#daftar" class="nav-cta">Daftar Sekarang</a>
       </div>
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Buka menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Buka menu"><i class="fa-solid fa-bars"></i></button>
     </div>
   </nav>
 
-  <!-- MOBILE MENU OVERLAY -->
+  <!-- ===== MOBILE MENU ===== -->
   <div class="mobile-menu" id="mobileMenu">
     <button class="mobile-close" id="mobileClose" aria-label="Tutup menu"><i class="fa-solid fa-xmark"></i></button>
     <a href="#masalah" class="mm-link">Masalah</a>
     <a href="#solusi" class="mm-link">Solusi</a>
     <a href="#metode" class="mm-link">Metode A.L.A.M.I</a>
-    <a href="#program" class="mm-link">Program</a>
-    <a href="#jadwal" class="mm-link">Jadwal</a>
+    <a href="#galeri" class="mm-link">Fasilitas</a>
+    <a href="#program" class="mm-link">Program Unggulan</a>
     <a href="#lokasi" class="mm-link">Lokasi</a>
-    <a href="#daftar" class="nav-cta mm-link">Daftar Sekarang</a>
+    <a href="#daftar" class="m-cta mm-link">Daftar Sekarang</a>
   </div>
 
-  <!-- HERO -->
+  <!-- ===== HERO ===== -->
   <section class="hero" id="hero">
     <div class="hero-atom ha1"></div>
     <div class="hero-atom ha2"></div>
@@ -358,43 +354,25 @@
     </div>
   </section>
 
-  <!-- MASALAH -->
+  <!-- ===== MASALAH ===== -->
   <section class="sec" id="masalah">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
         <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Masalah Umum</div>
         <h2 class="sec-title rv d1">Apakah Anda Mengalami Ini?</h2>
       </div>
-      <div class="g1 g2 g3" style="max-width:860px;margin:0 auto;">
-        <div class="prob-card rv d1">
-          <div class="prob-icon"><i class="fa-solid fa-face-frown-open"></i></div>
-          <div class="prob-text">Anak cepat bosan belajar</div>
-        </div>
-        <div class="prob-card rv d2">
-          <div class="prob-icon"><i class="fa-solid fa-chart-line"></i></div>
-          <div class="prob-text">Fokus hanya nilai, bukan karakter</div>
-        </div>
-        <div class="prob-card rv d3">
-          <div class="prob-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-          <div class="prob-text">Ketergantungan gadget tanpa arah</div>
-        </div>
-        <div class="prob-card rv d1">
-          <div class="prob-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
-          <div class="prob-text">Kurang mandiri dan disiplin</div>
-        </div>
-        <div class="prob-card rv d2">
-          <div class="prob-icon"><i class="fa-solid fa-compass"></i></div>
-          <div class="prob-text">Tidak tahu potensi dirinya</div>
-        </div>
-        <div class="prob-card sol rv d3">
-          <div class="prob-icon"><i class="fa-solid fa-lightbulb"></i></div>
-          <div class="prob-text">Atomic School hadir sebagai solusi</div>
-        </div>
+      <div class="g3" style="max-width:860px;margin:0 auto;">
+        <div class="prob-card rv d1"><div class="prob-icon"><i class="fa-solid fa-face-frown-open"></i></div><div class="prob-text">Anak cepat bosan belajar</div></div>
+        <div class="prob-card rv d2"><div class="prob-icon"><i class="fa-solid fa-chart-line"></i></div><div class="prob-text">Fokus hanya nilai, bukan karakter</div></div>
+        <div class="prob-card rv d3"><div class="prob-icon"><i class="fa-solid fa-mobile-screen"></i></div><div class="prob-text">Ketergantungan gadget tanpa arah</div></div>
+        <div class="prob-card rv d1"><div class="prob-icon"><i class="fa-solid fa-hand-holding-heart"></i></div><div class="prob-text">Kurang mandiri dan disiplin</div></div>
+        <div class="prob-card rv d2"><div class="prob-icon"><i class="fa-solid fa-compass"></i></div><div class="prob-text">Tidak tahu potensi dirinya</div></div>
+        <div class="prob-card sol rv d3"><div class="prob-icon"><i class="fa-solid fa-lightbulb"></i></div><div class="prob-text">Atomic School hadir sebagai solusi</div></div>
       </div>
     </div>
   </section>
 
-  <!-- SOLUSI -->
+  <!-- ===== SOLUSI ===== -->
   <section class="sec sol-bg" id="solusi">
     <div class="sec-inner" style="position:relative;z-index:1;">
       <div style="max-width:480px;margin-bottom:40px;">
@@ -402,35 +380,19 @@
         <h2 class="sec-title rv d1">Pendidikan Masa Depan Berbasis Karakter & Sistem</h2>
         <p class="sec-desc rv d2">Di Atomic School, kami tidak hanya mengajar. Kami membangun <strong style="color:#fff;">SISTEM KEBIASAAN ANAK</strong> yang membentuk mereka secara holistik.</p>
       </div>
-      <div class="g1 g2 g4">
-        <div class="sol-card rv d1">
-          <div class="sol-icon"><i class="fa-solid fa-repeat"></i></div>
-          <div class="sol-title">Habit-Based Learning</div>
-          <div class="sol-desc">Belajar berbasis kebiasaan (Atomic Habits) yang terukur dan konsisten setiap hari</div>
-        </div>
-        <div class="sol-card rv d2">
-          <div class="sol-icon"><i class="fa-solid fa-tree"></i></div>
-          <div class="sol-title">Alam + STEM + Digital</div>
-          <div class="sol-desc">Integrasi tiga pilar: sekolah alam, sains terapan, dan literasi digital</div>
-        </div>
-        <div class="sol-card rv d3">
-          <div class="sol-icon"><i class="fa-solid fa-star"></i></div>
-          <div class="sol-title">Akhlak & Kemandirian</div>
-          <div class="sol-desc">Fokus utama pada pembentukan karakter dan kemandirian anak</div>
-        </div>
-        <div class="sol-card rv d4">
-          <div class="sol-icon"><i class="fa-solid fa-flask-vial"></i></div>
-          <div class="sol-title">Active & Real Experience</div>
-          <div class="sol-desc">Pembelajaran aktif berbasis pengalaman nyata, bukan sekadar mendengar</div>
-        </div>
+      <div class="g4">
+        <div class="sol-card rv d1"><div class="sol-icon"><i class="fa-solid fa-repeat"></i></div><div class="sol-title">Habit-Based Learning</div><div class="sol-desc">Belajar berbasis kebiasaan (Atomic Habits) yang terukur dan konsisten setiap hari</div></div>
+        <div class="sol-card rv d2"><div class="sol-icon"><i class="fa-solid fa-tree"></i></div><div class="sol-title">Alam + STEM + Digital</div><div class="sol-desc">Integrasi tiga pilar: sekolah alam, sains terapan, dan literasi digital</div></div>
+        <div class="sol-card rv d3"><div class="sol-icon"><i class="fa-solid fa-star"></i></div><div class="sol-title">Akhlak & Kemandirian</div><div class="sol-desc">Fokus utama pada pembentukan karakter dan kemandirian anak</div></div>
+        <div class="sol-card rv d4"><div class="sol-icon"><i class="fa-solid fa-flask-vial"></i></div><div class="sol-title">Active & Real Experience</div><div class="sol-desc">Pembelajaran aktif berbasis pengalaman nyata, bukan sekadar mendengar</div></div>
       </div>
     </div>
   </section>
 
-  <!-- FILOSOFI -->
+  <!-- ===== FILOSOFI ===== -->
   <section class="sec filo-bg" id="filosofi">
     <div class="sec-inner">
-      <div class="filo-grid">
+      <div class="split" style="align-items:center;">
         <div>
           <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Filosofi Kami</div>
           <div class="filo-num rv d1">1%</div>
@@ -460,7 +422,7 @@
     </div>
   </section>
 
-  <!-- METODE A.L.A.M.I -->
+  <!-- ===== METODE A.L.A.M.I ===== -->
   <section class="sec al-bg" id="metode">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
@@ -469,38 +431,23 @@
         <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Metode pembelajaran unggulan yang dirancang untuk membentuk anak secara menyeluruh.</p>
       </div>
       <div style="max-width:600px;margin:0 auto;">
-        <div class="al-item rv d1">
-          <div class="al-letter" style="background:#FEF2F2;color:#DC2626;">A</div>
-          <div><div class="al-title">Akhlaqul Karimah</div><div class="al-desc">Pembentukan karakter & adab sebagai fondasi utama setiap aktivitas</div></div>
-        </div>
-        <div class="al-item rv d2">
-          <div class="al-letter" style="background:#EFF6FF;color:#2563EB;">L</div>
-          <div><div class="al-title">Literacy & Logic</div><div class="al-desc">Kemampuan dasar membaca, menulis, dan berpikir logis</div></div>
-        </div>
-        <div class="al-item rv d3">
-          <div class="al-letter" style="background:var(--primary-pale);color:var(--primary);">A</div>
-          <div><div class="al-title">Active Discovery</div><div class="al-desc">Belajar aktif melalui eksplorasi sesuai minat dan bakat</div></div>
-        </div>
-        <div class="al-item rv d4">
-          <div class="al-letter" style="background:var(--gold-light);color:var(--gold-dark);">M</div>
-          <div><div class="al-title">Master of STEM</div><div class="al-desc">Sains & teknologi berbasis praktik dan eksperimen nyata</div></div>
-        </div>
-        <div class="al-item rv">
-          <div class="al-letter" style="background:#F3E8FF;color:#9333EA;">I</div>
-          <div><div class="al-title">Inovasi Berkelanjutan</div><div class="al-desc">Menciptakan solusi kreatif dan pola pikir inovatif sejak dini</div></div>
-        </div>
+        <div class="al-item rv d1"><div class="al-letter" style="background:#FEF2F2;color:#DC2626;">A</div><div><div class="al-title">Akhlaqul Karimah</div><div class="al-desc">Pembentukan karakter & adab sebagai fondasi utama setiap aktivitas</div></div></div>
+        <div class="al-item rv d2"><div class="al-letter" style="background:#EFF6FF;color:#2563EB;">L</div><div><div class="al-title">Literacy & Logic</div><div class="al-desc">Kemampuan dasar membaca, menulis, dan berpikir logis</div></div></div>
+        <div class="al-item rv d3"><div class="al-letter" style="background:var(--primary-pale);color:var(--primary);">A</div><div><div class="al-title">Active Discovery</div><div class="al-desc">Belajar aktif melalui eksplorasi sesuai minat dan bakat</div></div></div>
+        <div class="al-item rv d4"><div class="al-letter" style="background:var(--gold-light);color:var(--gold-dark);">M</div><div><div class="al-title">Master of STEM</div><div class="al-desc">Sains & teknologi berbasis praktik dan eksperimen nyata</div></div></div>
+        <div class="al-item rv"><div class="al-letter" style="background:#F3E8FF;color:#9333EA;">I</div><div><div class="al-title">Inovasi Berkelanjutan</div><div class="al-desc">Menciptakan solusi kreatif dan pola pikir inovatif sejak dini</div></div></div>
       </div>
     </div>
   </section>
 
-  <!-- CARA BELAJAR -->
+  <!-- ===== CARA BELAJAR ===== -->
   <section class="sec" id="belajar" style="background:var(--cream);">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
         <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Cara Belajar</div>
         <h2 class="sec-title rv d1">Belajar Tidak Hanya di Kelas</h2>
       </div>
-      <div class="g2" style="gap:16px;margin-bottom:24px;">
+      <div class="g2" style="gap:14px;margin-bottom:24px;">
         <div class="bl-card rv d1" style="background:linear-gradient(135deg,#0B3D2E,#0D4A38);">
           <div class="bl-tag"><i class="fa-solid fa-laptop-code" style="margin-right:4px;"></i> Indoor</div>
           <div class="bl-title">Digital Mastery</div>
@@ -524,7 +471,59 @@
     </div>
   </section>
 
-  <!-- PERAN GURU -->
+  <!-- ===== GALERI FASILITAS (4 FOTO) ===== -->
+  <section class="sec gal-bg" id="galeri">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Fasilitas & Kegiatan</div>
+        <h2 class="sec-title rv d1">Lihat Langsung Suasana Belajar Kami</h2>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- GANTI ke-4 src DI BAWAH DENGAN URL FOTO ASLI  -->
+      <!-- ============================================== -->
+      <div class="gal-grid" style="max-width:860px;margin:0 auto;">
+        <div class="gal-item rv d1">
+          <img
+            src="https://i.imgur.com/uTjoSWY.jpeg"
+            alt="Ruang kelas Atomic School"
+            class="gal-img"
+            loading="lazy"
+          >
+          <div class="gal-label"><i class="fa-solid fa-chalkboard-user"></i> Ruang Kelas</div>
+        </div>
+        <div class="gal-item rv d2">
+          <img
+            src="https://i.imgur.com/eHuAaRa.jpeg"
+            alt="Koridor kelas Atomic School"
+            class="gal-img"
+            loading="lazy"
+          >
+          <div class="gal-label"><i class="fa-solid fa-door-open"></i> Koridor Kelas</div>
+        </div>
+        <div class="gal-item rv d3">
+          <img
+            src="https://i.imgur.com/ipJCjcL.jpeg"
+            alt="Anak menggunakan papan digital interaktif"
+            class="gal-img"
+            loading="lazy"
+          >
+          <div class="gal-label"><i class="fa-solid fa-display"></i> Papan Digital Interaktif</div>
+        </div>
+        <div class="gal-item rv d4">
+          <img
+            src="https://i.imgur.com/Nrz9Ozc.jpeg"
+            alt="Anak memainkan robotic lego"
+            class="gal-img"
+            loading="lazy"
+          >
+          <div class="gal-label"><i class="fa-solid fa-robot"></i> Robotic Lego</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PERAN GURU ===== -->
   <section class="sec guru-bg" id="guru">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
@@ -532,65 +531,38 @@
         <h2 class="sec-title rv d1">Guru Bukan Hanya Pengajar</h2>
         <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Tiga peran penting guru di Atomic School yang berbeda dari sekolah konvensional.</p>
       </div>
-      <div class="g1 g3" style="max-width:720px;margin:0 auto;">
-        <div class="guru-card rv d1">
-          <div class="guru-icon"><i class="fa-solid fa-fire"></i></div>
-          <div class="guru-role">Motivator</div>
-          <div class="guru-desc">Menjaga semangat belajar anak agar tetap menyala</div>
-        </div>
-        <div class="guru-card rv d2">
-          <div class="guru-icon"><i class="fa-solid fa-eye"></i></div>
-          <div class="guru-role">Observer</div>
-          <div class="guru-desc">Mengamati perkembangan karakter & potensi unik anak</div>
-        </div>
-        <div class="guru-card rv d3">
-          <div class="guru-icon"><i class="fa-solid fa-link"></i></div>
-          <div class="guru-role">Konektor</div>
-          <div class="guru-desc">Menghubungkan teori pembelajaran dengan kehidupan nyata</div>
-        </div>
+      <div class="g3" style="max-width:720px;margin:0 auto;">
+        <div class="guru-card rv d1"><div class="guru-icon"><i class="fa-solid fa-fire"></i></div><div class="guru-role">Motivator</div><div class="guru-desc">Menjaga semangat belajar anak agar tetap menyala</div></div>
+        <div class="guru-card rv d2"><div class="guru-icon"><i class="fa-solid fa-eye"></i></div><div class="guru-role">Observer</div><div class="guru-desc">Mengamati perkembangan karakter & potensi unik anak</div></div>
+        <div class="guru-card rv d3"><div class="guru-icon"><i class="fa-solid fa-link"></i></div><div class="guru-role">Konektor</div><div class="guru-desc">Menghubungkan teori pembelajaran dengan kehidupan nyata</div></div>
       </div>
     </div>
   </section>
 
-  <!-- GURU TAMU -->
+  <!-- ===== GURU TAMU ===== -->
   <section class="sec tamu-bg" id="program">
     <div class="sec-inner" style="position:relative;z-index:1;">
-      <div class="jad-grid">
+      <div class="split">
         <div>
           <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Program Unggulan</div>
           <h2 class="sec-title rv d1">Guru Tamu Profesional</h2>
           <p class="sec-desc rv d2" style="margin-bottom:24px;">Anak belajar langsung dari praktisi nyata — mendengar cerita, melihat keterampilan, dan terinspirasi dari yang menjalani profesi tersebut.</p>
-          <div class="tamu-badge rv d3">
-            <i class="fa-solid fa-graduation-cap"></i>
-            <span>Life Skill & Dunia Nyata</span>
-          </div>
+          <div class="tamu-badge rv d3"><i class="fa-solid fa-graduation-cap"></i><span>Life Skill & Dunia Nyata</span></div>
         </div>
         <div class="tamu-grid">
-          <div class="tamu-item rv d1">
-            <div class="tamu-icon"><i class="fa-solid fa-wheat-awn"></i></div>
-            <div class="tamu-text">Petani Modern</div>
-          </div>
-          <div class="tamu-item rv d2">
-            <div class="tamu-icon"><i class="fa-solid fa-briefcase"></i></div>
-            <div class="tamu-text">Pengusaha</div>
-          </div>
-          <div class="tamu-item rv d3">
-            <div class="tamu-icon"><i class="fa-solid fa-gear"></i></div>
-            <div class="tamu-text">Insinyur</div>
-          </div>
-          <div class="tamu-item rv d4">
-            <div class="tamu-icon"><i class="fa-solid fa-user-tie"></i></div>
-            <div class="tamu-text">Orang Tua Ahli</div>
-          </div>
+          <div class="tamu-item rv d1"><div class="tamu-icon"><i class="fa-solid fa-wheat-awn"></i></div><div class="tamu-text">Petani Modern</div></div>
+          <div class="tamu-item rv d2"><div class="tamu-icon"><i class="fa-solid fa-briefcase"></i></div><div class="tamu-text">Pengusaha</div></div>
+          <div class="tamu-item rv d3"><div class="tamu-icon"><i class="fa-solid fa-gear"></i></div><div class="tamu-text">Praktisi</div></div>
+          <div class="tamu-item rv d4"><div class="tamu-icon"><i class="fa-solid fa-user-tie"></i></div><div class="tamu-text">Orang Tua Ahli</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- JADWAL HARIAN -->
+  <!-- ===== JADWAL HARIAN (tanpa waktu) ===== -->
   <section class="sec jad-bg" id="jadwal">
     <div class="sec-inner">
-      <div class="jad-grid">
+      <div class="split">
         <div>
           <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Rutinitas Harian</div>
           <h2 class="sec-title rv d1">Jadwal Sehari di Atomic School</h2>
@@ -600,25 +572,21 @@
           <div class="tl">
             <div class="tl-item rv d1">
               <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-time">07.30</div>
               <div class="tl-title">Circle of Faith</div>
               <div class="tl-desc">Doa bersama, pembentukan karakter pagi, dan motivasi memulai hari</div>
             </div>
             <div class="tl-item rv d2">
               <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-time">08.15</div>
               <div class="tl-title">Digital Mastery</div>
               <div class="tl-desc">Belajar akademik mandiri dengan bimbingan platform digital terpilih</div>
             </div>
             <div class="tl-item rv d3">
               <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-time">10.00</div>
               <div class="tl-title">Nature STEM</div>
               <div class="tl-desc">Eksplorasi alam, eksperimen sains, dan belajar dari lingkungan sekitar</div>
             </div>
             <div class="tl-item rv d4">
               <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-time">12.30</div>
               <div class="tl-title">Discovery</div>
               <div class="tl-desc">Pengembangan minat bakat, sesi guru tamu, dan proyek kreatif</div>
             </div>
@@ -628,71 +596,25 @@
     </div>
   </section>
 
-  <!-- KEUNGGULAN -->
+  <!-- ===== KEUNGGULAN ===== -->
   <section class="sec ung-bg" id="keunggulan">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
         <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Keunggulan</div>
         <h2 class="sec-title rv d1">Kenapa Harus Atomic School?</h2>
       </div>
-      <div class="g1 g2 g3" style="max-width:860px;margin:0 auto;">
-        <div class="ung-card rv d1">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Sekolah Alam + Teknologi dalam satu ekosistem</div>
-        </div>
-        <div class="ung-card rv d2">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Fokus Karakter & Kemandirian anak</div>
-        </div>
-        <div class="ung-card rv d3">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Sistem kebiasaan, bukan sekadar kurikulum</div>
-        </div>
-        <div class="ung-card rv d1">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Belajar aktif, menyenangkan, dan bermakna</div>
-        </div>
-        <div class="ung-card rv d2">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Membentuk anak siap menghadapi masa depan</div>
-        </div>
-        <div class="ung-card rv d3">
-          <div class="ung-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ung-text">Lingkungan belajar aman dan kondusif</div>
-        </div>
+      <div class="g3" style="max-width:860px;margin:0 auto;">
+        <div class="ung-card rv d1"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Sekolah Alam + Teknologi dalam satu ekosistem</div></div>
+        <div class="ung-card rv d2"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Fokus Karakter & Kemandirian anak</div></div>
+        <div class="ung-card rv d3"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Sistem kebiasaan, bukan sekadar kurikulum</div></div>
+        <div class="ung-card rv d1"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Belajar aktif, menyenangkan, dan bermakna</div></div>
+        <div class="ung-card rv d2"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Membentuk anak siap menghadapi masa depan</div></div>
+        <div class="ung-card rv d3"><div class="ung-check"><i class="fa-solid fa-check"></i></div><div class="ung-text">Lingkungan belajar aman dan kondusif</div></div>
       </div>
     </div>
   </section>
 
-  <!-- TESTIMONI -->
-  <section class="sec tes-bg" id="testimoni">
-    <div class="sec-inner">
-      <div style="text-align:center;margin-bottom:36px;">
-        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Testimoni</div>
-        <h2 class="sec-title rv d1">Kata Mereka tentang Atomic School</h2>
-      </div>
-      <div class="g1 g2" style="max-width:760px;margin:0 auto;">
-        <div class="tes-card rv d1">
-          <div class="tes-mark">"</div>
-          <div class="tes-text">Anak saya jadi lebih mandiri dan semangat belajar. Dulu susah bangun pagi, sekarang sudah otomatis. Perubahan kecil yang luar biasa.</div>
-          <div class="tes-author">
-            <div class="tes-avatar" style="background:var(--primary);">S</div>
-            <div><div class="tes-name">Ibu Siti Nurhaliza</div><div class="tes-role">Orang Tua Murid</div></div>
-          </div>
-        </div>
-        <div class="tes-card rv d2">
-          <div class="tes-mark">"</div>
-          <div class="tes-text">Belajarnya beda banget. Anak jadi suka eksplorasi dan selalu cerita tentang apa yang dipelajari di sekolah. Kami sangat bersyukur.</div>
-          <div class="tes-author">
-            <div class="tes-avatar" style="background:var(--gold);">A</div>
-            <div><div class="tes-name">Bapak Ahmad Ramadhani</div><div class="tes-role">Wali Murid</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LOKASI -->
+  <!-- ===== LOKASI (2 foto + peta link) ===== -->
   <section class="sec lok-bg" id="lokasi">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
@@ -700,12 +622,33 @@
         <h2 class="sec-title rv d1">Temukan Kami</h2>
       </div>
       <div class="lok-card rv d2" style="max-width:760px;margin:0 auto;">
-        <div class="lok-map">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63347.99344955687!2d107.85!3d-7.2!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68b1234567890%3A0xabcdef1234567890!2sWanaraja%2C%20Garut%20Regency%2C%20West%20Java!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Lokasi Atomic School"></iframe>
-        </div>
+
+        <!-- ============================================ -->
+        <!-- GANTI 2 src DI BAWAH DENGAN FOTO LOKASI ASLI -->
+        <!-- ============================================ -->
+        <div class="lok-galeri">
+          <div class="lok-galeri-item">
+            <img
+              src="https://i.imgur.com/kUmbCAS.jpeg"
+              alt="Tampak depan gedung Atomic School"
+              class="lok-galeri-img"
+              loading="lazy"
+            >
+            <div class="lok-galeri-label"><i class="fa-solid fa-school"></i> Tampak Depan Sekolah</div>
+          </div>
+        <!-- Peta: klik untuk buka Google Maps -->
+        <a href="https://maps.app.goo.gl/gh4GFEdrgRyoNkkm7" target="_blank" rel="noopener noreferrer" class="lok-map-link">
+          <div class="lok-map-inner">
+            <div class="lok-map-pin"><i class="fa-solid fa-location-dot"></i></div>
+            <div class="lok-map-text">Lihat Lokasi di Google Maps</div>
+            <div class="lok-map-sub">Jl. Cinunuk, Wanaraja, Garut</div>
+          </div>
+          <div class="lok-map-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+        </a>
+
         <div class="lok-info">
           <div class="lok-info-inner">
-            <div class="lok-icon"><i class="fa-solid fa-school"></i></div>
+            <div class="lok-icon"><i class="fa-solid fa-location-dot"></i></div>
             <div>
               <div class="lok-name">Atomic School</div>
               <div class="lok-addr">Jl. Cinunuk, Desa Wanaraja<br>Kec. Wanaraja, Kab. Garut<br>Jawa Barat, Indonesia</div>
@@ -716,7 +659,7 @@
     </div>
   </section>
 
-  <!-- CTA -->
+  <!-- ===== CTA ===== -->
   <section class="sec cta-bg" id="daftar" style="padding-bottom:80px;">
     <div class="sec-inner" style="position:relative;z-index:1;text-align:center;">
       <div class="rv" style="margin-bottom:20px;">
@@ -739,13 +682,13 @@
         </a>
       </div>
       <div class="cta-contacts rv d4">
-        <a href="tel:+6285793715450" class="cta-contact"><i class="fa-solid fa-phone"></i> 085793715450/a>
+        <a href="tel:+628xxxxxxxxxx" class="cta-contact"><i class="fa-solid fa-phone"></i> 085793715450</a>
         <a href="mailto:info@atomicschool.id" class="cta-contact"><i class="fa-solid fa-envelope"></i> info@atomicschool.id</a>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- ===== FOOTER ===== -->
   <footer class="footer">
     <div class="sec-inner">
       <div class="footer-grid">
@@ -761,8 +704,8 @@
           <a href="#masalah" class="footer-link">Masalah</a>
           <a href="#solusi" class="footer-link">Solusi</a>
           <a href="#metode" class="footer-link">Metode A.L.A.M.I</a>
+          <a href="#galeri" class="footer-link">Fasilitas</a>
           <a href="#program" class="footer-link">Program Unggulan</a>
-          <a href="#jadwal" class="footer-link">Jadwal Harian</a>
           <a href="#daftar" class="footer-link">Pendaftaran</a>
         </div>
         <div>
@@ -785,86 +728,41 @@
   </footer>
 
   <script>
-    /* ===== NAVBAR SCROLL ===== */
     var nb=document.getElementById("navbar");
-    var lastScroll=0;
     window.addEventListener("scroll",function(){
-      var st=window.pageYOffset;
-      if(st>50){nb.classList.add("scrolled");}else{nb.classList.remove("scrolled");}
-      lastScroll=st;
+      if(window.pageYOffset>50){nb.classList.add("scrolled");}else{nb.classList.remove("scrolled");}
     },{passive:true});
 
-    /* ===== MOBILE MENU ===== */
-    var mm=document.getElementById("mobileMenu");
-    var mt=document.getElementById("mobileToggle");
-    var mc=document.getElementById("mobileClose");
+    var mm=document.getElementById("mobileMenu"),mt=document.getElementById("mobileToggle"),mc=document.getElementById("mobileClose");
     function openMenu(){mm.classList.add("open");document.body.style.overflow="hidden";}
     function closeMenu(){mm.classList.remove("open");document.body.style.overflow="";}
-    mt.addEventListener("click",openMenu);
-    mc.addEventListener("click",closeMenu);
-    // Tutup saat klik link
-    mm.querySelectorAll("a").forEach(function(a){
-      a.addEventListener("click",closeMenu);
-    });
-    // Tutup dengan Escape
-    document.addEventListener("keydown",function(e){
-      if(e.key==="Escape"&&mm.classList.contains("open"))closeMenu();
-    });
+    mt.addEventListener("click",openMenu);mc.addEventListener("click",closeMenu);
+    mm.querySelectorAll("a").forEach(function(a){a.addEventListener("click",closeMenu);});
+    document.addEventListener("keydown",function(e){if(e.key==="Escape"&&mm.classList.contains("open"))closeMenu();});
 
-    /* ===== SCROLL REVEAL ===== */
     var rvEls=document.querySelectorAll(".rv");
     var rvObs=new IntersectionObserver(function(entries){
-      entries.forEach(function(en){
-        if(en.isIntersecting){en.target.classList.add("vis");rvObs.unobserve(en.target);}
-      });
+      entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add("vis");rvObs.unobserve(en.target);}});
     },{threshold:0.06,rootMargin:"0px 0px -30px 0px"});
     rvEls.forEach(function(el){rvObs.observe(el);});
 
-    /* ===== RING ANIMATION ===== */
-    var ringDone=false;
-    var filoEl=document.getElementById("filosofi");
+    var ringDone=false,filoEl=document.getElementById("filosofi");
     var ringObs=new IntersectionObserver(function(entries){
       if(entries[0].isIntersecting&&!ringDone){
         ringDone=true;
-        var r1=document.querySelector(".r1");
-        var r2=document.querySelector(".r2");
-        var r3=document.querySelector(".r3");
-        if(r1)r1.style.strokeDashoffset="746";
-        if(r2)r2.style.strokeDashoffset="591";
-        if(r3)r3.style.strokeDashoffset="436";
+        var r1=document.querySelector(".r1"),r2=document.querySelector(".r2"),r3=document.querySelector(".r3");
+        if(r1)r1.style.strokeDashoffset="746";if(r2)r2.style.strokeDashoffset="591";if(r3)r3.style.strokeDashoffset="436";
       }
     },{threshold:0.25});
     if(filoEl)ringObs.observe(filoEl);
 
-    /* ===== HERO PARTICLES ===== */
     var pc=document.getElementById("heroParticles");
-    if(pc){
-      for(var i=0;i<16;i++){
-        var p=document.createElement("div");
-        p.className="hero-particle";
-        var sz=Math.random()*3+1.5;
-        p.style.width=sz+"px";p.style.height=sz+"px";
-        p.style.background=Math.random()>.6?"rgba(212,160,23,0.35)":"rgba(255,255,255,0.12)";
-        p.style.left=Math.random()*100+"%";
-        p.style.top=(55+Math.random()*45)+"%";
-        p.style.animationDuration=(10+Math.random()*14)+"s";
-        p.style.animationDelay=(Math.random()*12)+"s";
-        pc.appendChild(p);
-      }
-    }
+    if(pc){for(var i=0;i<14;i++){var p=document.createElement("div");p.className="hero-particle";var sz=Math.random()*3+1.5;p.style.width=sz+"px";p.style.height=sz+"px";p.style.background=Math.random()>.6?"rgba(212,160,23,0.35)":"rgba(255,255,255,0.12)";p.style.left=Math.random()*100+"%";p.style.top=(55+Math.random()*45)+"%";p.style.animationDuration=(10+Math.random()*14)+"s";p.style.animationDelay=(Math.random()*12)+"s";pc.appendChild(p);}}
 
-    /* ===== SMOOTH SCROLL ===== */
     document.querySelectorAll('a[href^="#"]').forEach(function(a){
       a.addEventListener("click",function(e){
-        var t=this.getAttribute("href");
-        if(t==="#")return;
-        var el=document.querySelector(t);
-        if(el){
-          e.preventDefault();
-          var off=70;
-          var top=el.getBoundingClientRect().top+window.pageYOffset-off;
-          window.scrollTo({top:top,behavior:"smooth"});
-        }
+        var t=this.getAttribute("href");if(t==="#")return;
+        var el=document.querySelector(t);if(el){e.preventDefault();window.scrollTo({top:el.getBoundingClientRect().top+window.pageYOffset-68,behavior:"smooth"});}
       });
     });
   </script>
