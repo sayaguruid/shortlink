@@ -129,8 +129,7 @@
     .sol-bg .sec-label{color:var(--gold);}.sol-bg .sec-title{color:#fff;}.sol-bg .sec-desc{color:rgba(255,255,255,.55);}
     .sol-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;transition:all .3s;position:relative;overflow:hidden;}
     .sol-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity .3s;}
-    .sol-card:hover{background:rgba(255,255,255,.09);transform:translateY(-4px);}
-    .sol-card:hover::before{opacity:1;}
+    .sol-card:hover{background:rgba(255,255,255,.09);transform:translateY(-4px);}.sol-card:hover::before{opacity:1;}
     .sol-icon{width:44px;height:44px;border-radius:11px;background:rgba(212,160,23,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
     .sol-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:#fff;margin-bottom:6px;}
     .sol-desc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.5);}
@@ -202,8 +201,41 @@
     .tamu-badge i{color:var(--gold);font-size:18px;}
     .tamu-badge span{color:rgba(255,255,255,.75);font-weight:700;font-size:13px;}
 
+    /* ===== KEMITRAAN ORANG TUA ===== */
+    .mitra-bg{background:linear-gradient(180deg,var(--cream),var(--cream-dark));}
+    .mitra-quote{font-family:'Fredoka',sans-serif;font-size:clamp(.95rem,2.5vw,1.15rem);color:var(--primary);line-height:1.7;font-weight:500;padding:20px 24px;background:var(--card);border-left:4px solid var(--gold);border-radius:0 14px 14px 0;box-shadow:0 2px 16px rgba(11,61,46,.05);margin-bottom:32px;}
+    .mitra-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+    @media(min-width:640px){.mitra-grid{grid-template-columns:repeat(3,1fr);}}
+    .mitra-card{padding:28px 22px;border-radius:18px;background:var(--card);border:1px solid var(--border);transition:all .3s;position:relative;overflow:hidden;}
+    .mitra-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--gold));transform:scaleX(0);transition:transform .3s;transform-origin:left;}
+    .mitra-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(11,61,46,.07);}.mitra-card:hover::after{transform:scaleX(1);}
+    .mitra-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:36px;color:var(--primary);opacity:.1;line-height:1;margin-bottom:-8px;}
+    .mitra-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:16px;}
+    .mitra-card-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;color:var(--primary);margin-bottom:8px;line-height:1.3;}
+    .mitra-card-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+
+    /* ===== PILAR TUMBUH KEMBANG ===== */
+    .pilar-bg{background:var(--card);}
+    .pilar-group{margin-bottom:28px;}.pilar-group:last-child{margin-bottom:0;}
+    .pilar-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid var(--border);}
+    .pilar-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;white-space:nowrap;}
+    .pilar-badge-1{background:var(--primary-pale);color:var(--primary);}
+    .pilar-badge-2{background:#FEF3C7;color:#92400E;}
+    .pilar-badge-3{background:#FCE7F3;color:#9D174D;}
+    .pilar-badge i{font-size:14px;}
+    .pilar-members{display:grid;grid-template-columns:1fr;gap:10px;}
+    @media(min-width:640px){.pilar-members{grid-template-columns:1fr 1fr;}}
+    .pilar-member{display:flex;align-items:flex-start;gap:14px;padding:18px;border-radius:14px;background:var(--cream);border:1px solid var(--border);transition:all .25s;}
+    .pilar-member:hover{border-color:var(--primary-mid);box-shadow:0 2px 12px rgba(11,61,46,.04);transform:translateY(-2px);}
+    .pilar-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+    .pilar-avatar-1{background:var(--primary);}
+    .pilar-avatar-2{background:var(--gold-dark);}
+    .pilar-avatar-3{background:#DB2777;}
+    .pilar-name{font-weight:800;font-size:13px;color:var(--text);margin-bottom:2px;}
+    .pilar-role-text{font-size:12px;color:var(--muted);line-height:1.5;}
+
     /* ===== JADWAL ===== */
-    .jad-bg{background:var(--card);}
+    .jad-bg{background:var(--cream-dark);}
     .tl{position:relative;padding-left:28px;}
     .tl::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--primary),var(--gold),var(--primary));border-radius:1px;}
     .tl-item{position:relative;margin-bottom:28px;}.tl-item:last-child{margin-bottom:0;}
@@ -231,7 +263,6 @@
     .lok-galeri-item:hover .lok-galeri-img{transform:scale(1.04);}
     .lok-galeri-label{position:absolute;bottom:0;left:0;right:0;padding:28px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.55));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;pointer-events:none;}
 
-    /* Peta link */
     .lok-map-link{display:block;position:relative;height:200px;background:linear-gradient(135deg,#e8e4dc,#d6d0c6);overflow:hidden;transition:all .3s;text-decoration:none;}
     @media(min-width:640px){.lok-map-link{height:240px;}}
     .lok-map-link:hover{background:linear-gradient(135deg,#ddd8ce,#ccc6bb);}
@@ -323,7 +354,7 @@
     <div class="hero-inner">
       <div class="hero-grid">
         <div>
-          <div class="hero-badge rv"><i class="fa-solid fa-seedling"></i> Pendaftaran 2025/2026</div>
+          <div class="hero-badge rv"><i class="fa-solid fa-seedling"></i> Pendaftaran 2026/2027</div>
           <h1 class="hero-title rv d1">Atomic School</h1>
           <p class="hero-tagline rv d2">Small Habits, Infinite Potential</p>
           <p class="hero-desc rv d3">Kebiasaan Kecil, Karakter Unggul, Kebaikan Semesta. Sekolah berbasis alam, karakter, dan teknologi yang membentuk anak menjadi mandiri, cerdas, dan berakhlak mulia.</p>
@@ -448,77 +479,30 @@
         <h2 class="sec-title rv d1">Belajar Tidak Hanya di Kelas</h2>
       </div>
       <div class="g2" style="gap:14px;margin-bottom:24px;">
-        <div class="bl-card rv d1" style="background:linear-gradient(135deg,#0B3D2E,#0D4A38);">
-          <div class="bl-tag"><i class="fa-solid fa-laptop-code" style="margin-right:4px;"></i> Indoor</div>
-          <div class="bl-title">Digital Mastery</div>
-          <div class="bl-desc">Belajar mandiri dengan platform digital terpilih. Anak dibimbing menggunakan teknologi sebagai alat, bukan sekadar hiburan.</div>
-        </div>
-        <div class="bl-card rv d2" style="background:linear-gradient(135deg,#1A5C3A,#2D8B5E);">
-          <div class="bl-tag"><i class="fa-solid fa-leaf" style="margin-right:4px;"></i> Outdoor</div>
-          <div class="bl-title">Nature STEM</div>
-          <div class="bl-desc">Belajar langsung di alam. Mengamati, menyentuh, dan bereksperimen dengan lingkungan sebagai laboratorium hidup.</div>
-        </div>
+        <div class="bl-card rv d1" style="background:linear-gradient(135deg,#0B3D2E,#0D4A38);"><div class="bl-tag"><i class="fa-solid fa-laptop-code" style="margin-right:4px;"></i> Indoor</div><div class="bl-title">Digital Mastery</div><div class="bl-desc">Belajar mandiri dengan platform digital terpilih. Anak dibimbing menggunakan teknologi sebagai alat, bukan sekadar hiburan.</div></div>
+        <div class="bl-card rv d2" style="background:linear-gradient(135deg,#1A5C3A,#2D8B5E);"><div class="bl-tag"><i class="fa-solid fa-leaf" style="margin-right:4px;"></i> Outdoor</div><div class="bl-title">Nature STEM</div><div class="bl-desc">Belajar langsung di alam. Mengamati, menyentuh, dan bereksperimen dengan lingkungan sebagai laboratorium hidup.</div></div>
       </div>
       <div class="bl-example rv d3" style="max-width:600px;margin:0 auto;">
         <div class="bl-example-inner">
           <div class="bl-example-icon"><i class="fa-solid fa-flask"></i></div>
-          <div>
-            <div class="bl-example-label">Contoh Nyata</div>
-            <div class="bl-example-text">Belajar volume → mengukur bak air di sekolah. Belajar tanaman → menanam kebun sendiri. Belajar matematika → menghitung hasil panen.</div>
-          </div>
+          <div><div class="bl-example-label">Contoh Nyata</div><div class="bl-example-text">Belajar volume → mengukur bak air di sekolah. Belajar tanaman → menanam kebun sendiri. Belajar matematika → menghitung hasil panen.</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== GALERI FASILITAS (4 FOTO) ===== -->
+  <!-- ===== GALERI FASILITAS ===== -->
   <section class="sec gal-bg" id="galeri">
     <div class="sec-inner">
       <div style="text-align:center;margin-bottom:36px;">
         <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Fasilitas & Kegiatan</div>
         <h2 class="sec-title rv d1">Lihat Langsung Suasana Belajar Kami</h2>
       </div>
-
-      <!-- ============================================== -->
-      <!-- GANTI ke-4 src DI BAWAH DENGAN URL FOTO ASLI  -->
-      <!-- ============================================== -->
       <div class="gal-grid" style="max-width:860px;margin:0 auto;">
-        <div class="gal-item rv d1">
-          <img
-            src="https://i.imgur.com/uTjoSWY.jpeg"
-            alt="Ruang kelas Atomic School"
-            class="gal-img"
-            loading="lazy"
-          >
-          <div class="gal-label"><i class="fa-solid fa-chalkboard-user"></i> Ruang Kelas</div>
-        </div>
-        <div class="gal-item rv d2">
-          <img
-            src="https://i.imgur.com/eHuAaRa.jpeg"
-            alt="Koridor kelas Atomic School"
-            class="gal-img"
-            loading="lazy"
-          >
-          <div class="gal-label"><i class="fa-solid fa-door-open"></i> Koridor Kelas</div>
-        </div>
-        <div class="gal-item rv d3">
-          <img
-            src="https://i.imgur.com/ipJCjcL.jpeg"
-            alt="Anak menggunakan papan digital interaktif"
-            class="gal-img"
-            loading="lazy"
-          >
-          <div class="gal-label"><i class="fa-solid fa-display"></i> Papan Digital Interaktif</div>
-        </div>
-        <div class="gal-item rv d4">
-          <img
-            src="https://i.imgur.com/Nrz9Ozc.jpeg"
-            alt="Anak memainkan robotic lego"
-            class="gal-img"
-            loading="lazy"
-          >
-          <div class="gal-label"><i class="fa-solid fa-robot"></i> Robotic Lego</div>
-        </div>
+        <div class="gal-item rv d1"><img src="https://i.imgur.com/uTjoSWY.jpeg" alt="Ruang kelas Atomic School" class="gal-img" loading="lazy"><div class="gal-label"><i class="fa-solid fa-chalkboard-user"></i> Ruang Kelas</div></div>
+        <div class="gal-item rv d2"><img src="https://i.imgur.com/eHuAaRa.jpeg" alt="Koridor kelas Atomic School" class="gal-img" loading="lazy"><div class="gal-label"><i class="fa-solid fa-door-open"></i> Koridor Kelas</div></div>
+        <div class="gal-item rv d3"><img src="https://i.imgur.com/ipJCjcL.jpeg" alt="Anak menggunakan papan digital interaktif" class="gal-img" loading="lazy"><div class="gal-label"><i class="fa-solid fa-display"></i> Papan Digital Interaktif</div></div>
+        <div class="gal-item rv d4"><img src="https://i.imgur.com/Nrz9Ozc.jpeg" alt="Anak memainkan robotic lego" class="gal-img" loading="lazy"><div class="gal-label"><i class="fa-solid fa-robot"></i> Robotic Lego</div></div>
       </div>
     </div>
   </section>
@@ -559,7 +543,110 @@
     </div>
   </section>
 
-  <!-- ===== JADWAL HARIAN (tanpa waktu) ===== -->
+  <!-- ===== EKOSISTEM KEMITRAAN ORANG TUA ===== -->
+  <section class="sec mitra-bg" id="kemitraan">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:32px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Kemitraan Keluarga</div>
+        <h2 class="sec-title rv d1">Ekosistem Kemitraan Orang Tua</h2>
+        <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Kami meyakini bahwa arsitektur pendidikan yang kokoh mustahil terwujud tanpa sinergi dengan orang tua. Orang tua adalah mitra strategis, bukan konsumen jasa pendidikan.</p>
+      </div>
+      <div class="mitra-quote rv d3" style="max-width:700px;margin-left:auto;margin-right:auto;">
+        "Pendidikan adalah tanggung jawab bersama; sekolah dan orang tua berjalan beriringan mendampingi anak."
+      </div>
+      <div class="mitra-grid" style="max-width:860px;margin:0 auto;">
+        <div class="mitra-card rv d1">
+          <div class="mitra-num">01</div>
+          <div class="mitra-icon" style="background:var(--primary-pale);color:var(--primary);"><i class="fa-solid fa-fingerprint"></i></div>
+          <div class="mitra-card-title">Menghargai Keunikan Anak</div>
+          <div class="mitra-card-desc">Menerima potensi dan bakat yang berbeda pada setiap individu. Tidak ada standar tunggal keberhasilan — setiap anak memiliki jalur pertumbuhannya sendiri.</div>
+        </div>
+        <div class="mitra-card rv d2">
+          <div class="mitra-num">02</div>
+          <div class="mitra-icon" style="background:var(--gold-light);color:var(--gold-dark);"><i class="fa-solid fa-seedling"></i></div>
+          <div class="mitra-card-title">Bertumbuh Sesuai Fitrah</div>
+          <div class="mitra-card-desc">Memberikan ruang bagi anak untuk tumbuh sesuai ritme perkembangannya tanpa melakukan perbandingan atau standardisasi yang mematikan potensi.</div>
+        </div>
+        <div class="mitra-card rv d3">
+          <div class="mitra-num">03</div>
+          <div class="mitra-icon" style="background:#F3E8FF;color:#7C3AED;"><i class="fa-solid fa-people-arrows"></i></div>
+          <div class="mitra-card-title">Keluarga sebagai Mitra</div>
+          <div class="mitra-card-desc">Keterlibatan aktif orang tua dalam sesi refleksi rutin <strong style="color:var(--text);">"Ruang Belajar Orang Tua"</strong> untuk menyelaraskan nilai-nilai pendidikan di rumah dan di sekolah.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PILAR PENDUKUNG TUMBUH KEMBANG ===== -->
+  <section class="sec pilar-bg" id="pilar">
+    <div class="sec-inner">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Tim Pendukung</div>
+        <h2 class="sec-title rv d1">Pilar Pendukung Tumbuh Kembang</h2>
+        <p class="sec-desc rv d2 mx-auto" style="text-align:center;">Struktur pendukung Atomic School melibatkan tim ahli lintas disiplin untuk memastikan pertumbuhan holistik yang terjaga.</p>
+      </div>
+      <div style="max-width:760px;margin:0 auto;">
+
+        <!-- Pilar 1: Edukasi & Karakter -->
+        <div class="pilar-group rv d1">
+          <div class="pilar-header">
+            <div class="pilar-badge pilar-badge-1"><i class="fa-solid fa-book-open-reader"></i> Pilar Edukasi & Karakter</div>
+          </div>
+          <div class="pilar-members">
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-1">GP</div>
+              <div><div class="pilar-name">Guru Pendamping Angkatan Pertama</div><div class="pilar-role-text">Tenaga pendidik berpengalaman — Staff Pengajar Pondok Pesantren Sumber Barokah Karawang & SD Negeri 3 Cimaragas</div></div>
+            </div>
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-1">UF</div>
+              <div><div class="pilar-name">Usman Firdaus, S.Pd., M.Pd.</div><div class="pilar-role-text">Pakar Pendidikan</div></div>
+            </div>
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-1">RN</div>
+              <div><div class="pilar-name">Randi Novajaya, S.Pd.I.</div><div class="pilar-role-text">Pakar Pendidikan</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilar 2: Psikologi & Human Growth -->
+        <div class="pilar-group rv d2">
+          <div class="pilar-header">
+            <div class="pilar-badge pilar-badge-2"><i class="fa-solid fa-brain"></i> Pilar Psikologi & Human Growth</div>
+          </div>
+          <div class="pilar-members">
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-2">ZI</div>
+              <div><div class="pilar-name">Zhuda Indra Pratama, S.Psi., M.Psi.</div><div class="pilar-role-text">Pendamping Psikologi Pendidikan</div></div>
+            </div>
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-2">FA</div>
+              <div><div class="pilar-name">Fuji Astuti AN.</div><div class="pilar-role-text">Praktisi Human Growth</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilar 3: Kesehatan Fisik -->
+        <div class="pilar-group rv d3">
+          <div class="pilar-header">
+            <div class="pilar-badge pilar-badge-3"><i class="fa-solid fa-heart-pulse"></i> Pilar Kesehatan Fisik</div>
+          </div>
+          <div class="pilar-members">
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-3">PA</div>
+              <div><div class="pilar-name">dr. Putri Auliya Hilfa Lubis</div><div class="pilar-role-text">Pendamping Kesehatan Anak</div></div>
+            </div>
+            <div class="pilar-member">
+              <div class="pilar-avatar pilar-avatar-3">PW</div>
+              <div><div class="pilar-name">Hj. Purwani, AMKG.</div><div class="pilar-role-text">Pendamping Kesehatan</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== JADWAL HARIAN ===== -->
   <section class="sec jad-bg" id="jadwal">
     <div class="sec-inner">
       <div class="split">
@@ -570,26 +657,10 @@
         </div>
         <div>
           <div class="tl">
-            <div class="tl-item rv d1">
-              <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-title">Circle of Faith</div>
-              <div class="tl-desc">Doa bersama, pembentukan karakter pagi, dan motivasi memulai hari</div>
-            </div>
-            <div class="tl-item rv d2">
-              <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-title">Digital Mastery</div>
-              <div class="tl-desc">Belajar akademik mandiri dengan bimbingan platform digital terpilih</div>
-            </div>
-            <div class="tl-item rv d3">
-              <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-title">Nature STEM</div>
-              <div class="tl-desc">Eksplorasi alam, eksperimen sains, dan belajar dari lingkungan sekitar</div>
-            </div>
-            <div class="tl-item rv d4">
-              <div class="tl-dot"><div class="tl-dot-in"></div></div>
-              <div class="tl-title">Discovery</div>
-              <div class="tl-desc">Pengembangan minat bakat, sesi guru tamu, dan proyek kreatif</div>
-            </div>
+            <div class="tl-item rv d1"><div class="tl-dot"><div class="tl-dot-in"></div></div><div class="tl-title">Circle of Faith</div><div class="tl-desc">Doa bersama, pembentukan karakter pagi, dan motivasi memulai hari</div></div>
+            <div class="tl-item rv d2"><div class="tl-dot"><div class="tl-dot-in"></div></div><div class="tl-title">Digital Mastery</div><div class="tl-desc">Belajar akademik mandiri dengan bimbingan platform digital terpilih</div></div>
+            <div class="tl-item rv d3"><div class="tl-dot"><div class="tl-dot-in"></div></div><div class="tl-title">Nature STEM</div><div class="tl-desc">Eksplorasi alam, eksperimen sains, dan belajar dari lingkungan sekitar</div></div>
+            <div class="tl-item rv d4"><div class="tl-dot"><div class="tl-dot-in"></div></div><div class="tl-title">Discovery</div><div class="tl-desc">Pengembangan minat bakat, sesi guru tamu, dan proyek kreatif</div></div>
           </div>
         </div>
       </div>
@@ -614,51 +685,56 @@
     </div>
   </section>
 
-  <!-- ===== LOKASI (2 foto + peta link) ===== -->
-  <section class="sec lok-bg" id="lokasi">
-    <div class="sec-inner">
-      <div style="text-align:center;margin-bottom:36px;">
-        <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Lokasi</div>
-        <h2 class="sec-title rv d1">Temukan Kami</h2>
-      </div>
-      <div class="lok-card rv d2" style="max-width:760px;margin:0 auto;">
 
-        <!-- ============================================ -->
-        <!-- GANTI 2 src DI BAWAH DENGAN FOTO LOKASI ASLI -->
-        <!-- ============================================ -->
-        <div class="lok-galeri">
-          <div class="lok-galeri-item">
-            <img
-              src="https://i.imgur.com/kUmbCAS.jpeg"
-              alt="Tampak depan gedung Atomic School"
-              class="lok-galeri-img"
-              loading="lazy"
-            >
-            <div class="lok-galeri-label"><i class="fa-solid fa-school"></i> Tampak Depan Sekolah</div>
-          </div>
-        <!-- Peta: klik untuk buka Google Maps -->
-        <a href="https://maps.app.goo.gl/gh4GFEdrgRyoNkkm7" target="_blank" rel="noopener noreferrer" class="lok-map-link">
-          <div class="lok-map-inner">
-            <div class="lok-map-pin"><i class="fa-solid fa-location-dot"></i></div>
+<!-- ===== LOKASI ===== -->
+<section class="sec lok-bg" id="lokasi">
+  <div class="sec-inner">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:36px;">
+      <div class="sec-label rv"><i class="fa-solid fa-circle"></i> Lokasi</div>
+      <h2 class="sec-title rv d1">Temukan Kami</h2>
+    </div>
+
+    <!-- Card -->
+    <div class="lok-card rv d2" style="max-width:760px;margin:0 auto;">
+
+      <!-- Gambar -->
+      <div class="lok-galeri-item">
+        <img src="https://i.imgur.com/kUmbCAS.jpeg" alt="Tampak depan gedung Atomic School" class="lok-galeri-img" loading="lazy">
+        <div class="lok-galeri-label"><i class="fa-solid fa-school"></i> Tampak Depan Sekolah</div>
+      </div>
+
+      <!-- Map Link -->
+      <a href="https://maps.app.goo.gl/gh4GFEdrgRyoNkkm7" target="_blank" rel="noopener noreferrer" class="lok-map-link">
+        <div class="lok-map-inner">
+          <div class="lok-map-pin"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
             <div class="lok-map-text">Lihat Lokasi di Google Maps</div>
             <div class="lok-map-sub">Jl. Cinunuk, Wanaraja, Garut</div>
           </div>
-          <div class="lok-map-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
-        </a>
+        </div>
+        <div class="lok-map-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+      </a>
 
-        <div class="lok-info">
-          <div class="lok-info-inner">
-            <div class="lok-icon"><i class="fa-solid fa-location-dot"></i></div>
-            <div>
-              <div class="lok-name">Atomic School</div>
-              <div class="lok-addr">Jl. Cinunuk, Desa Wanaraja<br>Kec. Wanaraja, Kab. Garut<br>Jawa Barat, Indonesia</div>
+      <!-- Info Alamat -->
+      <div class="lok-info">
+        <div class="lok-info-inner">
+          <div class="lok-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <div class="lok-name">Atomic School</div>
+            <div class="lok-addr">
+              Jl. Cinunuk, Desa Wanaraja<br>
+              Kec. Wanaraja, Kab. Garut<br>
+              Jawa Barat, Indonesia
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
+    </div>
+  </div>
+</section>
   <!-- ===== CTA ===== -->
   <section class="sec cta-bg" id="daftar" style="padding-bottom:80px;">
     <div class="sec-inner" style="position:relative;z-index:1;text-align:center;">
@@ -671,7 +747,7 @@
         Siap Membentuk Masa Depan Anak Anda?
       </h2>
       <p class="rv d2" style="color:rgba(255,255,255,.55);font-size:clamp(13px,2.5vw,15px);line-height:1.8;max-width:460px;margin:0 auto 28px;">
-        Jangan tunggu sampai terlambat. Mulai dari kebiasaan kecil hari ini. Slot terbatas untuk tahun ajaran 2026/2027.
+        Jangan tunggu sampai terlambat. Mulai dari kebiasaan kecil hari ini. Slot terbatas untuk tahun ajaran 2026-2027.
       </p>
       <div class="cta-btns rv d3">
         <a href="https://go.sayaguru.id/daftar" target="_blank" class="btn-gold" style="font-size:15px;padding:16px 36px;">
@@ -682,7 +758,7 @@
         </a>
       </div>
       <div class="cta-contacts rv d4">
-        <a href="tel:+628xxxxxxxxxx" class="cta-contact"><i class="fa-solid fa-phone"></i> 085793715450</a>
+        <a href="tel:+6285793715450" class="cta-contact"><i class="fa-solid fa-phone"></i> 085793715450</a>
         <a href="mailto:info@atomicschool.id" class="cta-contact"><i class="fa-solid fa-envelope"></i> info@atomicschool.id</a>
       </div>
     </div>
@@ -705,6 +781,8 @@
           <a href="#solusi" class="footer-link">Solusi</a>
           <a href="#metode" class="footer-link">Metode A.L.A.M.I</a>
           <a href="#galeri" class="footer-link">Fasilitas</a>
+          <a href="#kemitraan" class="footer-link">Kemitraan Orang Tua</a>
+          <a href="#pilar" class="footer-link">Tim Pendukung</a>
           <a href="#program" class="footer-link">Program Unggulan</a>
           <a href="#daftar" class="footer-link">Pendaftaran</a>
         </div>
