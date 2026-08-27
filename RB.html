@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <!-- Library SheetJS untuk Export ke Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{h:['Outfit','sans-serif'],b:['DM Sans','sans-serif']}}}}</script>
   <style>
     :root{--g1:#1D4ED8;--g2:#1E40AF;--g3:#1E3A5F;--g4:#3B82F6;--g5:#60A5FA;--gl:#DBEAFE;--gxl:#EFF6FF;--gxxl:#F0F7FF;--y1:#F59E0B;--y2:#FBBF24;--y3:#D97706;--yl:#FEF3C7;--bg:#EFF3F8;--bd:#D1DBE8;--tx:#0F172A;--tx2:#334155;--tx3:#64748B}
@@ -166,7 +168,6 @@
 <div id="loginPage">
   <div class="login-card">
     <div class="text-center mb-8">
-      <!-- MENGGANTI IKON DENGAN LOGO GAMBAR -->
       <img src="https://i.imgur.com/nUWaPDi.png" alt="Logo Ruang Belajar" class="w-20 h-auto mx-auto mb-3 drop-shadow-md">
       <h1 class="text-2xl font-h font-800 text-slate-800 tracking-tight">Ruang Belajar</h1>
       <p class="text-sm mt-1 text-slate-500">Sistem Pembelajaran Digital</p>
@@ -183,7 +184,6 @@
 
 <!-- ==================== APP ==================== -->
 <div id="appPage" class="hidden">
-  <!-- MENGGANTI HEADER MOBILE UNTUK MENAMPILKAN LOGO JUGA -->
   <header id="mHeader">
     <button onclick="togSB()" style="color:var(--g1)" class="text-lg"><i class="fas fa-bars"></i></button>
     <div class="flex items-center gap-2">
@@ -196,7 +196,6 @@
   <aside id="sidebar">
     <div class="p-4 pb-2">
       <div class="flex items-center gap-2.5">
-        <!-- MENGGANTI IKON DI SIDEBAR DENGAN LOGO GAMBAR -->
         <img src="https://i.imgur.com/nUWaPDi.png" alt="Logo" class="w-8 h-auto object-contain drop-shadow-sm">
         <div>
           <h2 class="font-h font-700 text-sm leading-tight" style="color:var(--tx)">Ruang Belajar</h2>
@@ -225,9 +224,11 @@ const SU='https://script.google.com/macros/s/AKfycbwxsLUsGuLmewHexmLVcpYdk58rJ4p
 const A={u:null,p:'dashboard',d:{mapel:[],kelas:[],tugas:[],jawaban:[],nk:[],progress:[],soal:[]},qs:{a:{},s:false},raPage:{},raData:[],raFilter:{},jgPage:1};
 const _c={};
 const _sk=['addMateri','updateMateri','deleteMateri','addSoal','updateSoal','deleteSoal','addTugas','updateTugas','deleteTugas','submitKuis','submitTugas','nilaiTugas','deleteNilaiTugas','submitAbsensi','addSiswa','updateSiswa','deleteSiswa','updateProgress','addJurnal','updateJurnal','deleteJurnal','addMapel','updateMapel','deleteMapel'];
+
+// MENU GURU DITAMBAHKAN "TRANSKRIP KELAS"
 const NV={
   Siswa:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'materi',c:'fa-book-open',l:'Materi'},{i:'latihan',c:'fa-pen-to-square',l:'Latihan'},{i:'tugas',c:'fa-file-lines',l:'Tugas'},{i:'nilai',c:'fa-chart-column',l:'Nilai'},{i:'transkrip',c:'fa-graduation-cap',l:'Transkrip'}],
-  Guru:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'kelola-mapel',c:'fa-layer-group',l:'Kelola Mapel'},{i:'kelola-siswa',c:'fa-users',l:'Kelola Siswa'},{i:'kelola-materi',c:'fa-book-open',l:'Kelola Materi'},{i:'kelola-soal',c:'fa-list-check',l:'Kelola Soal'},{i:'kelola-tugas',c:'fa-file-circle-plus',l:'Kelola Tugas'},{i:'penilaian',c:'fa-star',l:'Penilaian'},{i:'absensi',c:'fa-clipboard-check',l:'Absensi'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Riwayat Absen'},{i:'jurnal',c:'fa-book-journal-whills',l:'Jurnal Guru'}]
+  Guru:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'kelola-mapel',c:'fa-layer-group',l:'Kelola Mapel'},{i:'kelola-siswa',c:'fa-users',l:'Kelola Siswa'},{i:'kelola-materi',c:'fa-book-open',l:'Kelola Materi'},{i:'kelola-soal',c:'fa-list-check',l:'Kelola Soal'},{i:'kelola-tugas',c:'fa-file-circle-plus',l:'Kelola Tugas'},{i:'penilaian',c:'fa-star',l:'Penilaian'},{i:'absensi',c:'fa-clipboard-check',l:'Absensi'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Riwayat Absen'},{i:'jurnal',c:'fa-book-journal-whills',l:'Jurnal Guru'},{i:'transkrip-kelas',c:'fa-file-excel',l:'Transkrip Kelas'}]
 };
 
 /* ===== HELPER ===== */
@@ -302,7 +303,7 @@ function previewPdf(doc,filename){
 function clPDF(){document.getElementById('pdfModal').classList.remove('on')}
 
 /* ===== NAVIGASI ===== */
-async function nav(p){A.p=p;clsSB();uAN();const m=document.getElementById('mc');m.innerHTML=skC();try{const fn={dashboard:pD,materi:pMt,latihan:pKu,tugas:pTg,nilai:pNi,transkrip:pTr,'kelola-mapel':pKP,'kelola-siswa':pKS,'kelola-materi':pKM,'kelola-soal':pKSo,'kelola-tugas':pKT,penilaian:pNl,absensi:pAb,'riwayat-absen':pRA,jurnal:pJG};m.innerHTML=await(fn[p]||pD)()}catch(e){m.innerHTML=empty('fa-triangle-exclamation','Gagal: '+e.message)}}
+async function nav(p){A.p=p;clsSB();uAN();const m=document.getElementById('mc');m.innerHTML=skC();try{const fn={dashboard:pD,materi:pMt,latihan:pKu,tugas:pTg,nilai:pNi,transkrip:pTr,'kelola-mapel':pKP,'kelola-siswa':pKS,'kelola-materi':pKM,'kelola-soal':pKSo,'kelola-tugas':pKT,penilaian:pNl,absensi:pAb,'riwayat-absen':pRA,jurnal:pJG,'transkrip-kelas':pTK};m.innerHTML=await(fn[p]||pD)()}catch(e){m.innerHTML=empty('fa-triangle-exclamation','Gagal: '+e.message)}}
 
 /* ===== AUTH ===== */
 async function doLogin(){const e=document.getElementById('lE').value.trim(),p=document.getElementById('lP').value,er=document.getElementById('lErr');if(!e||!p){er.textContent='Email dan password wajib';er.classList.remove('hidden');return}er.classList.add('hidden');const b=document.getElementById('lBtn');b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...';const r=await api('login',{email:e,password:p});b.disabled=false;b.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i> Masuk';if(!r.success){er.textContent=r.message;er.classList.remove('hidden');return}A.u=r.user;entApp()}
@@ -613,7 +614,7 @@ async function smES(id){
   if(r.success){clM();cc();invCache(['updateSiswa','getSiswaByKelas']);toast(r.message);nav('kelola-siswa')}else toast(r.message,'error');
 }
 
-/* ===== KELOLA MATERI (FIXED: Tombol Tambah tetap muncul di Mapel kosong) ===== */
+/* ===== KELOLA MATERI ===== */
 async function pKM(){
   const rm=await api('getMapel');
   if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
@@ -627,7 +628,6 @@ async function ldKM(){
   c.innerHTML=skC();
   const r=await api('getMateriByMapel',{idMapel:id});
   
-  // FIXED: Tombol Tambah Materi ditaruh sebelum pengecekan length
   let h=`<div class="flex justify-end mb-3"><button class="bt bt1" onclick="mAMt('${id}')"><i class="fas fa-plus"></i> Tambah Materi</button></div>`;
   
   if(!r.success||!r.data.length){
@@ -1217,6 +1217,135 @@ function dlJgPdf(){
 
   const fn='Jurnal_Guru_'+A.u.Nama.replace(/\s+/g,'_')+'_'+todayISO()+'.pdf';
   previewPdf(doc,fn);
+}
+
+/* ============================================= */
+/* ========== FITUR BARU: TRANSKRIP KELAS ====== */
+/* ============================================= */
+async function pTK(){
+  const rk=await api('getKelasList');
+  const kl=rk.success?rk.data:[];
+  let h=`<div class="fi-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+      <div><h1 class="font-h font-800 text-xl mb-0.5">Transkrip Kelas</h1><p class="text-xs" style="color:var(--tx3)">Rekapitulasi dan download nilai akhir seluruh siswa di kelas (Excel)</p></div>
+    </div>
+    <div class="cd mb-3">
+      <div class="flex flex-col sm:flex-row gap-3 items-end">
+        <div class="flex-1 w-full"><label class="fl">Pilih Kelas</label><select id="tkK" class="fi">${so(kl.map(k=>({v:k,l:k})))}</select></div>
+        <button class="bt bt1" onclick="ldTK()"><i class="fas fa-search"></i> Muat Transkrip</button>
+      </div>
+    </div>
+    <div id="tkC">${empty('fa-file-excel','Pilih kelas untuk memuat transkrip nilai')}</div>
+  </div>`;
+  return h;
+}
+
+async function ldTK(){
+  const k=document.getElementById('tkK').value;
+  if(!k){toast('Pilih kelas terlebih dahulu','warning');return;}
+  const c=document.getElementById('tkC');
+  c.innerHTML=skC();
+  
+  const rs=await api('getSiswaByKelas',{kelas:k});
+  if(!rs.success||!rs.data.length){c.innerHTML=empty('fa-users','Tidak ada siswa terdaftar di kelas ini');return;}
+  
+  const siswa=rs.data.filter(u=>u.Role==='Siswa');
+  if(!siswa.length){c.innerHTML=empty('fa-users','Tidak ada data siswa (Hanya akun guru)');return;}
+
+  // Progress UI
+  c.innerHTML=`<div class="text-center py-10 fi-in"><div class="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style="background:var(--gl)"><i class="fas fa-spinner fa-spin text-xl" style="color:var(--g1)"></i></div><p class="text-sm font-600" style="color:var(--tx)">Memuat transkrip ${siswa.length} siswa...</p><p class="text-xs mt-1" style="color:var(--tx3)">Mohon tunggu sebentar, sedang mengkalkulasi nilai.</p><div class="w-full bg-gray-200 rounded-full h-2 mt-5 max-w-md mx-auto overflow-hidden"><div class="h-2 rounded-full transition-all duration-300" id="tkProg" style="background:var(--g1);width:0%"></div></div></div>`;
+  
+  let allData=[];
+  const chunkSize=4; // Fetch data concurrently per 4 siswa
+  for(let i=0;i<siswa.length;i+=chunkSize){
+    const chunk=siswa.slice(i,i+chunkSize);
+    const promises=chunk.map(s=>api('getTranskrip',{email:s.Email,kelas:k}).then(res=>({siswa:s,transkrip:res.success?res.data:[]})));
+    const results=await Promise.all(promises);
+    allData.push(...results);
+    
+    const pct=Math.round(((i+chunk.length)/siswa.length)*100);
+    const prog=document.getElementById('tkProg');
+    if(prog)prog.style.width=(pct>100?100:pct)+'%';
+  }
+  
+  A._tkData={kelas:k,data:allData};
+  rTK();
+}
+
+function rTK(){
+  const {kelas,data}=A._tkData;
+  let h=`<div class="cd fi-in">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-h font-700 text-sm">Preview Transkrip: ${kelas}</h3>
+      <button class="bt bty" onclick="dlTKExcel()"><i class="fas fa-file-excel"></i> Download Excel (.xlsx)</button>
+    </div>
+    <div class="overflow-x-auto"><table class="tb">
+      <thead><tr><th>Nama Siswa</th><th>Mapel</th><th>Akhir</th><th>Predikat</th><th>Status</th></tr></thead>
+      <tbody>`;
+  
+  data.forEach(d=>{
+    if(!d.transkrip.length){
+      h+=`<tr><td class="font-600 text-xs" style="border-right:1px solid #F0F4F8">${d.siswa.Nama}</td><td colspan="4" class="text-xs text-center" style="color:var(--tx3)">Belum ada data nilai</td></tr>`;
+    }else{
+      d.transkrip.forEach((t,idx)=>{
+        h+=`<tr>`;
+        if(idx===0)h+=`<td rowspan="${d.transkrip.length}" class="font-600 text-xs" style="border-right:1px solid #F0F4F8;vertical-align:top;padding-top:10px">${d.siswa.Nama}</td>`;
+        h+=`<td class="text-xs">${t.namaMapel}</td>
+            <td><span class="font-600 text-xs" style="color:${t.nilaiAkhir>=55?'var(--g1)':'#EF4444'}">${t.nilaiAkhir}</span></td>
+            <td><span class="bd ${t.predikat==='A'?'bg1':t.predikat==='B'?'bg2':t.predikat==='C'?'bg4':'bg3'}">${t.predikat}</span></td>
+            <td><span class="bd ${t.statusLulus==='Lulus'?'bg1':'bg3'}">${t.statusLulus}</span></td>
+            </tr>`;
+      });
+    }
+  });
+  
+  h+=`</tbody></table></div></div>`;
+  document.getElementById('tkC').innerHTML=h;
+}
+
+function dlTKExcel(){
+  if(!A._tkData||!A._tkData.data)return;
+  const data=A._tkData.data;
+  const rows=[];
+  
+  data.forEach(d=>{
+    if(!d.transkrip.length){
+      rows.push({
+        'Nama Siswa':d.siswa.Nama,
+        'Email':d.siswa.Email,
+        'Mata Pelajaran':'-',
+        '% Kehadiran':'-',
+        'Rata Kuis':'-',
+        'Rata Tugas':'-',
+        'Nilai Akhir':'-',
+        'Predikat':'-',
+        'Status Lulus':'-'
+      });
+    }else{
+      d.transkrip.forEach(t=>{
+        rows.push({
+          'Nama Siswa':d.siswa.Nama,
+          'Email':d.siswa.Email,
+          'Mata Pelajaran':t.namaMapel,
+          '% Kehadiran':t.persenKehadiran+'%',
+          'Rata Kuis':t.rataKuis,
+          'Rata Tugas':t.rataTugas,
+          'Nilai Akhir':t.nilaiAkhir,
+          'Predikat':t.predikat,
+          'Status Lulus':t.statusLulus
+        });
+      });
+    }
+  });
+  
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  
+  // Set lebar kolom Excel agar rapi saat dibuka
+  ws['!cols']=[{wch:25},{wch:30},{wch:25},{wch:15},{wch:12},{wch:12},{wch:12},{wch:10},{wch:15}];
+  
+  XLSX.utils.book_append_sheet(wb,ws,"Transkrip "+A._tkData.kelas);
+  XLSX.writeFile(wb, `Transkrip_Nilai_${A._tkData.kelas.replace(/[^a-z0-9]/gi,'_')}_${todayISO()}.xlsx`);
 }
 </script>
 </body>
