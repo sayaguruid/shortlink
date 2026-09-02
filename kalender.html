@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto PDF Kalender Kegiatan Musyawarah</title>
+    <title>Kegiatan Daerah</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js untuk membaca file PDF langsung di browser -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -13,11 +15,13 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 sm:p-6">
 
     <div class="max-w-4xl mx-auto">
+        <!-- Header -->
         <header class="bg-white shadow-sm rounded-2xl p-6 mb-6 border border-slate-100">
-            <h1 class="text-2xl font-bold text-slate-900 mb-2">📅 Kegiatan Garut</h1>
-            <p class="text-slate-600 text-sm">Sistem pembuat kegiatan daerah</p>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">📅Kegiatan Daerah</h1>
+            <p class="text-slate-600 text-sm">Aplikasi kalender daerah</p>
         </header>
 
+        <!-- Upload Section -->
         <div class="bg-white shadow-sm rounded-2xl p-6 mb-6 border border-slate-100">
             <label class="block text-sm font-semibold text-slate-700 mb-2">1. Upload File PDF Hasil Musyawarah:</label>
             
@@ -37,11 +41,12 @@
                     ✨ Generate Kalender dari PDF
                 </button>
                 <button onclick="clearAll()" class="bg-red-50 hover:bg-red-100 text-red-600 font-medium px-4 py-2.5 rounded-xl transition text-sm ml-auto">
-                    Reset
+                    Reset Data
                 </button>
             </div>
         </div>
 
+        <!-- Output Section -->
         <div class="bg-white shadow-sm rounded-2xl p-6 border border-slate-100">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-slate-900">🗓️ Hasil Kalender & Catatan Musyawarah</h2>
@@ -56,7 +61,19 @@
         </div>
     </div>
 
+    <!-- JavaScript Parser & Formatter Logic -->
     <script>
+        // Cek data tersimpan (Local Storage) saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedText = localStorage.getItem('savedPdfData');
+            if (savedText) {
+                document.getElementById('pdfInput').value = savedText;
+                document.getElementById('fileLabel').innerText = "✅ Data tersimpan dari sesi sebelumnya";
+                document.getElementById('generateBtn').classList.remove('hidden');
+                parseText(); // Langsung proses kalender tanpa harus upload ulang
+            }
+        });
+
         async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -73,19 +90,26 @@
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
-                        let lastY, textLine = '';
+                        let lastY = -1; 
+                        let textLine = '';
                         
                         textContent.items.forEach(item => {
-                            if (lastY && Math.abs(item.transform[5] - lastY) > 2) {
+                            // Pembulatan Math.round agar HP dan Laptop membaca baris PDF secara identik
+                            let currentY = Math.round(item.transform[5]);
+                            
+                            if (lastY !== -1 && Math.abs(currentY - lastY) > 4) {
                                 fullText += textLine.trim() + '\n';
                                 textLine = '';
                             }
                             textLine += item.str + ' ';
-                            lastY = item.transform[5];
+                            lastY = currentY;
                         });
                         fullText += textLine.trim() + '\n';
                     }
 
+                    // Simpan hasil ektraksi PDF ke memory peramban HP/Laptop
+                    localStorage.setItem('savedPdfData', fullText);
+                    
                     document.getElementById('pdfInput').value = fullText;
                     document.getElementById('generateBtn').classList.remove('hidden');
                     parseText(); 
@@ -98,6 +122,9 @@
         }
 
         function clearAll() {
+            // Hapus memory lokal saat tombol Reset ditekan
+            localStorage.removeItem('savedPdfData');
+            
             document.getElementById('pdfFile').value = '';
             document.getElementById('fileLabel').innerText = 'Klik di sini atau seret file PDF ke sini';
             document.getElementById('pdfInput').value = '';
@@ -116,12 +143,10 @@
             const rawLines = rawText.split('\n');
             let cleanedLines = [];
             
-            // Tahap 1: Gabungkan baris yang terpotong acak di PDF
             rawLines.forEach(line => {
                 let trimmed = line.trim();
                 if (!trimmed) return;
 
-                // Deteksi Awal Baris Baru (Angka, Huruf poin, Nama Hari, atau Kategori Khusus)
                 const isNewItem = /^(?:\d+\.|\b[a-z]\.)\s+/i.test(trimmed) || 
                                   /^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Ahad|Minggu)/i.test(trimmed) ||
                                   /^(4s|L|S|P|PPG|FKKI|FORSGI)\s*[:\.]/i.test(trimmed) ||
@@ -139,19 +164,16 @@
             let currentDayObj = null;
             let currentSectionObj = null;
 
-            // Tahap 2: Pisahkan Hari dan Kategori Khusus
             cleanedLines.forEach(line => {
                 if (/^Page\s+\d+/i.test(line)) return;
 
                 const dayMatch = /^(?:\d+\.\s*)?(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Ahad|Minggu)/i.test(line);
-                // Regex ketat untuk memastikan "4s:", "L:", "P:", "S:" terdeteksi sebagai awal section baru
                 const sectionMatch = line.match(/^(4s|L|S|P|PPG|FKKI|FORSGI)\s*[:\.]/i);
 
                 if (sectionMatch) {
-                    // JIKA MENEMUKAN KATEGORI KHUSUS (4s:, L:, dll), HENTIKAN HARI INI
                     if (currentDayObj) {
                         structuredDays.push(currentDayObj);
-                        currentDayObj = null; // Putus koneksi dengan hari
+                        currentDayObj = null; 
                     }
                     
                     let titleText = sectionMatch[1].toUpperCase() + ":";
@@ -161,26 +183,21 @@
                     };
                     generalSections.push(currentSectionObj);
                     
-                    // Jika ada teks setelah titik dua (misal "L: Kepengurusan...")
                     let remainder = line.substring(sectionMatch[0].length).trim();
                     if (remainder) {
                         currentSectionObj.items.push(remainder.replace(/^\d+\.\s*/, ''));
                     }
                 } 
                 else if (dayMatch && (line.includes('/') || line.includes(','))) {
-                    // JIKA MENEMUKAN HARI BARU
                     if (currentDayObj) structuredDays.push(currentDayObj);
                     currentDayObj = {
                         title: line.replace(/^[0-9]+\.\s*/, ''),
                         events: []
                     };
-                    currentSectionObj = null; // Putus koneksi dengan kategori khusus
+                    currentSectionObj = null; 
                 } 
                 else if (currentSectionObj) {
-                    // Masukkan ke Kategori Khusus (karena currentSectionObj aktif)
                     let cleanItem = line.replace(/^\d+\.\s*/, '').replace(/^[a-z]\.\s*/i, '');
-                    
-                    // Cek jika ini baris terpotong tanpa nomor urut di depannya
                     if (/^\d+\./.test(line) || /^[a-z]\./i.test(line) || currentSectionObj.items.length === 0) {
                         currentSectionObj.items.push(cleanItem);
                     } else {
@@ -188,16 +205,13 @@
                     }
                 } 
                 else if (currentDayObj) {
-                    // Masukkan ke Jadwal Harian (karena currentDayObj aktif)
                     let formattedEvent = line.replace(/^[a-z]\.\s*/i, '').replace(/^\d+\.\s*/, '');
                     currentDayObj.events.push(formattedEvent);
                 }
             });
 
-            // Push sisa terakhir
             if (currentDayObj) structuredDays.push(currentDayObj);
 
-            // Tahap 3: Render HTML
             if (structuredDays.length === 0 && generalSections.length === 0) {
                 outputDiv.innerHTML = '<p class="text-red-500 text-sm text-center py-4">Format dokumen PDF tidak dikenali secara otomatis.</p>';
                 copyAllBtn.classList.add('hidden');
