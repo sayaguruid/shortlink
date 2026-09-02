@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kegiatan Daerah</title>
+    <title>Auto PDF Kalender Kegiatan Musyawarah</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PDF.js untuk membaca file PDF langsung di browser -->
@@ -17,8 +17,8 @@
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <header class="bg-white shadow-sm rounded-2xl p-6 mb-6 border border-slate-100">
-            <h1 class="text-2xl font-bold text-slate-900 mb-2">📅Kegiatan Daerah</h1>
-            <p class="text-slate-600 text-sm">Aplikasi kalender daerah</p>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Kalender Daerah</h1>
+            <p class="text-slate-600 text-sm">Hasil musda.</p>
         </header>
 
         <!-- Upload Section -->
@@ -70,7 +70,7 @@
                 document.getElementById('pdfInput').value = savedText;
                 document.getElementById('fileLabel').innerText = "✅ Data tersimpan dari sesi sebelumnya";
                 document.getElementById('generateBtn').classList.remove('hidden');
-                parseText(); // Langsung proses kalender tanpa harus upload ulang
+                parseText(); 
             }
         });
 
@@ -78,7 +78,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('fileLabel').innerText = `File dipilih: ${file.name}`;
+            document.getElementById('fileLabel').innerText = `File memproses: ${file.name}...`;
             
             const reader = new FileReader();
             reader.onload = async function() {
@@ -90,27 +90,45 @@
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
-                        let lastY = -1; 
+                        let lastY = -1;
+                        let lastX = -1;
                         let textLine = '';
                         
+                        // Sistem Scanner Baru: Menganalisa jarak antar huruf & baris
                         textContent.items.forEach(item => {
-                            // Pembulatan Math.round agar HP dan Laptop membaca baris PDF secara identik
-                            let currentY = Math.round(item.transform[5]);
-                            
-                            if (lastY !== -1 && Math.abs(currentY - lastY) > 4) {
+                            let currentY = item.transform[5];
+                            let currentX = item.transform[4];
+                            let fontSize = Math.abs(item.transform[0]) || 12;
+
+                            // Jika ganti baris (jarak Y lebih besar dari 40% ukuran huruf)
+                            if (lastY !== -1 && Math.abs(currentY - lastY) > (fontSize * 0.4)) {
                                 fullText += textLine.trim() + '\n';
                                 textLine = '';
+                                lastX = -1;
                             }
-                            textLine += item.str + ' ';
+                            
+                            // Jika ada jarak antar kata (jarak X lebih besar dari 20% ukuran huruf)
+                            if (lastX !== -1 && (currentX - lastX) > (fontSize * 0.2)) {
+                                if (!textLine.endsWith(' ') && !item.str.startsWith(' ')) {
+                                    textLine += ' ';
+                                }
+                            }
+                            
+                            textLine += item.str;
+                            lastX = currentX + item.width;
                             lastY = currentY;
                         });
                         fullText += textLine.trim() + '\n';
                     }
 
-                    // Simpan hasil ektraksi PDF ke memory peramban HP/Laptop
+                    // Bersihkan spasi ganda yang tidak wajar
+                    fullText = fullText.replace(/ {2,}/g, ' ');
+
+                    // Simpan hasil ke memory HP/Laptop
                     localStorage.setItem('savedPdfData', fullText);
                     
                     document.getElementById('pdfInput').value = fullText;
+                    document.getElementById('fileLabel').innerText = `✅ Selesai: ${file.name}`;
                     document.getElementById('generateBtn').classList.remove('hidden');
                     parseText(); 
                 } catch (error) {
@@ -122,7 +140,7 @@
         }
 
         function clearAll() {
-            // Hapus memory lokal saat tombol Reset ditekan
+            // Hapus memory saat tombol Reset ditekan
             localStorage.removeItem('savedPdfData');
             
             document.getElementById('pdfFile').value = '';
@@ -144,7 +162,7 @@
             let cleanedLines = [];
             
             rawLines.forEach(line => {
-                let trimmed = line.trim();
+                let trimmed = line.trim().replace(/ {2,}/g, ' '); // Bersihkan spasi berlebih per baris
                 if (!trimmed) return;
 
                 const isNewItem = /^(?:\d+\.|\b[a-z]\.)\s+/i.test(trimmed) || 
@@ -176,7 +194,9 @@
                         currentDayObj = null; 
                     }
                     
-                    let titleText = sectionMatch[1].toUpperCase() + ":";
+                    let titleText = sectionMatch[1].toUpperCase().replace('.', ':');
+                    if (!titleText.endsWith(':')) titleText += ':';
+
                     currentSectionObj = {
                         title: titleText,
                         items: []
@@ -220,7 +240,7 @@
 
             let htmlContent = '';
             
-            // Render 1: Jadwal Harian
+            // Render Jadwal Harian
             structuredDays.forEach((day) => {
                 let dayNameOnly = day.title.split(',')[0].trim();
                 let eventTextForCopy = `Assalamualaikum wr wb\nKegiatan amrin jami' pada hari ${dayNameOnly} :\n\n`;
@@ -245,7 +265,7 @@
                 `;
             });
 
-            // Render 2: Kategori Khusus (4s, L, P, dll)
+            // Render Kategori Khusus (4s, L, P, dll)
             generalSections.forEach((sec) => {
                 let secTextForCopy = `Assalamualaikum wr wb\nKegiatan amrin jami' bagian *${sec.title.replace(':','')}* :\n\n`;
                 secTextForCopy += `*${sec.title}*\n`;
