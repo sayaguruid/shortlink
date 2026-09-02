@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Atomic School LMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Jspdf & Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>tailwind.config={theme:{extend:{fontFamily:{h:['Outfit','sans-serif'],b:['DM Sans','sans-serif']}}}}</script>
+  <style>
+    :root{--g1:#1D4ED8;--g2:#1E40AF;--g3:#1E3A5F;--g4:#3B82F6;--g5:#60A5FA;--gl:#DBEAFE;--gxl:#EFF6FF;--gxxl:#F0F7FF;--y1:#F59E0B;--y2:#FBBF24;--y3:#D97706;--yl:#FEF3C7;--bg:#EFF3F8;--bd:#D1DBE8;--tx:#0F172A;--tx2:#334155;--tx3:#64748B}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+    h1,h2,h3,h4{font-family:'Outfit',sans-serif}
+    ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--g5);border-radius:4px}::-webkit-scrollbar-track{background:transparent}
+
+    .mo{position:fixed;inset:0;background:rgba(15,23,42,.12);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;backdrop-filter:blur(2px)}.mo.on{display:flex}
+    .mb{background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(29,78,216,.1);animation:mU .2s ease}.mb.lg{max-width:860px}.mb.xl{max-width:1100px}
+    @keyframes mU{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .mh{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0}.mbo{padding:14px 20px}.mf{padding:0 20px 18px;display:flex;gap:8px;justify-content:flex-end}
+    #toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:60;padding:14px 22px;border-radius:12px;color:#fff;font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.2);animation:tI .25s ease}
+    #toast.on{display:flex} @keyframes tI{from{opacity:0;transform:translate(-50%,-50%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+    .sk{background:linear-gradient(90deg,var(--bd) 25%,var(--gxxl) 50%,var(--bd) 75%);background-size:200% 100%;animation:sh 1.5s infinite;border-radius:6px}
+    @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .fi{width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:#fff;color:var(--tx)}
+    .fi:focus{border-color:var(--g1);box-shadow:0 0 0 3px rgba(29,78,216,.08)}
+    .fl{display:block;font-size:11.5px;font-weight:600;color:var(--tx3);margin-bottom:5px;text-transform:uppercase}
+    
+    .bt{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:all .15s}
+    .bt1{background:var(--g1);color:#fff}.bt1:hover{background:var(--g2);box-shadow:0 4px 14px rgba(29,78,216,.3)}
+    .bt2{background:#fff;color:var(--tx2);border:1.5px solid var(--bd)}.bt2:hover{border-color:var(--g1);color:var(--g1);background:var(--gxxl)}
+    .btd{background:#fff;color:#EF4444;border:1.5px solid #FECACA}.btd:hover{background:#FEF2F2;border-color:#EF4444}
+    .bty{background:var(--y1);color:#fff;border:none}.bty:hover{background:var(--y3);box-shadow:0 4px 14px rgba(245,158,11,.3)}
+    .bts{padding:6px 12px;font-size:12px;border-radius:8px}.btg{background:#059669;color:#fff}
+    
+    .cd{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:20px}
+    .sc{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:16px}
+    .tb{width:100%;border-collapse:collapse;font-size:13px}
+    .tb th{text-align:left;padding:9px 12px;background:var(--gxxl);color:var(--tx3);font-weight:600;font-size:10.5px;text-transform:uppercase;border-bottom:1px solid var(--bd)}
+    .tb td{padding:9px 12px;border-bottom:1px solid #F0F4F8}
+    .bg1{background:var(--gl);color:var(--g3)}.bg2{background:var(--gxxl);color:var(--g2)}.bg3{background:#FEE2E2;color:#991B1B}.bg4{background:var(--bd);color:var(--tx3)}.bgy{background:var(--yl);color:var(--y3)}.bgg{background:#D1FAE5;color:#065F46}
+    .bd{display:inline-block;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600}
+    .fi-in{animation:fU .3s ease} @keyframes fU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    
+    .info-box{background:var(--gl);border:1px solid #93C5FD;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;gap:8px}
+    .info-box i{color:var(--g1);margin-top:2px} .info-box p{font-size:12px;color:var(--g3)}
+    .danger-box{background:#FEE2E2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;gap:8px}
+    .danger-box i{color:#DC2626;margin-top:2px} .danger-box p{font-size:12px;color:#991B1B}
+    .ibtn{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--tx3);font-size:11px}
+    .ibtn:hover{border-color:var(--g1);color:var(--g1);background:var(--gxxl)}
+    .ibtn.del:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2}
+    .pag-btn{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--tx3);font-size:12px;font-weight:600}
+    .pag-btn.act{background:var(--g1);color:#fff;border-color:var(--g1)}
+    
+    .qo{border:2px solid var(--bd);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px}
+    .qo:hover{border-color:var(--g1);background:var(--gxxl)}.qo.sel{border-color:var(--g1);background:var(--gl)}.qo.ok{border-color:var(--g1);background:var(--gl)}.qo.no{border-color:#EF4444;background:#FEE2E2}
+    .qo .ql{width:28px;height:28px;border-radius:7px;background:var(--gxxl);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;color:var(--g2)}
+    .qo.sel .ql,.qo.ok .ql{background:var(--g1);color:#fff}.qo.no .ql{background:#EF4444;color:#fff}
+
+    #loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:#F8FAFC}
+    .login-card{background:#fff;border:1px solid #E2E8F0;border-radius:24px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 20px 40px -15px rgba(0,0,0,0.05)}
+    .login-btn{background:var(--g1);color:#fff;border-radius:12px;padding:14px;width:100%;font-weight:700;display:flex;justify-content:center;gap:8px;cursor:pointer;transition:all .2s}
+    .login-btn:hover{background:var(--g2);box-shadow:0 8px 20px rgba(29,78,216,.25);transform:translateY(-1px)}
+    
+    #sidebar{position:fixed;top:0;left:0;width:252px;height:100vh;background:#fff;border-right:1px solid var(--bd);z-index:40;display:flex;flex-direction:column;transition:transform .25s}
+    #sidebarOverlay{position:fixed;inset:0;background:rgba(15,23,42,.12);z-index:35;opacity:0;pointer-events:none;transition:opacity .25s}
+    #sidebarOverlay.on{opacity:1;pointer-events:auto}
+    .ni{display:flex;align-items:center;gap:11px;padding:9px 14px;margin:1px 8px;border-radius:8px;color:var(--tx3);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent}
+    .ni:hover{background:var(--gxxl);color:var(--g2)}.ni.on{background:var(--g1);color:#fff;border-left:3px solid var(--y1)}
+    .ni i{width:18px;text-align:center;font-size:13px}
+    #mainWrap{margin-left:252px;min-height:100vh;display:flex;flex-direction:column}
+    #mc{flex:1;padding:28px;max-width:1080px;width:100%;margin:0 auto}
+    #mHeader{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:#fff;border-bottom:1px solid var(--bd);z-index:30;align-items:center;padding:0 14px;gap:10px}
+    @media(max-width:768px){#sidebar{transform:translateX(-100%)}#sidebar.open{transform:translateX(0)}#mainWrap{margin-left:0;padding-top:52px}#mHeader{display:flex}#mc{padding:16px}}
+  </style>
+</head>
+<body>
+
+<div id="glLoader" class="fixed inset-0 z-[9999] hidden items-center justify-center" style="background:rgba(15,23,42,0.4);backdrop-filter:blur(3px)">
+  <div class="bg-white px-8 py-6 rounded-2xl flex flex-col items-center gap-4 shadow-2xl">
+    <i class="fas fa-circle-notch fa-spin text-4xl" style="color:var(--g1)"></i>
+    <p class="text-sm font-700 text-slate-800">Memproses...</p>
+  </div>
+</div>
+
+<div id="loginPage">
+  <div class="login-card">
+    <div class="text-center mb-6">
+      <img src="https://i.imgur.com/zKX5JtG.jpeg" alt="Logo" class="w-16 h-16 mx-auto mb-3 rounded-xl shadow-sm object-cover">
+      <h1 class="text-2xl font-h font-800 text-slate-800 tracking-tight">Atomic School</h1>
+      <p class="text-sm mt-1 text-slate-500">Sistem Manajemen Pembelajaran</p>
+    </div>
+    <div class="space-y-3">
+      <div><label class="fl">Email</label><input id="lE" type="email" class="fi" placeholder="emailanda@contoh.com"></div>
+      <div><label class="fl">Password</label><input id="lP" type="password" class="fi" placeholder="Masukkan password"></div>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div><label class="fl">Semester</label><select id="lSM" class="fi"><option value="1">Ganjil (1)</option><option value="2">Genap (2)</option></select></div>
+        <div><label class="fl">Tahun Pelajaran</label><select id="lTP" class="fi"><option value="2023/2024">2023/2024</option></select></div>
+      </div>
+      <div id="lErr" class="text-xs text-red-500 hidden bg-red-50 p-2.5 rounded-lg border border-red-100 font-500 text-center mt-3"></div>
+      <button onclick="doLogin()" id="lBtn" class="login-btn mt-6"><i class="fas fa-arrow-right-to-bracket"></i> Masuk</button>
+    </div>
+  </div>
+</div>
+
+<div id="appPage" class="hidden">
+  <header id="mHeader">
+    <button onclick="togSB()" style="color:var(--g1)" class="text-lg"><i class="fas fa-bars"></i></button>
+    <div class="flex items-center gap-2"><span class="font-h font-700 text-sm" style="color:var(--g2)">Atomic School</span></div>
+  </header>
+  
+  <div id="sidebarOverlay" onclick="clsSB()"></div>
+  <aside id="sidebar">
+    <div class="p-4 pb-2">
+      <div class="flex items-center gap-2.5">
+        <div><h2 class="font-h font-800 text-base leading-tight" style="color:var(--g2)">Atomic School</h2></div>
+      </div>
+    </div>
+    <div class="px-3 py-1.5">
+      <div class="rounded-lg p-2.5 mb-2" style="background:var(--gxxl)">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center font-h font-700 text-xs" style="background:var(--g1);color:#fff" id="avI">-</div>
+          <div class="min-w-0">
+            <p class="text-[13px] font-600 truncate" style="color:var(--tx)" id="sbN">-</p>
+            <p class="text-[11px] truncate line-clamp-2" style="color:var(--tx3)" id="sbR">-</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto" id="sbNav"></nav>
+    <div class="p-3" style="border-top:1px solid var(--bd)"><div class="ni" style="color:#EF4444" onclick="doLogout()"><i class="fas fa-arrow-right-from-bracket"></i><span>Keluar</span></div></div>
+  </aside>
+  
+  <div id="mainWrap">
+    <main id="mc"></main>
+    <footer class="text-center text-[11px] py-3 mt-auto" style="color:var(--tx3);border-top:1px solid var(--bd);background:#fff">&copy; sayaguru.id</footer>
+  </div>
+</div>
+
+<div class="mo" id="modal"><div class="mb" id="mBox"><div class="mh"><h3 class="font-h font-700 text-base" style="color:var(--tx)" id="mTi"></h3><button onclick="clM()" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded"><i class="fas fa-xmark"></i></button></div><div class="mbo" id="mBo"></div><div class="mf" id="mFo"></div></div></div>
+<div class="mo" id="viewer"><div class="mb lg" id="vBox"><div class="mh"><h3 class="font-h font-700 text-base" style="color:var(--tx)" id="vTi"></h3><button onclick="clV()" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded"><i class="fas fa-xmark"></i></button></div><div class="mbo" style="padding:0"><iframe id="vIf" style="width:100%;height:72vh;border:none;border-radius:0 0 16px 16px" allowfullscreen></iframe></div></div></div>
+<div class="mo" id="confirmModal"><div class="mb" style="max-width:380px"><div class="mh"><h3 class="font-h font-700 text-base" style="color:#991B1B">Konfirmasi</h3><button onclick="clCF()" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded"><i class="fas fa-xmark"></i></button></div><div class="mbo"><p class="text-sm" style="color:var(--tx2)" id="cfMs"></p></div><div class="mf"><button class="bt bt2" onclick="clCF()">Batal</button><button class="bt btd" id="cfBtn"><i class="fas fa-trash"></i> Hapus</button></div></div></div>
+<div class="mo" id="pdfModal"><div class="mb xl"><div class="mh"><h3 class="font-h font-700 text-base" id="pdfTi">Preview PDF</h3><button onclick="clPDF()" class="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded"><i class="fas fa-xmark"></i></button></div><div class="mbo" id="pdfPreview" style="height:65vh"></div><div class="mf"><button class="bt bt2" onclick="clPDF()">Tutup</button><button class="bt bty" id="pdfDlBtn"><i class="fas fa-download"></i> Unduh PDF</button></div></div></div>
+<div id="toast"><i id="tIc" class="fas fa-check-circle"></i><span id="tMs"></span></div>
+
+<script>
+const SU = 'https://script.google.com/macros/s/AKfycbwZJZNV_IQSI_LXc7XJVFnxjdKeqax408ZVL_hzhMzL6OCrPqHoJpk_OS4m6IP8UZiD/exec'; // GANTI URL WEB APP ANDA
+const LOGO_URL = 'https://i.imgur.com/zKX5JtG.jpeg';
+let LOGO_B64 = '';
+
+const A = {u:null, p:'dashboard', sess:{semester:'1', tahunPelajaran:''}, d:{mapel:[],kelas:[],tugas:[],jawaban:[],nk:[],progress:[],soal:[]}, qs:{a:{},s:false}, raPage:{}, raData:[], raFilter:{}, jgPage:1, ygPage:1, ymPage:1};
+const _c = {};
+const _sk = ['addMateri','updateMateri','deleteMateri','addSoal','updateSoal','deleteSoal','addTugas','updateTugas','deleteTugas','submitKuis','submitTugas','nilaiTugas','deleteNilaiTugas','submitAbsensi','addSiswa','updateSiswa','deleteSiswa','updateProgress','addJurnal','updateJurnal','deleteJurnal','addMapel','updateMapel','deleteMapel','submitKarakter'];
+
+const NV = {
+  Siswa: [{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'materi',c:'fa-book-open',l:'Materi'},{i:'latihan',c:'fa-pen-to-square',l:'Latihan'},{i:'tugas',c:'fa-file-lines',l:'Tugas'},{i:'nilai',c:'fa-chart-column',l:'Nilai'},{i:'transkrip',c:'fa-graduation-cap',l:'Rapor & Transkrip'}],
+  Guru: [{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'kelola-mapel',c:'fa-layer-group',l:'Kelola Mapel'},{i:'kelola-siswa',c:'fa-users',l:'Kelola Pengguna'},{i:'kelola-materi',c:'fa-book-open',l:'Kelola Materi'},{i:'kelola-soal',c:'fa-list-check',l:'Kelola Soal'},{i:'kelola-tugas',c:'fa-file-circle-plus',l:'Kelola Tugas'},{i:'penilaian',c:'fa-star',l:'Penilaian Tugas'},{i:'karakter-guru',c:'fa-seedling',l:'Penilaian Karakter'},{i:'absensi',c:'fa-clipboard-check',l:'Absensi Siswa'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Riwayat Absen'},{i:'jurnal',c:'fa-book-journal-whills',l:'Jurnal Guru'},{i:'transkrip-kelas',c:'fa-file-excel',l:'Cetak Rapor Kelas'}],
+  'Orang Tua': [{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'jurnal-anak',c:'fa-book-journal-whills',l:'Jurnal Kelas'},{i:'tugas',c:'fa-file-lines',l:'Tugas Anak'},{i:'nilai',c:'fa-chart-column',l:'Nilai Anak'},{i:'karakter-ortu',c:'fa-child-reaching',l:'Penilaian Karakter'},{i:'transkrip',c:'fa-graduation-cap',l:'Rapor Anak'}],
+  'Kepala Sekolah': [{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'jurnal-pantau',c:'fa-book-journal-whills',l:'Pantau Jurnal'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Pantau Absensi'},{i:'transkrip-kelas',c:'fa-file-excel',l:'Cetak Rapor Siswa'}],
+  Yayasan: [{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'y-guru',c:'fa-chalkboard-user',l:'Kehadiran Guru'},{i:'y-siswa',c:'fa-chart-pie',l:'Statistik Siswa'},{i:'y-materi',c:'fa-book-open',l:'Materi Diajarkan'}]
+};
+
+function normJ(j){if(!j||typeof j!=='object')return j;for(const k of Object.keys(j)){const lk=k.toLowerCase().replace(/[\s_\-]+/g,'');j[lk]=j[k]}return j}
+function fmtDS(iso){if(!iso)return'-';let d=new Date(iso);if(isNaN(d.getTime()))return iso;const bl=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];return d.getDate()+' '+bl[d.getMonth()]+' '+d.getFullYear()}
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function td(){return new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function ytE(u){const m=(u||'').match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return m?'https://www.youtube.com/embed/'+m[1]:u}
+function drP(u){if(!u)return '';if(u.includes('drive.google.com')){let m=u.match(/file\/d\/([a-zA-Z0-9_-]+)/)||u.match(/[?&]id=([a-zA-Z0-9_-]+)/);if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;return u.replace(/\/view(\?|$)/,'/preview$1').replace(/\/edit(\?|$)/,'/preview$1')}return u}
+function so(a,s='',p='-- Pilih --'){return `<option value="">${p}</option>`+a.map(o=>{const v=typeof o==='string'?o:o.v,l=typeof o==='string'?o:o.l;return `<option value="${v}" ${v==s?'selected':''}>${l}</option>`}).join('')}
+function soK(a,s='',p='-- Pilih --'){return `<option value="">${p}</option>`+a.map(o=>`<option value="${o}" ${o==s?'selected':''}>${o}</option>`)+`<option value="__new__" style="color:var(--y3);font-weight:600">+ Tambah Baru</option>`}
+function invCache(actions){for(const k in _c){for(const a of actions){if(k.includes('"'+a+'"')){delete _c[k];break}}}}
+
+function toast(m,t='success'){const e=document.getElementById('toast'),ic=document.getElementById('tIc'),ms=document.getElementById('tMs');e.style.background=t==='error'?'#EF4444':t==='warning'?'#F59E0B':'#1D4ED8';ic.className='fas '+(t==='error'?'fa-times-circle':t==='warning'?'fa-exclamation-triangle':'fa-check-circle');ms.textContent=m;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),3000)}
+function sk(h=12){return `<div class="sk" style="height:${h}px;margin-bottom:7px"></div><div class="sk" style="height:${h}px;margin-bottom:7px;width:70%"></div><div class="sk" style="height:${h}px;width:50%"></div>`}
+function skC(){return '<div class="cd mb-3">'+sk()+'</div>'}
+function empty(ic,m){return `<div class="text-center py-12 fi-in"><div class="w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center" style="background:var(--gxxl)"><i class="fas ${ic} text-2xl" style="color:var(--g4)"></i></div><p class="text-sm font-500" style="color:var(--tx3)">${m}</p></div>`}
+function st(ic,l,v,c1='var(--g1)'){return `<div class="sc fi-in"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:${c1}"><i class="fas ${ic} text-white text-sm"></i></div><div><p class="text-[11px] font-500" style="color:var(--tx3)">${l}</p><p class="text-lg font-h font-800 leading-tight" style="color:var(--tx)">${v}</p></div></div></div>`}
+function opM(ti,bo,fo='',lg){document.getElementById('mTi').textContent=ti;document.getElementById('mBo').innerHTML=bo;document.getElementById('mFo').innerHTML=fo;document.getElementById('mBox').className='mb '+(lg||'');document.getElementById('modal').classList.add('on')}
+function clM(){document.getElementById('modal').classList.remove('on')}
+function opV(ti,u){document.getElementById('vTi').textContent=ti;document.getElementById('vIf').src=u;document.getElementById('viewer').classList.add('on')}
+function clV(){document.getElementById('viewer').classList.remove('on');document.getElementById('vIf').src=''}
+function togSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('on')}
+function clsSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('on')}
+let _cfCb=null;function cfDel(m,cb){document.getElementById('cfMs').textContent=m;_cfCb=cb;document.getElementById('cfBtn').onclick=async()=>{if(_cfCb)await _cfCb();clCF()};document.getElementById('confirmModal').classList.add('on')}
+function clCF(){document.getElementById('confirmModal').classList.remove('on');_cfCb=null}
+function previewPdf(d,f){const u=URL.createObjectURL(d.output('blob'));document.getElementById('pdfTi').textContent='Preview: '+f;document.getElementById('pdfPreview').innerHTML=`<iframe src="${u}" style="width:100%;height:100%;border:none;border-radius:8px"></iframe>`;document.getElementById('pdfDlBtn').onclick=()=>d.save(f);document.getElementById('pdfModal').classList.add('on')}
+function clPDF(){document.getElementById('pdfModal').classList.remove('on')}
+
+async function api(a,d={}){d.action=a;const k=JSON.stringify({a,d});const isMut=_sk.includes(a);if(!isMut&&_c[k])return _c[k];if(isMut)document.getElementById('glLoader').style.display='flex';try{const r=await fetch(SU,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)});const j=await r.json();if(!isMut)_c[k]=j;if(isMut)document.getElementById('glLoader').style.display='none';return j}catch(e){if(isMut)document.getElementById('glLoader').style.display='none';return{success:false,message:'Koneksi gagal'}}}
+
+async function loadLogo(){
+  try{ const res = await fetch(LOGO_URL); const blob = await res.blob(); const reader = new FileReader(); reader.onloadend = () => LOGO_B64 = reader.result; reader.readAsDataURL(blob); }catch(e){}
+}
+
+document.addEventListener("DOMContentLoaded", async function(){ 
+  loadLogo();
+  if(!A.u) {
+    try{
+      const r = await fetch(SU,{method:'POST',body:JSON.stringify({action:'getTahunPelajaran'})}).then(x=>x.json());
+      if(r.success && r.data.length) document.getElementById('lTP').innerHTML = r.data.map(d=>`<option value="${d.Tahun}">${d.Tahun}</option>`).join('');
+    }catch(e){}
+  }
+});
+(function(){try{const s=sessionStorage.getItem('edu_u'), sess=sessionStorage.getItem('edu_sess');if(s){A.u=JSON.parse(s);if(sess)A.sess=JSON.parse(sess);document.getElementById('loginPage').style.display='none';document.getElementById('appPage').classList.remove('hidden');entApp();}}catch(e){}})();
+
+async function doLogin(){const e=document.getElementById('lE').value.trim(),p=document.getElementById('lP').value,er=document.getElementById('lErr');if(!e||!p){er.textContent='Lengkapi form';er.classList.remove('hidden');return}er.classList.add('hidden');const b=document.getElementById('lBtn');b.innerHTML='<i class="fas fa-spinner fa-spin"></i>';const r=await api('login',{email:e,password:p});b.innerHTML='Masuk';if(!r.success){er.textContent=r.message;er.classList.remove('hidden');return}A.u=r.user;A.sess={semester:document.getElementById('lSM').value, tahunPelajaran:document.getElementById('lTP').value};entApp()}
+function entApp(){sessionStorage.setItem('edu_u',JSON.stringify(A.u));sessionStorage.setItem('edu_sess',JSON.stringify(A.sess));document.getElementById('loginPage').style.display='none';document.getElementById('appPage').classList.remove('hidden');document.getElementById('sbN').textContent=A.u.Nama;document.getElementById('sbR').textContent=A.u.Role+(A.u.Kelas?' — '+A.u.Kelas:'') + ` (SMT ${A.sess.semester})`;document.getElementById('avI').textContent=A.u.Nama.charAt(0).toUpperCase();rSB();nav('dashboard')}
+function doLogout(){A.u=null;sessionStorage.clear();location.reload();}
+
+function rSB(){document.getElementById('sbNav').innerHTML=NV[A.u.Role].map(n=>`<div class="ni ${A.p===n.i?'on':''}" onclick="nav('${n.i}')"><i class="fas ${n.c}"></i><span>${n.l}</span></div>`).join('')}
+function uAN(){document.querySelectorAll('#sbNav .ni').forEach(e=>e.classList.toggle('on',e.getAttribute('onclick')?.includes("'"+A.p+"'")))}
+
+async function nav(p){A.p=p;clsSB();uAN();const m=document.getElementById('mc');m.innerHTML=skC();try{
+  const fn={
+    dashboard:pD, materi:pMt, latihan:pKu, tugas:pTg, nilai:pNi, transkrip:pTr,
+    'kelola-mapel':pKP, 'kelola-siswa':pKS, 'kelola-materi':pKM, 'kelola-soal':pKSo, 'kelola-tugas':pKT,
+    penilaian:pNl, absensi:pAb, 'riwayat-absen':pRA, jurnal:pJG, 'jurnal-pantau':pJG, 'transkrip-kelas':pTK,
+    'jurnal-anak':pJgAnak, 'karakter-guru':pKarGuru, 'karakter-ortu':pKarOrtu,
+    'y-guru':pYG, 'y-siswa':pYS, 'y-materi':pYM
+  };
+  m.innerHTML=await(fn[p]||pD)();
+}catch(e){m.innerHTML=empty('fa-triangle-exclamation','Error: '+e.message)}}
+
+/* ===== DASHBOARD ===== */
+async function pD(){
+  const isOrtu = A.u.Role === 'Orang Tua';
+  const isYayasan = A.u.Role === 'Yayasan';
+  const eml = isOrtu ? A.u.EmailAnak : A.u.Email;
+  const kls = isOrtu ? A.u.KelasAnak : A.u.Kelas;
+  
+  if(isYayasan) {
+    const [rU, rK] = await Promise.all([api('getSiswaByKelas',{kelas:'__ALL__'}), api('getKelasList')]);
+    const users = rU.success ? rU.data : [];
+    const tSiswa = users.filter(u=>u.Role==='Siswa').length;
+    const tGuru = users.filter(u=>u.Role==='Guru').length;
+    const tOrtu = users.filter(u=>u.Role==='Orang Tua').length;
+    const tKelas = rK.success ? rK.data.length : 0;
+    
+    let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Dashboard Yayasan</h1><p class="text-xs mb-5" style="color:var(--tx3)">${td()} | Data Keseluruhan Sekolah</p><div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">`;
+    h+=st('fa-users','Total Siswa',tSiswa,'var(--g1)');
+    h+=st('fa-chalkboard-user','Total Guru',tGuru,'var(--y1)');
+    h+=st('fa-user-group','Total Orang Tua',tOrtu,'var(--g4)');
+    h+=st('fa-door-open','Total Kelas',tKelas,'#EF4444');
+    h+=`</div></div>`;
+    return h;
+  }
+
+  invCache(['getStats','getProgress']);
+  const r=await api('getStats',{role: isOrtu ? 'Siswa' : A.u.Role, email: eml, kelas: kls});
+  if(!r.success)return empty('fa-triangle-exclamation',r.message);
+  const s=r.data;
+  let tName = A.u.Nama.split(' ')[0];
+  if(isOrtu) tName += ` (Wali dari ${A.u.NamaAnak})`;
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Selamat datang, ${tName}</h1><p class="text-xs mb-5" style="color:var(--tx3)">${td()} | SMT ${A.sess.semester} - TP ${A.sess.tahunPelajaran}</p><div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">`;
+  if(A.u.Role==='Siswa' || isOrtu){
+    h+=st('fa-book-open','Total Materi',s.totalMateri,'var(--g1)'); h+=st('fa-circle-check','Selesai',s.materiSelesai,'var(--y1)'); h+=st('fa-file-lines','Tugas',s.tugasDikumpulkan,'var(--g4)'); h+=st('fa-pen-to-square','Rata Kuis',s.rataKuis,'var(--y3)');
+    h+=`</div><div class="cd"><div class="flex items-center justify-between mb-2.5"><h3 class="font-h font-700 text-sm">Progress Materi ${isOrtu?'Anak':''}</h3><span class="text-xs font-700" style="color:var(--g1)">${s.persenProgress}%</span></div><div class="w-full h-3 rounded-full overflow-hidden" style="background:var(--gxxl)"><div class="h-full rounded-full transition-all" style="background:linear-gradient(90deg,var(--g1),var(--y1));width:${s.persenProgress}%"></div></div><p class="text-[11px] mt-1.5" style="color:var(--tx3)">${s.materiSelesai} dari ${s.totalMateri} materi selesai</p></div>`;
+  }else{
+    h+=st('fa-users','Siswa',s.totalSiswa,'var(--g1)'); h+=st('fa-book','Mapel',s.totalMapel,'var(--y1)'); h+=st('fa-file-lines','Tugas',s.totalTugas,'var(--g4)'); h+=st('fa-clock','Belum Dinilai',s.belumDinilai,'#EF4444');
+    h+=`</div>`;
+    if(s.belumDinilai>0 && (A.u.Role==='Guru'||A.u.Role==='Kepala Sekolah'))h+=`<div class="cd flex items-center gap-3 cursor-pointer hover:shadow-sm transition" style="border-color:var(--yl)" onclick="nav('penilaian')"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--yl)"><i class="fas fa-bell text-sm" style="color:var(--y3)"></i></div><div class="flex-1 min-w-0"><p class="text-sm font-600">${s.belumDinilai} pengumpulan belum dinilai</p></div><i class="fas fa-chevron-right text-xs" style="color:var(--y1)"></i></div>`;
+  }
+  return h+'</div>';
+}
+
+/* ===== MODUL SISWA ===== */
+async function pMt(){
+  const[rm,rp]=await Promise.all([api('getMapel',{kelas:A.u.Kelas}),api('getProgress',{email:A.u.Email})]);
+  if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  A.d.mapel=rm.data; if(!rm.data.length)return empty('fa-book-open','Belum ada mata pelajaran');
+  A.d.progress=rp.success?rp.data:[];
+  const mR=await Promise.all(rm.data.map(mp=>api('getMateriByMapel',{idMapel:mp.IDMapel})));
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Materi Pelajaran</h1><p class="text-xs mb-5" style="color:var(--tx3)">Akses materi belajar Anda di sini</p>`;
+  rm.data.forEach((mp,mi)=>{
+    const items=(mR[mi].success?mR[mi].data:[]); if(!items.length)return;
+    const babs={}; items.forEach(m=>{if(!babs[m.Bab])babs[m.Bab]=[];babs[m.Bab].push(m)});
+    h+=`<div class="cd mb-3"><h2 class="font-h font-700 text-sm mb-3 flex items-center gap-2"><div class="w-6 h-6 rounded-md flex items-center justify-center" style="background:var(--gxxl)"><i class="fas fa-book text-[10px]" style="color:var(--g1)"></i></div>${mp.NamaMapel}</h2>`;
+    for(const[bab,bi]of Object.entries(babs)){
+      h+=`<p class="text-[10.5px] font-700 uppercase tracking-wider mb-2 mt-1 text-gray-500">${bab}</p><div class="space-y-2">`;
+      bi.forEach(m=>{
+        const done=A.d.progress.find(p=>p.IDMateri===m.IDMateri&&p.Status==='Selesai');
+        h+=`<div class="rounded-lg p-3 flex flex-col sm:flex-row sm:items-center gap-2.5" style="border:1px solid var(--bd)"><div class="flex-1 min-w-0"><p class="font-600 text-sm">${m.Judul}</p>${m.Deskripsi?`<p class="text-[11px] mt-0.5 text-gray-500 line-clamp-1">${m.Deskripsi}</p>`:''}</div><div class="flex items-center gap-1.5 flex-shrink-0 flex-wrap">${m.PdfUrl?`<button class="bt bt2 bts" onclick="opV('${esc(m.Judul)}','${drP(m.PdfUrl)}')"><i class="fas fa-file-pdf"></i> PDF</button>`:''}${m.YoutubeUrl?`<button class="bt bt2 bts" onclick="opV('${esc(m.Judul)}','${ytE(m.YoutubeUrl)}')"><i class="fas fa-play"></i> Video</button>`:''}<button class="bt ${done?'bt1':'bt2'} bts" id="mb_${m.IDMateri}" ${done?'disabled':''} onclick="mDn('${m.IDMateri}',this)"><i class="fas ${done?'fa-check-circle':'fa-circle'}"></i> ${done?'Selesai':'Tandai'}</button></div></div>`;
+      }); h+=`</div>`;
+    } h+=`</div>`;
+  });
+  return h+'</div>';
+}
+async function mDn(id,btn){
+  const r=await api('updateProgress',{email:A.u.Email,idMateri:id,status:'Selesai'});
+  if(r.success){btn.className='bt bt1 bts';btn.innerHTML='<i class="fas fa-check-circle"></i> Selesai';btn.disabled=true;invCache(['getStats','getProgress']);toast('Ditandai selesai')}
+}
+
+async function pKu(){
+  const rm=await api('getMapel',{kelas:A.u.Kelas});
+  if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  A.d.mapel=rm.data;
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Latihan & Kuis</h1><p class="text-xs mb-5" style="color:var(--tx3)">Pilih mapel dan bab — Maksimal 3 kali percobaan</p><div class="cd"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3"><div><label class="fl">Mata Pelajaran</label><select class="fi" id="kM" onchange="ldBK()">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Bab / Topik</label><select class="fi" id="kB"><option value="">-- Pilih Mapel --</option></select></div></div><button class="bt bt1" onclick="stK()" id="bSK" disabled><i class="fas fa-play"></i> Mulai</button></div><div id="kA" class="mt-5"></div></div>`;
+}
+async function ldBK(){
+  const id=document.getElementById('kM').value,bs=document.getElementById('kB'),btn=document.getElementById('bSK');
+  if(!id){bs.innerHTML='<option value="">-- Pilih Mapel --</option>';btn.disabled=true;return}
+  const r=await api('getBabSoal',{idMapel:id});
+  if(!r.success||!r.data.length){bs.innerHTML='<option value="">Tidak ada bab</option>';btn.disabled=true;return}
+  bs.innerHTML=so(r.data);btn.disabled=false;
+}
+async function stK(){
+  const id=document.getElementById('kM').value,bab=document.getElementById('kB').value,area=document.getElementById('kA');
+  if(!id||!bab)return; area.innerHTML=skC(); invCache(['getNilaiKuis']);
+  const rn=await api('getNilaiKuis',{email:A.u.Email});
+  let attempts=[]; if(rn.success)attempts=rn.data.filter(n=>String(n.IDMapel)===String(id)&&n.Bab===bab);
+  const maxAttempt=3,usedAttempt=attempts.length;
+  if(usedAttempt>=maxAttempt){
+    area.innerHTML=`<div class="cd fi-in"><div class="danger-box"><i class="fas fa-ban"></i><p>Batas percobaan habis! Nilai tercatat: <strong>${attempts[attempts.length-1].Skor}</strong></p></div><table class="tb mt-3"><thead><tr><th>#</th><th>Skor</th><th>Tanggal</th></tr></thead><tbody>${attempts.map((a,i)=>`<tr><td>${i+1}</td><td><span class="bd ${Number(a.Skor)>=70?'bg1':'bg3'}">${a.Skor}</span></td><td class="text-xs text-gray-500">${fmtDS(a.Tanggal)}</td></tr>`).join('')}</tbody></table></div>`;return;
+  }
+  const r=await api('getSoalByBab',{idMapel:id,bab});
+  if(!r.success||!r.data.length){area.innerHTML=empty('fa-clipboard-question','Tidak ada soal');return}
+  A.d.soal=r.data;A.qs={a:{},s:false}; const mp=A.d.mapel.find(m=>m.IDMapel==id);
+  
+  let h=`<div class="cd fi-in"><div class="flex items-center justify-between mb-3"><h2 class="font-h font-700 text-sm">${mp?mp.NamaMapel:''} — ${bab}</h2><span class="bd bg4">${r.data.length} soal</span></div><div class="space-y-4" id="qWrap">`;
+  r.data.forEach((s,i)=>{
+    h+=`<div><p class="font-600 text-sm mb-2">${i+1}. ${s.Pertanyaan}</p><div class="space-y-1.5" id="q${i}"><div class="qo" onclick="pO(${i},'A')"><span class="ql">A</span><span class="text-sm">${s.OpsiA}</span></div><div class="qo" onclick="pO(${i},'B')"><span class="ql">B</span><span class="text-sm">${s.OpsiB}</span></div><div class="qo" onclick="pO(${i},'C')"><span class="ql">C</span><span class="text-sm">${s.OpsiC}</span></div><div class="qo" onclick="pO(${i},'D')"><span class="ql">D</span><span class="text-sm">${s.OpsiD}</span></div></div></div>`;
+  });
+  h+=`</div><button class="bt bt1 w-full justify-center mt-5 py-2.5" id="submitKuisBtn" onclick="smK('${id}','${bab}')"><i class="fas fa-paper-plane"></i> Kirim Jawaban</button></div>`;
+  area.innerHTML=h;
+}
+function pO(qi,opt){if(A.qs.s)return;A.qs.a[qi]=opt;const L=['A','B','C','D'];document.getElementById('q'+qi).querySelectorAll('.qo').forEach((e,j)=>e.classList.toggle('sel',L[j]===opt))}
+async function smK(id,bab){
+  if(A.qs.s)return;const t=A.d.soal.length; if(t-Object.keys(A.qs.a).length>0){toast('Belum semua soal dijawab','warning');return}
+  A.qs.s=true;let b=0;const L=['A','B','C','D'];
+  A.d.soal.forEach((s,i)=>{const an=A.qs.a[i];document.getElementById('q'+i).querySelectorAll('.qo').forEach((e,j)=>{if(L[j]===s.KunciJawaban)e.classList.add('ok');if(L[j]===an&&an!==s.KunciJawaban)e.classList.add('no')});if(an===s.KunciJawaban)b++});
+  const sk=Math.round((b/t)*100);const btn=document.getElementById('submitKuisBtn');btn.disabled=true;btn.innerHTML=`<i class="fas fa-check-circle"></i> Skor: ${sk}`;
+  await api('submitKuis',{idMapel:id,bab,email:A.u.Email,nama:A.u.Nama,skor:sk});invCache(['getNilaiKuis','getStats']);toast('Skor tersimpan');setTimeout(()=>{A.qs={a:{},s:false};stK()},2500);
+}
+
+async function pTg(){
+  const isOrtu = A.u.Role === 'Orang Tua'; const kls = isOrtu ? A.u.KelasAnak : A.u.Kelas; const eml = isOrtu ? A.u.EmailAnak : A.u.Email;
+  const[rt,rj]=await Promise.all([api('getTugas',{kelas:kls}),api('getJawabanTugas',{email:eml})]);
+  if(!rt.success)return empty('fa-triangle-exclamation',rt.message);
+  A.d.tugas=rt.data;A.d.jawaban=(rj.success?rj.data:[]).map(normJ);
+  if(!rt.data.length)return empty('fa-file-lines','Belum ada tugas');
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">${isOrtu?'Tugas Anak':'Tugas'}</h1><p class="text-xs mb-5 text-gray-500">${isOrtu?'Kumpulkan tugas mewakili anak':'Kumpulkan tugas sesuai tenggat'}</p><div class="space-y-2.5">`;
+  rt.data.forEach(t=>{
+    const sub=A.d.jawaban.find(j=>j.IDTugas===t.IDTugas);const sn=sub&&sub.Nilai!==''&&sub.Nilai!==null;const bn=sub&&!sn;const tp=t.Tipe||'Individu';
+    h+=`<div class="cd" ${bn?'style="border-color:var(--yl)"':''}><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><h3 class="font-h font-700 text-sm">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span>${sub?(sn?'<span class="bd bg1">Dinilai</span>':'<span class="bd bgy">Terkumpul</span>'):''}</div><p class="text-[11px] text-gray-500 mt-1">${t.Deskripsi||''}</p><p class="text-[11px] mt-1 text-gray-500"><i class="fas fa-calendar mr-0.5"></i>Tenggat: ${fmtDS(t.Tenggat)}</p>${sub?`<p class="text-[11px] font-600 mt-0.5" style="color:${sn?'var(--g1)':'var(--y3)'}">${sn?'Nilai: '+sub.Nilai:'Menunggu penilaian'}${sub.CatatanGuru?' — '+sub.CatatanGuru:''}</p>`:''}</div><div class="flex-shrink-0">${sub?`<button class="bt bt2 bts" onclick="opST('${t.IDTugas}','${tp}','${kls}',true)"><i class="fas fa-rotate"></i> Perbarui</button>`:`<button class="bt bt1 bts" onclick="opST('${t.IDTugas}','${tp}','${kls}',false)"><i class="fas fa-paper-plane"></i> Kumpulkan</button>`}</div></div></div>`;
+  });
+  return h+'</div></div>';
+}
+let _ms=[];
+async function opST(id,tipe,kelas,isEdit){
+  _ms=[];let ah='', w='';
+  if(tipe==='Kelompok'){const rs=await api('getSiswaByKelas',{kelas,excludeEmail:(A.u.Role==='Orang Tua'?A.u.EmailAnak:A.u.Email)});if(rs.success&&rs.data.length)ah=`<div class="mt-3"><label class="fl">Pilih Anggota</label><select multiple class="fi" id="tAng" style="height:100px">${rs.data.map(s=>`<option value="${s.Email}" data-n="${esc(s.Nama)}">${s.Nama}</option>`).join('')}</select><p class="text-[10px] mt-1 text-gray-500">Tahan CTRL/CMD untuk memilih lebih dari satu</p></div>`}
+  if(isEdit)w=`<div class="info-box"><i class="fas fa-info"></i><p>Jawaban baru menggantikan yang lama.</p></div>`;
+  opM(isEdit?'Perbarui Tugas':'Kumpulkan Tugas',w+`<div><label class="fl">Link Jawaban (Google Drive/Docs)</label><input id="tL" class="fi" placeholder="https://..."></div>${ah}`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smT('${id}','${tipe}')"><i class="fas fa-paper-plane"></i> Simpan</button>`);
+}
+async function smT(id,tipe){
+  const l=document.getElementById('tL').value.trim();if(!l){toast('Link wajib','warning');return}
+  if(tipe==='Kelompok'){Array.from(document.getElementById('tAng').selectedOptions).forEach(o=>_ms.push({e:o.value,n:o.dataset.n}));}
+  const emailP = A.u.Role === 'Orang Tua' ? A.u.EmailAnak : A.u.Email; const namaP = A.u.Role === 'Orang Tua' ? A.u.NamaAnak : A.u.Nama;
+  const r=await api('submitTugas',{idTugas:id,emailPengumpul:emailP,namaPengumpul:namaP,tipe,emailAnggota:_ms.map(s=>s.e).join(','),namaAnggota:_ms.map(s=>s.n).join(','),linkJawaban:l});
+  if(r.success){clM();cc();invCache(['getJawabanTugas']);toast(r.message);nav(A.p)}else toast(r.message,'error');
+}
+
+async function pNi(){
+  const isOrtu = A.u.Role === 'Orang Tua'; const eml = isOrtu ? A.u.EmailAnak : A.u.Email; const kls = isOrtu ? A.u.KelasAnak : A.u.Kelas;
+  const[rn,rj,rt]=await Promise.all([api('getNilaiKuis',{email:eml}),api('getJawabanTugas',{email:eml}),api('getTugas',{kelas:kls})]);
+  A.d.nk=rn.success?rn.data:[];A.d.tugas=rt.success?rt.data:[]; const jw=(rj.success?rj.data:[]).map(normJ);
+  const rm=await api('getMapel',{kelas:kls});const mm={};if(rm.success)rm.data.forEach(m=>mm[m.IDMapel]=m.NamaMapel);
+  if(!A.d.nk.length&&!jw.length)return empty('fa-chart-column','Belum ada nilai');
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">${isOrtu?'Nilai Anak':'Nilai Saya'}</h1>`;
+  if(A.d.nk.length){h+=`<div class="cd mb-3"><h3 class="font-h font-700 text-sm mb-3">Nilai Kuis</h3><div class="overflow-x-auto"><table class="tb"><thead><tr><th>Mapel</th><th>Bab</th><th>Skor</th></tr></thead><tbody>`;A.d.nk.forEach(n=>{h+=`<tr><td class="text-xs">${mm[n.IDMapel]||n.IDMapel}</td><td class="text-xs">${n.Bab}</td><td><span class="bd ${Number(n.Skor)>=70?'bg1':'bg3'}">${n.Skor}</span></td></tr>`});h+=`</tbody></table></div></div>`}
+  if(jw.length){h+=`<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Nilai Tugas</h3><div class="overflow-x-auto"><table class="tb"><thead><tr><th>Tugas</th><th>Nilai</th></tr></thead><tbody>`;jw.forEach(j=>{const t=A.d.tugas.find(x=>x.IDTugas===j.IDTugas);const nr=j.Nilai;const hasN=nr!==''&&nr!==null;h+=`<tr><td class="text-xs font-500">${t?t.Judul:j.IDTugas}</td><td>${hasN?`<span class="bd ${Number(nr)>=70?'bg1':'bg3'}">${nr}</span>`:`<span class="bd bgy">Belum</span>`}</td></tr>`});h+=`</tbody></table></div></div>`}
+  return h+'</div>';
+}
+
+async function pTr(){
+  const email = A.u.Role === 'Orang Tua' ? A.u.EmailAnak : A.u.Email;
+  const nama = A.u.Role === 'Orang Tua' ? A.u.NamaAnak : A.u.Nama;
+  const kls = A.u.Role === 'Orang Tua' ? A.u.KelasAnak : A.u.Kelas;
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Rapor dan Transkrip</h1><p class="text-xs mb-5 text-gray-500">Anda dapat mengunduh rapor akademik dan rapor karakter.</p><div class="flex gap-3 flex-wrap"><button class="bt bt1" onclick="cetakRaporAkademik('${email}','${esc(nama)}','${kls}')"><i class="fas fa-graduation-cap"></i> Download Rapor Akademik</button><button class="bt bty" onclick="cetakRaporKarakter('${email}','${esc(nama)}')"><i class="fas fa-seedling"></i> Download Rapor Karakter</button></div></div>`;
+}
+
+async function pJgAnak(){
+  const rj = await api('getJurnal',{kelas: A.u.KelasAnak}); A._jgData = rj.success ? rj.data : []; A.jgPage = 1;
+  return `<div class="fi-in"><div class="mb-5"><h1 class="font-h font-800 text-xl mb-0.5">Jurnal Kelas</h1><p class="text-xs text-gray-500">Aktivitas kelas ${A.u.KelasAnak}</p></div><div id="jgCA">${rJGListAnak(A._jgData)}</div></div>`;
+}
+function rJGListAnak(data){
+  if(!data.length)return empty('fa-book','Belum ada jurnal untuk kelas ini');
+  const sorted=[...data].sort((a,b)=>(b.Tanggal||'').localeCompare(a.Tanggal||''));
+  const limit=10;const tp=Math.ceil(sorted.length/limit);if(A.jgPage>tp&&tp>0)A.jgPage=tp;
+  const pageData=sorted.slice((A.jgPage-1)*limit,A.jgPage*limit);
+  let h=`<div class="space-y-2">`;
+  pageData.forEach(j=>{h+=`<div class="cd"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><span class="text-xs font-700 text-blue-600">${fmtDS(j.Tanggal)}</span><span class="bd bg2">${j.NamaMapel||'-'}</span></div><p class="text-sm font-600">${j.MateriYangDiajarkan||'-'}</p><p class="text-[11px] text-gray-500"><i class="fas fa-clock mr-0.5"></i>${j.WaktuMulai||'-'} — ${j.WaktuSelesai||'-'} | Guru: ${j.NamaGuru||'-'}</p></div>`});
+  h+='</div>';
+  if(tp>1){h+=`<div class="flex items-center justify-center gap-1 mt-4"><button class="pag-btn" onclick="jgPgA(${A.jgPage-1})" ${A.jgPage<=1?'disabled':''}><i class="fas fa-chevron-left text-[10px]"></i></button>`;for(let p=1;p<=tp;p++)h+=`<button class="pag-btn ${p===A.jgPage?'act':''}" onclick="jgPgA(${p})">${p}</button>`;h+=`<button class="pag-btn" onclick="jgPgA(${A.jgPage+1})" ${A.jgPage>=tp?'disabled':''}><i class="fas fa-chevron-right text-[10px]"></i></button></div>`}
+  return h;
+}
+function jgPgA(p){if(p<1)return;A.jgPage=p;document.getElementById('jgCA').innerHTML=rJGListAnak(A._jgData);}
+
+async function pKarOrtu(){
+  const blns=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  setTimeout(ldKoForm,100);
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Karakter Anak</h1><p class="text-xs mb-5 text-gray-500">Anak: ${A.u.NamaAnak} | SMT ${A.sess.semester}</p><div class="cd mb-3"><label class="fl">Pilih Bulan Penilaian</label><select id="koB" class="fi" onchange="ldKoForm()">${so(blns.map(b=>({v:b,l:b})),blns[new Date().getMonth()])}</select></div><div id="koC"></div></div>`;
+}
+async function ldKoForm(){
+  const b=document.getElementById('koB').value,c=document.getElementById('koC');c.innerHTML=skC();
+  const[rt,rn]=await Promise.all([api('getTargetKarakter',{semua:true,semester:A.sess.semester,bulan:b}),api('getNilaiKarakter',{emailSiswa:A.u.EmailAnak,semua:true,semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran,bulan:b})]);
+  const tG=rt.success?rt.dataGuru:[]; const tO=rt.success?rt.dataOrtu:[];
+  const nilais=rn.success?rn.data.map(normJ):[];
+
+  let h=`<div class="fi-in"><div class="cd mb-3"><h3 class="font-h font-700 text-sm mb-2">Penilaian oleh Orang Tua (${b})</h3><div class="flex flex-wrap gap-2 text-[11px] mb-3"><span class="bd bg3">1: Tdk Pernah</span><span class="bd bgy">2: Kadang</span><span class="bd bg2">3: Sering</span><span class="bd bg1">4: Selalu</span></div><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Target</th><th>Nilai</th></tr></thead><tbody>`;
+  if(!tO.length) h+=`<tr><td colspan="2" class="text-center">Target ortu untuk bulan ini belum diatur.</td></tr>`;
+  else{
+    tO.forEach(t=>{
+      const idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+      const nObj=nilais.find(n=>n.idtarget===idT && n.penilai==='Ortu');const v=nObj?nObj.nilai:'';
+      h+=`<tr><td class="text-xs">${t.Target}<br><span class="text-[10px] text-gray-400">${t.Deskripsi||''}</span></td><td><div class="flex items-center gap-2">`;
+      [1,2,3,4].forEach(n=>h+=`<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="ko_${idT}" value="${n}" class="accent-blue-600" ${v===String(n)?'checked':''}> <span class="text-xs">${n}</span></label>`);
+      h+=`</div></td></tr>`;
+    });
+    h+=`</tbody></table></div><button class="bt bt1 mt-4" onclick="svKo()"><i class="fas fa-save"></i> Simpan Penilaian Ortu</button></div>`;
+  }
+  
+  h+=`<div class="cd"><h3 class="font-h font-700 text-sm mb-2">Pantauan Penilaian Guru (Semester ${A.sess.semester})</h3><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Bidang</th><th>Target</th><th>Nilai Guru (1-4)</th></tr></thead><tbody>`;
+  if(!tG.length) h+=`<tr><td colspan="3" class="text-center">Belum ada target guru</td></tr>`;
+  else{
+    tG.forEach(t=>{
+      const idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+      const nObj=nilais.find(n=>n.idtarget===idT && n.penilai==='Guru');
+      const lbl = nObj ? (nObj.nilai==1?'PB':nObj.nilai==2?'MB':nObj.nilai==3?'BSH':'SB') : '-';
+      h+=`<tr><td class="text-xs">${t.Bidang}</td><td class="text-xs">${t.Target}</td><td class="text-xs font-600">${nObj?nObj.nilai+' ('+lbl+')':'-'}</td></tr>`;
+    });
+  }
+  h+=`</tbody></table></div></div></div>`;
+  c.innerHTML=h;
+}
+async function svKo(){
+  const b=document.getElementById('koB').value,inps=document.querySelectorAll('#koC input[type="radio"]:checked'),list=[];
+  inps.forEach(i=>list.push({idTarget:i.name.replace('ko_',''),nilai:i.value}));
+  const r=await api('submitKarakter',{emailSiswa:A.u.EmailAnak,type:'Ortu',semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran,bulan:b,list});
+  if(r.success)toast('Tersimpan');else toast(r.message,'error');
+}
+
+/* ===== MODUL GURU / ADMIN ===== */
+async function pKP(){
+  const rm=await api('getMapel'); if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  A.d.mapel=rm.data;
+  let h=`<div class="fi-in"><div class="flex flex-col sm:flex-row justify-between gap-3 mb-5"><div><h1 class="font-h font-800 text-xl">Kelola Mapel</h1></div><button class="bt bt1" onclick="mAMp()"><i class="fas fa-plus"></i> Tambah</button></div>`;
+  if(!rm.data.length)return h+empty('fa-layer-group','Belum ada mapel');
+  const grp={}; rm.data.forEach(m=>{if(!grp[m.NamaMapel])grp[m.NamaMapel]=[];grp[m.NamaMapel].push(m)});
+  h+=`<div class="space-y-3">`;
+  for(const[nm,items]of Object.entries(grp)){
+    h+=`<div class="cd"><h3 class="font-h font-700 text-sm mb-3">${nm}</h3><div class="flex flex-col gap-2">`;
+    items.forEach(m=>{
+      const idMapel = m.ID || m.IDMapel || '';
+      h+=`<div class="flex items-center justify-between p-2 rounded-lg bg-blue-50 border border-blue-100"><div class="flex items-center gap-2"><span class="bd ${m.Kelas==='Semua'?'bgy':'bg2'}">${m.Kelas==='Semua'?'Semua Kelas':m.Kelas}</span></div><div class="flex gap-1"><button class="ibtn" onclick="mEMp('${idMapel}','${esc(nm)}','${esc(m.Kelas)}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus?',async()=>{const r=await api('deleteMapel',{id:'${idMapel}'});if(r.success){cc();invCache(['getMapel']);toast(r.message);nav('kelola-mapel')}else toast(r.message,'error');})"><i class="fas fa-trash"></i></button></div></div>`;
+    }); h+=`</div></div>`;
+  } h+=`</div></div>`; return h;
+}
+function mAMp(){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[]; const klsChecks=kl.map(k=>`<label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer border border-gray-200 hover:bg-gray-50"><input type="checkbox" class="mpKc accent-blue-600" value="${k}"><span class="text-sm">${k}</span></label>`).join('');
+    opM('Tambah Mapel',`<div class="space-y-4"><div><label class="fl">Nama Mapel</label><input id="mpN" class="fi"></div><div><label class="fl">Pilih Kelas</label><label class="flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer mb-2 bg-amber-50 border border-amber-200"><input type="checkbox" id="mpAll" onchange="const a=this.checked;document.querySelectorAll('.mpKc').forEach(c=>{c.disabled=a;c.checked=false;c.closest('label').style.opacity=a?'.4':'1'})" class="accent-amber-600"><span class="text-sm font-600 text-amber-700">Semua Kelas</span></label><div class="grid grid-cols-2 gap-1.5">${klsChecks}</div></div><div><label class="fl">Tambah Kelas Baru (Ketik nama kelas, pisahkan koma)</label><input id="mpNKList" class="fi" placeholder="Contoh: XII IPA 1, XII IPA 2"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAMp()"><i class="fas fa-save"></i> Simpan</button>`);
+  });
+}
+async function smAMp(){
+  const nama=document.getElementById('mpN').value.trim(); if(!nama){toast('Nama mapel wajib','warning');return}
+  let kList=[]; if(document.getElementById('mpAll').checked){kList=['Semua']}else{document.querySelectorAll('.mpKc:checked').forEach(c=>kList.push(c.value))}
+  const newK = document.getElementById('mpNKList').value.split(',').map(x=>x.trim()).filter(Boolean); kList.push(...newK);
+  if(!kList.length){toast('Pilih atau buat kelas','warning');return}
+  let ok=0; for(const kelas of kList){const r=await api('addMapel',{namaMapel:nama,kelas});if(r.success)ok++}
+  if(ok>0){clM();cc();invCache(['getMapel']);toast(ok+' mapel ditambahkan');nav('kelola-mapel')}
+}
+function mEMp(id, nama, kelas){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Edit Mapel',`<div class="space-y-3"><div><label class="fl">Nama Mapel</label><input id="empN" class="fi" value="${nama}"></div><div><label class="fl">Pilih Kelas</label><select id="empK" class="fi" onchange="document.getElementById('empNK').style.display=this.value==='__new__'?'block':'none'">${soK(kl,kelas)}</select></div><div id="empNK" style="display:${kelas==='__new__'?'block':'none'}"><label class="fl">Kelas Baru</label><input id="empNKI" class="fi"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smEMp('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+  });
+}
+async function smEMp(id){
+  const nama=document.getElementById('empN').value.trim(), kv=document.getElementById('empK').value;
+  let kelas=kv;if(kv==='__new__'){kelas=document.getElementById('empNKI').value.trim();if(!kelas){toast('Kelas baru wajib','warning');return}}
+  if(!nama){toast('Nama mapel wajib','warning');return}
+  const r=await api('updateMapel',{id,namaMapel:nama,kelas});
+  if(r.success){clM();cc();invCache(['getMapel']);toast(r.message);nav('kelola-mapel')}else toast(r.message,'error');
+}
+
+async function pKS(){
+  const[rk,ru]=await Promise.all([api('getKelasList'),api('getSiswaByKelas',{kelas:'__ALL__'})]);
+  const kl=rk.success?rk.data:[];const siswa=ru.success?ru.data:[];
+  let h=`<div class="fi-in"><div class="flex flex-col sm:flex-row justify-between gap-3 mb-5"><div><h1 class="font-h font-800 text-xl">Kelola Pengguna</h1></div><button class="bt bt1" onclick="mAS()"><i class="fas fa-plus"></i> Tambah</button></div><div class="cd mb-3"><label class="fl">Filter Kelas</label><select class="fi" id="fKS" onchange="fKSCh()"><option value="">Semua (Semua Role)</option>${so(kl.map(k=>({v:k,l:k})))}</select></div><div class="cd overflow-x-auto" id="ksTb">${rTbSiswa(siswa)}</div></div>`;
+  return h;
+}
+function rTbSiswa(data){
+  if(!data.length)return empty('fa-users','Tidak ada pengguna');
+  let h=`<table class="tb w-full"><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Kelas</th><th>Aksi</th></tr></thead><tbody>`;
+  data.forEach(s=>{h+=`<tr><td class="font-600 text-sm">${s.Nama}</td><td class="text-xs text-gray-500">${s.Email}</td><td><span class="bd ${s.Role==='Guru'?'bg1':s.Role==='Orang Tua'?'bgy':s.Role==='Yayasan'?'bg4':'bg2'}">${s.Role}</span></td><td><span class="bd bg4">${s.Kelas||'-'}</span></td><td><div class="flex gap-1"><button class="ibtn" onclick="mES('${s.ID}','${esc(s.Nama)}','${esc(s.Email)}','${esc(s.Role)}','${esc(s.Kelas)}','${esc(s.EmailAnak||'')}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus ${esc(s.Nama)}?',async()=>{const r=await api('deleteSiswa',{id:'${s.ID}'});if(r.success){cc();invCache(['getSiswaByKelas']);toast(r.message);nav('kelola-siswa')}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></td></tr>`});
+  return h+'</tbody></table>';
+}
+async function fKSCh(){
+  const k=document.getElementById('fKS').value; const r=await api('getSiswaByKelas',{kelas:k||'__ALL__'});
+  document.getElementById('ksTb').innerHTML=rTbSiswa(r.success?r.data:[]);
+}
+function mAS(){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Tambah Pengguna',`<div class="space-y-3"><div><label class="fl">Nama</label><input id="sN" class="fi"></div><div><label class="fl">Email</label><input id="sE" class="fi" type="email"></div><div><label class="fl">Password</label><input id="sP" class="fi"></div><div><label class="fl">Role</label><select id="sR" class="fi" onchange="document.getElementById('sEAWrap').style.display=this.value==='Orang Tua'?'block':'none'"><option value="Siswa">Siswa</option><option value="Guru">Guru</option><option value="Orang Tua">Orang Tua</option><option value="Kepala Sekolah">Kepala Sekolah</option><option value="Yayasan">Yayasan</option></select></div><div id="sEAWrap" style="display:none"><label class="fl">Email Anak (Khusus Orang Tua)</label><input id="sEA" class="fi" placeholder="Email anak yang terdaftar"></div><div><label class="fl">Kelas (Kosongkan jika bukan Siswa)</label><select id="sK" class="fi">${soK(kl)}</select></div><div id="sNK" style="display:none"><label class="fl">Kelas Baru</label><input id="sNKI" class="fi"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAS()"><i class="fas fa-save"></i> Simpan</button>`);
+    document.getElementById('sK').addEventListener('change',function(){document.getElementById('sNK').style.display=this.value==='__new__'?'block':'none'});
+  });
+}
+async function smAS(){
+  const n=document.getElementById('sN').value.trim(),e=document.getElementById('sE').value.trim(),p=document.getElementById('sP').value,r=document.getElementById('sR').value,ea=document.getElementById('sEA').value.trim(),kv=document.getElementById('sK').value;
+  let k=kv;if(kv==='__new__')k=document.getElementById('sNKI').value.trim();
+  if(!n||!e||!p){toast('Nama, email, password wajib','warning');return}
+  const res=await api('addSiswa',{nama:n,email:e,password:p,role:r,kelas:k,emailAnak:ea});
+  if(res.success){clM();cc();invCache(['getSiswaByKelas']);toast(res.message);nav('kelola-siswa')}else toast(res.message,'error');
+}
+function mES(id,nama,email,role,kelas,emailAnak){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Edit Pengguna',`<div class="space-y-3"><div><label class="fl">Nama</label><input id="sN" class="fi" value="${nama}"></div><div><label class="fl">Email</label><input id="sE" class="fi" value="${email}" disabled style="background:#f8fafc"></div><div><label class="fl">Password Baru</label><input id="sP" class="fi" placeholder="Kosongkan jika tidak diubah"></div><div><label class="fl">Role</label><select id="sR" class="fi" onchange="document.getElementById('sEAWrap').style.display=this.value==='Orang Tua'?'block':'none'"><option value="Siswa" ${role==='Siswa'?'selected':''}>Siswa</option><option value="Guru" ${role==='Guru'?'selected':''}>Guru</option><option value="Orang Tua" ${role==='Orang Tua'?'selected':''}>Orang Tua</option><option value="Kepala Sekolah" ${role==='Kepala Sekolah'?'selected':''}>Kepala Sekolah</option><option value="Yayasan" ${role==='Yayasan'?'selected':''}>Yayasan</option></select></div><div id="sEAWrap" style="display:${role==='Orang Tua'?'block':'none'}"><label class="fl">Email Anak</label><input id="sEA" class="fi" value="${emailAnak}"></div><div><label class="fl">Kelas</label><select id="sK" class="fi">${soK(kl,kelas)}</select></div><div id="sNK" style="display:none"><label class="fl">Kelas Baru</label><input id="sNKI" class="fi"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smES('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+    document.getElementById('sK').addEventListener('change',function(){document.getElementById('sNK').style.display=this.value==='__new__'?'block':'none'});
+  });
+}
+async function smES(id){
+  const n=document.getElementById('sN').value.trim(),p=document.getElementById('sP').value,ro=document.getElementById('sR').value,ea=document.getElementById('sEA').value.trim(),kv=document.getElementById('sK').value;
+  let k=kv;if(kv==='__new__')k=document.getElementById('sNKI').value.trim();
+  const res=await api('updateSiswa',{id,nama:n,password:p,role:ro,kelas:k,emailAnak:ea});
+  if(res.success){clM();cc();invCache(['getSiswaByKelas']);toast(res.message);nav('kelola-siswa')}else toast(res.message,'error');
+}
+
+async function pKM(){
+  const rm=await api('getMapel'); if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Kelola Materi</h1><div class="cd mb-3"><label class="fl">Pilih Mapel</label><select class="fi" id="kmM" onchange="ldKM()">${so(rm.data.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div id="kmC">${empty('fa-book-open','Pilih mapel')}</div></div>`;
+}
+async function ldKM(){
+  const id=document.getElementById('kmM').value,c=document.getElementById('kmC'); if(!id){c.innerHTML=empty('fa-book','Pilih mapel');return} c.innerHTML=skC();
+  const r=await api('getMateriByMapel',{idMapel:id});
+  let h=`<div class="flex justify-end mb-3"><button class="bt bt1" onclick="mAMt('${id}')"><i class="fas fa-plus"></i> Tambah Materi</button></div>`;
+  if(!r.success||!r.data.length){ h+=empty('fa-folder-open','Belum ada materi'); c.innerHTML=h; return; }
+  const babs={}; r.data.forEach(m=>{if(!babs[m.Bab])babs[m.Bab]=[];babs[m.Bab].push(m)});
+  for(const[bab,items]of Object.entries(babs)){
+    h+=`<div class="cd mb-3"><h3 class="font-h font-700 text-sm mb-3">${bab}</h3><div class="space-y-2">`;
+    items.forEach(m=>{
+      const mid=m.IDMateri||m.ID||'';
+      h+=`<div class="p-3 border border-gray-200 rounded-lg flex justify-between"><div class="flex-1"><p class="font-600 text-sm">${m.Judul}</p><p class="text-[11px] text-gray-500">${m.Deskripsi||''}</p></div><div class="flex gap-1"><button class="ibtn" onclick="mEMt('${mid}','${id}','${esc(bab)}','${esc(m.Judul)}','${esc(m.Deskripsi||'')}','${esc(m.PdfUrl||'')}','${esc(m.YoutubeUrl||'')}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus materi?',async()=>{const r=await api('deleteMateri',{id:'${mid}'});if(r.success){cc();invCache(['getMateriByMapel']);toast(r.message);ldKM()}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></div>`;
+    }); h+=`</div></div>`;
+  } c.innerHTML=h;
+}
+function mAMt(id){ opM('Tambah Materi',`<div class="space-y-3"><div><label class="fl">Bab</label><input id="mtB" class="fi"></div><div><label class="fl">Judul</label><input id="mtJ" class="fi"></div><div><label class="fl">Deskripsi</label><textarea id="mtD" class="fi"></textarea></div><div><label class="fl">Link PDF</label><input id="mtP" class="fi"></div><div><label class="fl">Link YouTube</label><input id="mtY" class="fi"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAMt('${id}')"><i class="fas fa-save"></i> Simpan</button>`); }
+async function smAMt(idMapel){
+  const b=document.getElementById('mtB').value.trim(),j=document.getElementById('mtJ').value.trim(),d=document.getElementById('mtD').value.trim(),p=document.getElementById('mtP').value.trim(),y=document.getElementById('mtY').value.trim();
+  if(!b||!j){toast('Bab & Judul wajib','warning');return}
+  const r=await api('addMateri',{idMapel,bab:b,judul:j,deskripsi:d,pdfUrl:p,youtubeUrl:y});
+  if(r.success){clM();cc();invCache(['getMateriByMapel']);toast(r.message);ldKM()}else toast(r.message,'error');
+}
+function mEMt(id,idMapel,bab,judul,desk,pdf,yt){ opM('Edit Materi',`<div class="space-y-3"><div><label class="fl">Bab</label><input id="mtB" class="fi" value="${bab}"></div><div><label class="fl">Judul</label><input id="mtJ" class="fi" value="${judul}"></div><div><label class="fl">Deskripsi</label><textarea id="mtD" class="fi">${desk}</textarea></div><div><label class="fl">Link PDF</label><input id="mtP" class="fi" value="${pdf}"></div><div><label class="fl">Link YouTube</label><input id="mtY" class="fi" value="${yt}"></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smEMt('${id}','${idMapel}')"><i class="fas fa-save"></i> Simpan</button>`); }
+async function smEMt(id,idMapel){
+  const b=document.getElementById('mtB').value.trim(),j=document.getElementById('mtJ').value.trim(),d=document.getElementById('mtD').value.trim(),p=document.getElementById('mtP').value.trim(),y=document.getElementById('mtY').value.trim();
+  const r=await api('updateMateri',{id,bab:b,judul:j,deskripsi:d,pdfUrl:p,youtubeUrl:y});
+  if(r.success){clM();cc();invCache(['getMateriByMapel']);toast(r.message);ldKM()}else toast(r.message,'error');
+}
+
+async function pKSo(){
+  const rm=await api('getMapel'); if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Kelola Soal</h1><div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Mapel</label><select class="fi" id="ksM" onchange="ldBabKSo()">${so(rm.data.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Bab</label><select class="fi" id="ksB" onchange="ldSoalKSo()"><option value="">-- Pilih Mapel --</option></select></div></div></div><div id="ksC">${empty('fa-list-check','Pilih mapel dan bab')}</div></div>`;
+}
+async function ldBabKSo(){
+  const id=document.getElementById('ksM').value,bs=document.getElementById('ksB'); if(!id){bs.innerHTML='<option value="">-- Pilih Mapel --</option>';return}
+  const r=await api('getBabSoal',{idMapel:id}); bs.innerHTML=r.success&&r.data.length?so(r.data.map(b=>({v:b,l:b}))):'<option value="">Tidak ada bab</option>';
+}
+async function ldSoalKSo(){
+  const id=document.getElementById('ksM').value,bab=document.getElementById('ksB').value,c=document.getElementById('ksC'); if(!id||!bab)return; c.innerHTML=skC();
+  const r=await api('getSoalByBab',{idMapel:id,bab}); A._soalList=r.success?r.data:[];
+  let h=`<div class="flex justify-end mb-3"><button class="bt bt1" onclick="mASo('${id}','${bab}')"><i class="fas fa-plus"></i> Tambah Soal</button></div>`;
+  if(!A._soalList.length){h+=empty('fa-clipboard-question','Belum ada soal'); c.innerHTML=h; return;}
+  A._soalList.forEach((s,i)=>{
+    const sid=s.IDSoal||s.ID||'';
+    h+=`<div class="cd mb-2"><div class="flex items-start gap-3"><div class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-xs">${i+1}</div><div class="flex-1"><p class="font-600 text-sm">${s.Pertanyaan}</p><div class="grid grid-cols-2 gap-1 mt-1.5 text-xs text-gray-500"><p>A. ${s.OpsiA}</p><p>B. ${s.OpsiB}</p><p>C. ${s.OpsiC}</p><p>D. ${s.OpsiD}</p></div><p class="text-[11px] mt-1 text-amber-600 font-bold">Kunci: ${s.KunciJawaban}</p></div><div class="flex gap-1"><button class="ibtn" onclick="mESo('${sid}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus soal?',async()=>{const r=await api('deleteSoal',{id:'${sid}'});if(r.success){cc();invCache(['getSoalByBab']);toast(r.message);ldSoalKSo()}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></div></div>`;
+  }); c.innerHTML=h;
+}
+function mASo(id,bab){ opM('Tambah Soal',`<div class="space-y-3"><div><label class="fl">Pertanyaan</label><textarea id="soP" class="fi" rows="3"></textarea></div><div class="grid grid-cols-2 gap-3"><div><label class="fl">Opsi A</label><input id="soA" class="fi"></div><div><label class="fl">Opsi B</label><input id="soB" class="fi"></div><div><label class="fl">Opsi C</label><input id="soC" class="fi"></div><div><label class="fl">Opsi D</label><input id="soD" class="fi"></div></div><div><label class="fl">Kunci</label><select id="soK" class="fi">${so(['A','B','C','D'])}</select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smASo('${id}','${bab}')"><i class="fas fa-save"></i> Simpan</button>`); }
+async function smASo(idMapel,bab){
+  const p=document.getElementById('soP').value,a=document.getElementById('soA').value,b=document.getElementById('soB').value,c=document.getElementById('soC').value,d=document.getElementById('soD').value,k=document.getElementById('soK').value;
+  if(!p||!a||!b||!c||!d||!k){toast('Lengkapi form','warning');return}
+  const r=await api('addSoal',{idMapel,bab,pertanyaan:p,opsiA:a,opsiB:b,opsiC:c,opsiD:d,kunciJawaban:k});
+  if(r.success){clM();cc();invCache(['getSoalByBab']);toast(r.message);ldSoalKSo()}else toast(r.message,'error');
+}
+function mESo(id){
+  const s=A._soalList.find(x=>(x.IDSoal||x.ID||'')===id); if(!s)return;
+  opM('Edit Soal',`<div class="space-y-3"><div><label class="fl">Pertanyaan</label><textarea id="soP" class="fi" rows="3">${s.Pertanyaan}</textarea></div><div class="grid grid-cols-2 gap-3"><div><label class="fl">Opsi A</label><input id="soA" class="fi" value="${s.OpsiA}"></div><div><label class="fl">Opsi B</label><input id="soB" class="fi" value="${s.OpsiB}"></div><div><label class="fl">Opsi C</label><input id="soC" class="fi" value="${s.OpsiC}"></div><div><label class="fl">Opsi D</label><input id="soD" class="fi" value="${s.OpsiD}"></div></div><div><label class="fl">Kunci</label><select id="soK" class="fi">${so(['A','B','C','D'],s.KunciJawaban)}</select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smESo('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+}
+async function smESo(id){
+  const idMapel=document.getElementById('ksM').value,bab=document.getElementById('ksB').value,p=document.getElementById('soP').value,a=document.getElementById('soA').value,b=document.getElementById('soB').value,c=document.getElementById('soC').value,d=document.getElementById('soD').value,k=document.getElementById('soK').value;
+  const r=await api('updateSoal',{id,bab,pertanyaan:p,opsiA:a,opsiB:b,opsiC:c,opsiD:d,kunciJawaban:k});
+  if(r.success){clM();cc();invCache(['getSoalByBab']);toast(r.message);ldSoalKSo()}else toast(r.message,'error');
+}
+
+async function pKT(){
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);
+  A.d.mapel=rm.success?rm.data:[]; const kl=rk.success?rk.data:[];
+  return `<div class="fi-in"><div class="flex justify-between gap-3 mb-5"><div><h1 class="font-h font-800 text-xl">Kelola Tugas</h1></div><button class="bt bt1" onclick="mATg()"><i class="fas fa-plus"></i> Tambah</button></div><div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Filter Mapel</label><select class="fi" id="ftM" onchange="ldTg()"><option value="">Semua</option>${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Filter Kelas</label><select class="fi" id="ftK" onchange="ldTg()"><option value="">Semua</option>${so(kl.map(k=>({v:k,l:k})))}</select></div></div></div><div id="ktC">${empty('fa-file','Lihat Semua atau Filter')}</div></div>`;
+}
+async function ldTg(){
+  const c=document.getElementById('ktC'); c.innerHTML=skC();
+  const fm=document.getElementById('ftM').value,fk=document.getElementById('ftK').value, d={}; if(fm)d.idMapel=fm; if(fk)d.kelas=fk;
+  const r=await api('getTugas',d); A._tugasList=r.success?r.data:[]; const mm={}; A.d.mapel.forEach(m=>mm[m.IDMapel]=m.NamaMapel);
+  if(!A._tugasList.length){c.innerHTML=empty('fa-file-lines','Tidak ada tugas');return}
+  let h=`<div class="space-y-2">`;
+  A._tugasList.forEach(t=>{
+    const tp=t.Tipe||'Individu';
+    h+=`<div class="cd"><div class="flex justify-between gap-2"><div class="flex-1"><div class="flex items-center gap-1.5 mb-1"><h3 class="font-h font-700 text-sm">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span><span class="bd bg1">${mm[t.IDMapel]||t.IDMapel}</span><span class="bd bg4">${t.Kelas}</span></div><p class="text-[11px] text-gray-500">${t.Deskripsi||''}</p><p class="text-[11px] text-gray-500 mt-1"><i class="fas fa-calendar"></i> Tenggat: ${fmtDS(t.Tenggat)}</p></div><div class="flex gap-1"><button class="ibtn" onclick="mETg('${t.IDTugas}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus tugas?',async()=>{const r=await api('deleteTugas',{id:'${t.IDTugas}'});if(r.success){cc();invCache(['getTugas']);toast(r.message);ldTg()}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></div></div>`;
+  }); h+=`</div>`; c.innerHTML=h;
+}
+function mATg(){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Tambah Tugas',`<div class="space-y-3"><div><label class="fl">Mapel</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi" onchange="document.getElementById('tgNK').style.display=this.value==='__new__'?'block':'none'">${soK(kl)}</select></div><div id="tgNK" style="display:none"><label class="fl">Kelas Baru</label><input id="tgNKI" class="fi"></div><div><label class="fl">Judul Tugas</label><input id="tgJ" class="fi"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi"></textarea></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi"><option value="Individu">Individu</option><option value="Kelompok">Kelompok</option></select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smATg()"><i class="fas fa-save"></i> Simpan</button>`);
+  });
+}
+async function smATg(){
+  const idMapel=document.getElementById('tgM').value,kv=document.getElementById('tgK').value;
+  let kelas=kv;if(kv==='__new__')kelas=document.getElementById('tgNKI').value.trim();
+  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value;
+  if(!idMapel||!kelas||!judul||!tenggat){toast('Lengkapi form','warning');return}
+  const r=await api('addTugas',{idMapel,kelas,judul,deskripsi:desk,tenggat,tipe});
+  if(r.success){clM();cc();invCache(['getTugas']);toast(r.message);ldTg()}else toast(r.message,'error');
+}
+function mETg(id){
+  const t=A._tugasList.find(x=>x.IDTugas===id); if(!t)return;
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Edit Tugas',`<div class="space-y-3"><div><label class="fl">Mapel</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})),t.IDMapel)}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi" onchange="document.getElementById('tgNK').style.display=this.value==='__new__'?'block':'none'">${soK(kl,t.Kelas)}</select></div><div id="tgNK" style="display:none"><label class="fl">Kelas Baru</label><input id="tgNKI" class="fi"></div><div><label class="fl">Judul</label><input id="tgJ" class="fi" value="${t.Judul}"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi">${t.Deskripsi||''}</textarea></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi" value="${t.Tenggat}"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi">${so([{v:'Individu',l:'Individu'},{v:'Kelompok',l:'Kelompok'}],t.Tipe)}</select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smETg('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+  });
+}
+async function smETg(id){
+  const idMapel=document.getElementById('tgM').value,kv=document.getElementById('tgK').value;
+  let kelas=kv;if(kv==='__new__')kelas=document.getElementById('tgNKI').value.trim();
+  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value;
+  const r=await api('updateTugas',{id,idMapel,kelas,judul,deskripsi:desk,tenggat,tipe});
+  if(r.success){clM();cc();invCache(['getTugas']);toast(r.message);ldTg()}else toast(r.message,'error');
+}
+
+async function pNl(){
+  const[rm,rt,rj]=await Promise.all([api('getMapel'),api('getTugas'),api('getJawabanTugas')]);
+  A.d.mapel=rm.success?rm.data:[]; const tugas=rt.success?rt.data:[]; const jawaban=(rj.success?rj.data:[]).map(normJ);
+  const mm={}; A.d.mapel.forEach(m=>mm[m.IDMapel]=m.NamaMapel);
+  const ugCount={}; jawaban.forEach(j=>{const nv=j.nilai;if(nv===''||nv===null)ugCount[j.idtugas]=(ugCount[j.idtugas]||0)+1;});
+  A._nl={tugas,jawaban,mm,ugCount,loaded:{}};
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-5">Penilaian Tugas</h1><select class="fi mb-3" id="nlF" onchange="nlFilter()"><option value="">Semua Mapel</option>${A.d.mapel.map(m=>`<option value="${m.IDMapel}">${m.NamaMapel}</option>`).join('')}</select><div id="nlC">`;
+  h+=rNlCards(tugas,mm,ugCount); h+=`</div></div>`; return h;
+}
+function rNlCards(tugas,mm,ugCount){
+  if(!tugas.length)return empty('fa-star','Belum ada tugas'); let h='';
+  tugas.forEach(t=>{
+    const ug=ugCount[t.IDTugas]||0; const tp=t.Tipe||'Individu';
+    h+=`<div class="cd mb-2 cursor-pointer" onclick="togNlSub('${t.IDTugas}')"><div class="flex justify-between items-center"><div class="flex-1"><div class="flex items-center gap-1.5 mb-1"><h3 class="font-h font-700 text-sm">${t.Judul}</h3><span class="bd bg1">${mm[t.IDMapel]||'-'}</span><span class="bd bg4">${t.Kelas}</span></div><p class="text-[11px] text-gray-500">Tenggat: ${fmtDS(t.Tenggat)}</p></div><div>${ug>0?`<span class="bd bg3">${ug} belum dinilai</span>`:`<span class="bd bgg">Selesai</span>`}</div></div></div><div id="nlS_${t.IDTugas}" class="hidden"></div>`;
+  }); return h;
+}
+function nlFilter(){
+  const fv=document.getElementById('nlF').value; let f=A._nl.tugas; if(fv)f=f.filter(t=>t.IDMapel===fv);
+  document.getElementById('nlC').innerHTML=rNlCards(f,A._nl.mm,A._nl.ugCount); A._nl.loaded={};
+}
+async function togNlSub(id){
+  const sub=document.getElementById('nlS_'+id); if(!sub.classList.contains('hidden')){sub.classList.add('hidden');return;}
+  sub.classList.remove('hidden'); if(A._nl.loaded[id])return;
+  sub.innerHTML=`<div class="cd mb-2 bg-gray-50" style="padding:16px">${sk(10)}</div>`;
+  const jw=A._nl.jawaban.filter(j=>String(j.idtugas)===String(id)); A._nl.loaded[id]=true;
+  if(!jw.length){sub.innerHTML=`<div class="cd mb-2 bg-gray-50"><p class="text-xs text-center text-gray-500">Belum ada pengumpulan</p></div>`;return;}
+  let h=`<div class="cd mb-2 bg-gray-50" style="padding:16px"><div class="space-y-2">`;
+  jw.forEach(j=>{
+    const isGraded=j.nilai!==''&&j.nilai!==null; const anggota=j.listnamaanggota?j.listnamaanggota.split(',').join(', '):'';
+    h+=`<div class="p-3 bg-white border border-gray-200 rounded-lg flex justify-between items-start gap-3"><div class="flex-1"><p class="font-600 text-sm">${j.namapengumpul}</p><p class="text-[11px] text-gray-500">${j.emailpengumpul}</p>${anggota?`<p class="text-[10px] text-blue-600 mt-1"><i class="fas fa-users"></i> ${anggota}</p>`:''}${j.linkjawaban?`<a href="${j.linkjawaban}" target="_blank" class="text-[11px] text-blue-600 mt-1 inline-block"><i class="fas fa-link"></i> Link Jawaban</a>`:''}</div>`;
+    if(isGraded){
+      h+=`<div class="text-right"><p class="font-h font-800 text-xl text-blue-600">${j.nilai}</p><p class="text-[10px] text-gray-500 mb-1">${j.catatanguru||''}</p><button class="text-xs text-red-500" onclick="cfDel('Reset nilai?',async()=>{const r=await api('deleteNilaiTugas',{id:'${j.id}'});if(r.success){cc();invCache(['getJawabanTugas']);toast(r.message);nav('penilaian')}else toast(r.message,'error')})">Reset</button></div>`;
+    }else{
+      h+=`<div class="flex flex-col items-end gap-1"><input type="number" class="fi" style="width:70px;padding:4px" placeholder="Nilai" id="nv_${j.id}"><input class="fi" style="width:120px;padding:4px" placeholder="Catatan" id="nc_${j.id}"><button class="bt bt1 bts" onclick="nlSm('${j.idtugas}','${j.emailpengumpul}','${j.id}')">Simpan</button></div>`;
+    } h+=`</div>`;
+  }); h+=`</div></div>`; sub.innerHTML=h;
+}
+async function nlSm(idTugas,em,id){
+  const v=document.getElementById('nv_'+id).value, c=document.getElementById('nc_'+id).value;
+  if(v===''||isNaN(v)||v<0||v>100){toast('Nilai 0-100','warning');return}
+  const r=await api('nilaiTugas',{idTugas,emailPengumpul:em,nilai:Number(v),catatanGuru:c});
+  if(r.success){cc();invCache(['getJawabanTugas']);toast(r.message);nav('penilaian')}else toast(r.message,'error');
+}
+
+async function pAb(){
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]); A.d.mapel=rm.success?rm.data:[]; const kl=rk.success?rk.data:[];
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-5">Input Absensi Siswa</h1><div class="cd mb-3"><div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><div><label class="fl">Mapel</label><select class="fi" id="abM">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="abK" class="fi">${soK(kl)}</select></div><div><label class="fl">Tanggal</label><input type="date" id="abT" class="fi" value="${todayISO()}"></div></div><button class="bt bt1 mt-3" onclick="ldAbSiswa()"><i class="fas fa-users"></i> Muat Siswa</button></div><div id="abC"></div></div>`;
+}
+async function ldAbSiswa(){
+  const idM=document.getElementById('abM').value, k=document.getElementById('abK').value, t=document.getElementById('abT').value, c=document.getElementById('abC');
+  if(!idM||!k||!t){toast('Lengkapi filter','warning');return} c.innerHTML=skC();
+  const cd=await api('checkAbsenDuplikat',{idMapel:idM,kelas:k,tanggal:t});
+  if(cd.success&&cd.duplicate){c.innerHTML=`<div class="danger-box"><i class="fas fa-ban"></i><p>${cd.message}</p></div>`;return}
+  const rs=await api('getSiswaByKelas',{kelas:k}); const siswa=rs.success?rs.data.filter(u=>u.Role==='Siswa'):[];
+  if(!siswa.length){c.innerHTML=empty('fa-users','Tidak ada siswa di kelas ini');return}
+  let h=`<div class="cd"><div class="flex justify-between items-center mb-3"><h3 class="font-h font-700 text-sm">Input Kehadiran</h3><button class="bt btg" onclick="smAb('${idM}','${k}','${t}')"><i class="fas fa-save"></i> Simpan</button></div><div class="space-y-1.5">`;
+  siswa.forEach(s=>{ h+=`<div class="flex items-center gap-3 p-2 rounded-lg border border-gray-100"><div class="flex-1"><p class="text-sm font-500">${s.Nama}</p></div><select class="fi ab-st" data-e="${s.Email}" data-n="${esc(s.Nama)}" style="width:110px"><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Alpha">Alpha</option></select></div>`; });
+  h+=`</div></div>`; c.innerHTML=h;
+}
+async function smAb(idMapel,kelas,tanggal){
+  const list=[]; document.querySelectorAll('.ab-st').forEach(s=>list.push({email:s.dataset.e,nama:s.dataset.n,status:s.value}));
+  const r=await api('submitAbsensi',{idMapel,kelas,tanggal,list});
+  if(r.success){cc();invCache(['getRiwayatAbsen']);toast(r.message);document.getElementById('abC').innerHTML=`<div class="info-box"><i class="fas fa-check"></i><p>Tersimpan</p></div>`}else toast(r.message,'error');
+}
+
+async function pRA(){
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]); A.d.mapel=rm.success?rm.data:[]; const kl=rk.success?rk.data:[];
+  return `<div class="fi-in"><div class="flex justify-between items-center mb-5"><div><h1 class="font-h font-800 text-xl">Riwayat Absensi Siswa</h1></div><button class="bt bty" onclick="dlAbsPdf()"><i class="fas fa-file-pdf"></i> Download PDF</button></div><div class="cd mb-3"><div class="grid grid-cols-2 lg:grid-cols-4 gap-3"><div><label class="fl">Mapel</label><select class="fi" id="raM"><option value="">Semua</option>${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select class="fi" id="raK"><option value="">Semua</option>${so(kl.map(k=>({v:k,l:k})))}</select></div><div><label class="fl">Dari</label><input type="date" id="raD" class="fi"></div><div><label class="fl">Sampai</label><input type="date" id="raS" class="fi"></div></div><div class="flex gap-2 mt-3"><button class="bt bt1" onclick="ldRA()"><i class="fas fa-search"></i> Cari</button></div></div><div id="raC">${empty('fa-clock','Gunakan filter pencarian')}</div></div>`;
+}
+async function ldRA(){
+  const c=document.getElementById('raC'); c.innerHTML=skC();
+  const d={idMapel:document.getElementById('raM').value,kelas:document.getElementById('raK').value,tanggalDari:document.getElementById('raD').value,tanggalSampai:document.getElementById('raS').value};
+  A.raFilter=d; const r=await api('getRiwayatAbsen',d); A.raData=r.success?r.data.map(normJ):[]; A.raPage={}; rRA();
+}
+function rRA(){
+  const c=document.getElementById('raC'), data=A.raData; if(!data.length){c.innerHTML=empty('fa-clock','Tidak ada data');return}
+  const bk={}; data.forEach(a=>{const k=a.kelas||'-';if(!bk[k])bk[k]=[];bk[k].push(a)}); let h='';
+  for(const[k,items]of Object.entries(bk)){
+    if(!A.raPage[k])A.raPage[k]=1; const pg=A.raPage[k], lim=10, tp=Math.ceil(items.length/lim); if(pg>tp)A.raPage[k]=tp;
+    const start=(A.raPage[k]-1)*lim, pageItems=items.slice(start,start+lim);
+    const hc=items.filter(a=>a.status==='Hadir').length, sc=items.filter(a=>a.status==='Sakit').length, ic=items.filter(a=>a.status==='Izin').length, ac=items.filter(a=>a.status==='Alpha').length;
+    h+=`<div class="cd mb-4"><div class="flex justify-between items-center mb-3"><div><h3 class="font-h font-700 text-sm">Kelas ${k}</h3><p class="text-[11px] text-gray-500">${items.length} record (H:${hc} S:${sc} I:${ic} A:${ac})</p></div></div><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Nama</th><th>Tanggal</th><th>Status</th></tr></thead><tbody>`;
+    pageItems.forEach(a=>{h+=`<tr><td class="font-500 text-sm">${a.namasiswa||a.emailsiswa}</td><td class="text-xs text-gray-500">${fmtDS(a.tanggal)}</td><td><span class="bd ${a.status==='Hadir'?'bgg':a.status==='Sakit'?'bgy':a.status==='Izin'?'bg2':'bg3'}">${a.status}</span></td></tr>`});
+    h+=`</tbody></table></div>`;
+    if(tp>1){h+=`<div class="flex items-center justify-center gap-1 mt-3"><button class="pag-btn" onclick="raPg('${k}',${A.raPage[k]-1})" ${A.raPage[k]<=1?'disabled':''}><i class="fas fa-chevron-left text-[10px]"></i></button><span class="text-xs px-2">${A.raPage[k]}/${tp}</span><button class="pag-btn" onclick="raPg('${k}',${A.raPage[k]+1})" ${A.raPage[k]>=tp?'disabled':''}><i class="fas fa-chevron-right text-[10px]"></i></button></div>`} h+=`</div>`;
+  } c.innerHTML=h;
+}
+function raPg(k,p){if(p<1)return;A.raPage[k]=p;rRA()}
+function dlAbsPdf(){
+  const data=A.raData; if(!data.length){toast('Tidak ada data','warning');return}
+  const{jsPDF}=window.jspdf; const doc=new jsPDF('p','mm','a4'); const pw=210,ph=297,ml=15,mr=15; let yPos=15;
+  if(LOGO_B64){try{doc.addImage(LOGO_B64,'JPEG',15,yPos,20,20)}catch(e){}}
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('LAPORAN ABSENSI',pw/2,yPos+8,{align:'center'});doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('Atomic School',pw/2,yPos+14,{align:'center'});yPos+=25;
+  doc.setDrawColor(0);doc.setLineWidth(0.5);doc.line(ml,yPos,pw-mr,yPos);yPos+=8;
+  doc.setFontSize(9);doc.text('Periode: '+(A.raFilter.tanggalDari||'-')+' s/d '+(A.raFilter.tanggalSampai||'-'),ml,yPos);yPos+=8;
+  
+  const bk={}; data.forEach(a=>{const k=a.kelas||'-';if(!bk[k])bk[k]=[];bk[k].push(a)});
+  for(const[k,items]of Object.entries(bk)){
+    if(yPos>ph-40){doc.addPage();yPos=20}
+    doc.setFont('helvetica','bold');doc.text('Kelas: '+k,ml,yPos);yPos+=4;
+    const tData=items.map((a,i)=>[i+1,a.namasiswa,a.tanggal,a.status]);
+    doc.autoTable({startY:yPos,margin:{left:ml,right:mr},head:[['No','Nama Siswa','Tanggal','Status']],body:tData,theme:'grid',headStyles:{fillColor:[50,50,50],textColor:255,fontSize:8},bodyStyles:{fontSize:8}});
+    yPos=doc.lastAutoTable.finalY+10;
+  }
+  previewPdf(doc,'Laporan_Absensi_'+todayISO()+'.pdf');
+}
+
+async function pJG(){
+  const isKepsek = A.u.Role === 'Kepala Sekolah';
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]); A.d.mapel=rm.success?rm.data:[]; const kl=rk.success?rk.data:[];
+  invCache(['getJurnal']); const req = isKepsek ? {} : {emailGuru:A.u.Email};
+  const rj=await api('getJurnal',req); A._jgData=rj.success?rj.data:[]; A.jgPage=1;
+  let h=`<div class="fi-in"><div class="flex justify-between items-center mb-5"><div><h1 class="font-h font-800 text-xl">${isKepsek?'Pantau Jurnal':'Jurnal Guru'}</h1></div><div class="flex gap-2"><button class="bt bty" onclick="dlJgPdf()"><i class="fas fa-file-pdf"></i> Cetak</button>${!isKepsek?`<button class="bt bt1" onclick="mAJG()"><i class="fas fa-plus"></i> Tambah</button>`:''}</div></div><div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Filter Mapel</label><select class="fi" id="jgFM" onchange="A.jgPage=1; ldJGFilter()"><option value="">Semua</option>${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Filter Kelas</label><select class="fi" id="jgFK" onchange="A.jgPage=1; ldJGFilter()"><option value="">Semua</option>${so(kl.map(k=>({v:k,l:k})))}</select></div></div></div><div id="jgC">${rJGList(A._jgData, isKepsek)}</div></div>`;
+  return h;
+}
+function rJGList(data, isKepsek){
+  if(!data.length)return empty('fa-book','Belum ada jurnal');
+  const sorted=[...data].sort((a,b)=>(b.Tanggal||'').localeCompare(a.Tanggal||''));
+  const lim=10, tp=Math.ceil(sorted.length/lim); if(A.jgPage>tp&&tp>0)A.jgPage=tp;
+  const pageData=sorted.slice((A.jgPage-1)*lim,A.jgPage*lim); let h=`<div class="space-y-2">`;
+  pageData.forEach(j=>{
+    const jid=j.IDJurnal||j.ID||'';
+    h+=`<div class="cd"><div class="flex justify-between gap-2"><div class="flex-1"><div class="flex items-center gap-1.5 mb-1"><span class="text-xs font-700 text-blue-600">${fmtDS(j.Tanggal)}</span><span class="bd bg2">${j.NamaMapel||'-'}</span><span class="bd bg4">${j.Kelas||'-'}</span><span class="bd ${j.StatusGuru==='Hadir'?'bgg':j.StatusGuru==='Sakit'?'bgy':'bg3'}">Guru: ${j.StatusGuru||'Hadir'}</span></div><p class="text-sm font-600">${j.MateriYangDiajarkan||'-'}</p><p class="text-[11px] text-gray-500 mt-1"><i class="fas fa-clock"></i> ${j.WaktuMulai||'-'} — ${j.WaktuSelesai||'-'} ${isKepsek?'| Guru: '+j.NamaGuru:''}</p></div>`;
+    if(!isKepsek){h+=`<div class="flex gap-1"><button class="ibtn" onclick="mEJG('${jid}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus jurnal?',async()=>{const r=await api('deleteJurnal',{id:'${jid}'});if(r.success){cc();invCache(['getJurnal']);A._jgData=A._jgData.filter(x=>(x.IDJurnal||x.ID||'')!=='${jid}');ldJGFilter()}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div>`;}
+    h+=`</div></div>`;
+  }); h+='</div>';
+  if(tp>1){h+=`<div class="flex items-center justify-center gap-1 mt-4"><button class="pag-btn" onclick="jgPg(${A.jgPage-1})" ${A.jgPage<=1?'disabled':''}><i class="fas fa-chevron-left text-[10px]"></i></button><button class="pag-btn" onclick="jgPg(${A.jgPage+1})" ${A.jgPage>=tp?'disabled':''}><i class="fas fa-chevron-right text-[10px]"></i></button></div>`} return h;
+}
+function ldJGFilter(){
+  const fm=document.getElementById('jgFM').value, fk=document.getElementById('jgFK').value; let f=A._jgData;
+  if(fm)f=f.filter(j=>String(j.IDMapel)===String(fm)); if(fk)f=f.filter(j=>j.Kelas===fk);
+  document.getElementById('jgC').innerHTML=rJGList(f, A.u.Role==='Kepala Sekolah');
+}
+function jgPg(p){if(p<1)return;A.jgPage=p;ldJGFilter()}
+function mAJG(){
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Tambah Jurnal',`<div class="space-y-3"><div><label class="fl">Tanggal</label><input type="date" id="jgT" class="fi" value="${todayISO()}"></div><div><label class="fl">Status Guru</label><select id="jgSG" class="fi"><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option></select></div><div><label class="fl">Mapel</label><select id="jgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="jgK" class="fi">${soK(kl)}</select></div><div id="jgNK" style="display:none"><label class="fl">Kelas Baru</label><input id="jgNKI" class="fi"></div><div><label class="fl">Materi</label><input id="jgMt" class="fi"></div><div class="grid grid-cols-2 gap-3"><div><label class="fl">Waktu Mulai</label><input type="time" id="jgWM" class="fi"></div><div><label class="fl">Waktu Selesai</label><input type="time" id="jgWS" class="fi"></div></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAJG()"><i class="fas fa-save"></i> Simpan</button>`);
+    document.getElementById('jgK').addEventListener('change',function(){document.getElementById('jgNK').style.display=this.value==='__new__'?'block':'none'});
+  });
+}
+async function smAJG(){
+  const t=document.getElementById('jgT').value,idM=document.getElementById('jgM').value,kv=document.getElementById('jgK').value,sg=document.getElementById('jgSG').value; let k=kv;if(kv==='__new__')k=document.getElementById('jgNKI').value.trim();
+  const m=document.getElementById('jgMt').value.trim(),wm=document.getElementById('jgWM').value,ws=document.getElementById('jgWS').value;
+  if(!t||!idM||!k||!m){toast('Lengkapi form','warning');return}
+  const r=await api('addJurnal',{tanggal:t,idMapel:idM,kelas:k,materi:m,waktuMulai:wm,waktuSelesai:ws,emailGuru:A.u.Email,namaGuru:A.u.Nama,statusGuru:sg});
+  if(r.success){clM();cc();invCache(['getJurnal']);const rj=await api('getJurnal',{emailGuru:A.u.Email});A._jgData=rj.success?rj.data:[];ldJGFilter();toast(r.message)}else toast(r.message,'error');
+}
+function mEJG(id){
+  const j=A._jgData.find(x=>(x.IDJurnal||x.ID||'')===id); if(!j)return;
+  api('getKelasList').then(r=>{
+    const kl=r.success?r.data:[];
+    opM('Edit Jurnal',`<div class="space-y-3"><div><label class="fl">Tanggal</label><input type="date" id="jgT" class="fi" value="${j.Tanggal}"></div><div><label class="fl">Status Guru</label><select id="jgSG" class="fi">${so([{v:'Hadir',l:'Hadir'},{v:'Sakit',l:'Sakit'},{v:'Izin',l:'Izin'}],j.StatusGuru||'Hadir')}</select></div><div><label class="fl">Mapel</label><select id="jgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})),j.IDMapel)}</select></div><div><label class="fl">Kelas</label><select id="jgK" class="fi">${soK(kl,j.Kelas)}</select></div><div id="jgNK" style="display:none"><label class="fl">Kelas Baru</label><input id="jgNKI" class="fi"></div><div><label class="fl">Materi</label><input id="jgMt" class="fi" value="${j.MateriYangDiajarkan}"></div><div class="grid grid-cols-2 gap-3"><div><label class="fl">Waktu Mulai</label><input type="time" id="jgWM" class="fi" value="${j.WaktuMulai}"></div><div><label class="fl">Waktu Selesai</label><input type="time" id="jgWS" class="fi" value="${j.WaktuSelesai}"></div></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smEJG('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+  });
+}
+async function smEJG(id){
+  const t=document.getElementById('jgT').value,idM=document.getElementById('jgM').value,kv=document.getElementById('jgK').value,sg=document.getElementById('jgSG').value; let k=kv;if(kv==='__new__')k=document.getElementById('jgNKI').value.trim();
+  const m=document.getElementById('jgMt').value.trim(),wm=document.getElementById('jgWM').value,ws=document.getElementById('jgWS').value;
+  const r=await api('updateJurnal',{id,tanggal:t,idMapel:idM,kelas:k,materi:m,waktuMulai:wm,waktuSelesai:ws,statusGuru:sg});
+  if(r.success){clM();cc();invCache(['getJurnal']);const idx=A._jgData.findIndex(x=>(x.IDJurnal||x.ID||'')===id);if(idx>-1)A._jgData[idx]={...A._jgData[idx],Tanggal:t,IDMapel:idM,Kelas:k,MateriYangDiajarkan:m,WaktuMulai:wm,WaktuSelesai:ws,StatusGuru:sg};ldJGFilter();toast(r.message)}else toast(r.message,'error');
+}
+function dlJgPdf(){
+  const d=A._jgData; if(!d.length){toast('Tidak ada data','warning');return}
+  const{jsPDF}=window.jspdf; const doc=new jsPDF('p','mm','a4'); const pw=210,ph=297,ml=15,mr=15; let yPos=15;
+  if(LOGO_B64){try{doc.addImage(LOGO_B64,'JPEG',15,yPos,20,20)}catch(e){}}
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('JURNAL GURU',pw/2,yPos+8,{align:'center'});doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('Atomic School',pw/2,yPos+14,{align:'center'});yPos+=25;
+  doc.setDrawColor(0);doc.setLineWidth(0.5);doc.line(ml,yPos,pw-mr,yPos);yPos+=8;
+  const tData=[...d].sort((a,b)=>(a.Tanggal||'').localeCompare(b.Tanggal||'')).map((j,i)=>[i+1,j.NamaMapel,j.Tanggal,j.Kelas,j.MateriYangDiajarkan,j.WaktuMulai+'-'+j.WaktuSelesai,j.StatusGuru||'Hadir']);
+  doc.autoTable({startY:yPos,margin:{left:ml,right:mr},head:[['No','Mapel','Tanggal','Kelas','Materi','Waktu','Status']],body:tData,theme:'grid',headStyles:{fillColor:[50,50,50],textColor:255,fontSize:8},bodyStyles:{fontSize:8}});
+  previewPdf(doc,'Jurnal_'+todayISO()+'.pdf');
+}
+
+async function pKarGuru(){
+  const rk=await api('getKelasList');const kl=rk.success?rk.data:[];
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Penilaian Karakter</h1><p class="text-xs mb-5 text-gray-500">SMT ${A.sess.semester} - TP ${A.sess.tahunPelajaran}</p><div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Kelas</label><select id="kgK" class="fi" onchange="ldKgSiswa()">${soK(kl)}</select></div><div><label class="fl">Siswa</label><select id="kgS" class="fi" onchange="ldKgForm()"><option value="">-- Pilih Kelas --</option></select></div></div></div><div id="kgC">${empty('fa-seedling','Pilih siswa')}</div></div>`;
+}
+async function ldKgSiswa(){
+  const k=document.getElementById('kgK').value,sel=document.getElementById('kgS');if(!k)return;
+  const r=await api('getSiswaByKelas',{kelas:k});
+  sel.innerHTML=r.success&&r.data.length?so(r.data.filter(u=>u.Role==='Siswa').map(u=>({v:u.Email,l:u.Nama}))):'<option value="">Kosong</option>';
+}
+async function ldKgForm(){
+  const email=document.getElementById('kgS').value,c=document.getElementById('kgC');if(!email)return; c.innerHTML=skC();
+  const[rt,rn]=await Promise.all([api('getTargetKarakter',{semua:true,semester:A.sess.semester}),api('getNilaiKarakter',{emailSiswa:email,semua:true,semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran})]);
+  const tG=rt.success?rt.dataGuru:[]; const tO=rt.success?rt.dataOrtu:[];
+  const nilais=rn.success?rn.data.map(normJ):[];
+
+  let h=`<div class="fi-in"><div class="cd mb-3"><h3 class="font-h font-700 text-sm mb-2">Penilaian oleh Guru</h3><div class="flex flex-wrap gap-2 text-[11px] mb-3"><span class="bd bg3">1: PB</span><span class="bd bgy">2: MB</span><span class="bd bg2">3: BSH</span><span class="bd bg1">4: SB</span></div><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Bidang</th><th>Target</th><th>Nilai</th></tr></thead><tbody>`;
+  tG.forEach(t=>{
+    const idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+    const nObj=nilais.find(n=>n.idtarget===idT && n.penilai==='Guru');const v=nObj?nObj.nilai:'';
+    h+=`<tr><td class="text-xs font-600">${t.Bidang}</td><td class="text-xs">${t.Target}</td><td><div class="flex items-center gap-2">`;
+    [1,2,3,4].forEach(n=>h+=`<label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="kar_${idT}" value="${n}" class="accent-blue-600" ${v===String(n)?'checked':''}> <span class="text-xs">${n}</span></label>`);
+    h+=`</div></td></tr>`;
+  });
+  h+=`</tbody></table></div><button class="bt bt1 mt-4" onclick="svKg()"><i class="fas fa-save"></i> Simpan Penilaian Guru</button></div>`;
+  
+  h+=`<div class="cd"><h3 class="font-h font-700 text-sm mb-2">Pantauan Penilaian Orang Tua</h3><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Target</th><th>Bulan</th><th>Nilai Ortu (1-4)</th></tr></thead><tbody>`;
+  if(!tO.length) h+=`<tr><td colspan="3" class="text-center">Belum ada target ortu</td></tr>`;
+  else{
+    tO.forEach(t=>{
+      const idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+      const bln = t.Bulan;
+      const nObj=nilais.find(n=>n.idtarget===idT && n.penilai==='Ortu' && String(n.bulan).toLowerCase()===String(bln).toLowerCase());
+      const lbl = nObj ? (nObj.nilai==1?'Tidak Pernah':nObj.nilai==2?'Kadang-kadang':nObj.nilai==3?'Sering':'Selalu') : '-';
+      h+=`<tr><td class="text-xs">${t.Target}</td><td class="text-xs">${bln}</td><td class="text-xs font-600">${nObj?nObj.nilai+' ('+lbl+')':'-'}</td></tr>`;
+    });
+  }
+  h+=`</tbody></table></div></div></div>`;
+  c.innerHTML=h;
+}
+async function svKg(){
+  const email=document.getElementById('kgS').value;const inps=document.querySelectorAll('#kgC input[type="radio"]:checked');const list=[];
+  inps.forEach(i=>list.push({idTarget:i.name.replace('kar_',''),nilai:i.value}));
+  const r=await api('submitKarakter',{emailSiswa:email,type:'Guru',semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran,list});
+  if(r.success)toast('Tersimpan');else toast(r.message,'error');
+}
+
+/* ===== CETAK RAPOR ===== */
+async function pTK(){
+  const rk=await api('getKelasList');const kl=rk.success?rk.data:[];
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5">Cetak Rapor Siswa</h1><div class="cd mb-3"><div class="flex gap-3 items-end"><div class="flex-1"><label class="fl">Pilih Kelas</label><select id="tkK" class="fi">${so(kl.map(k=>({v:k,l:k})))}</select></div><button class="bt bt1" onclick="ldTK()"><i class="fas fa-search"></i> Muat Siswa</button></div></div><div id="tkC">${empty('fa-file-pdf','Pilih kelas untuk memuat transkrip')}</div></div>`;
+}
+async function ldTK(){
+  const k=document.getElementById('tkK').value, c=document.getElementById('tkC'); if(!k)return; c.innerHTML=skC();
+  const rs=await api('getSiswaByKelas',{kelas:k});
+  const siswa=rs.success?rs.data.filter(u=>u.Role==='Siswa'):[];
+  if(!siswa.length){c.innerHTML=empty('fa-users','Tidak ada data siswa');return}
+
+  let h=`<div class="cd"><table class="tb"><thead><tr><th>Nama Siswa</th><th>Email</th><th>Aksi Rapor</th></tr></thead><tbody>`;
+  siswa.forEach(s=>{
+    h+=`<tr><td class="font-600">${s.Nama}</td><td class="text-xs">${s.Email}</td><td><div class="flex gap-2"><button class="bt bt1 bts" onclick="cetakRaporAkademik('${s.Email}','${esc(s.Nama)}','${k}')"><i class="fas fa-graduation-cap"></i> Akademik</button><button class="bt bty bts" onclick="cetakRaporKarakter('${s.Email}','${esc(s.Nama)}')"><i class="fas fa-seedling"></i> Karakter</button></div></td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  c.innerHTML=h;
+}
+
+function drawPdfHeader(doc, title, subTitle, profil, yPos, pw) {
+  if (LOGO_B64) { try { doc.addImage(LOGO_B64, 'JPEG', 15, yPos-2, 18, 18); } catch(e){} }
+  doc.setFont('helvetica','bold');doc.setFontSize(14);
+  doc.text(title, pw/2, yPos+6, {align:'center'});
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text(profil.NamaSekolah || subTitle, pw/2, yPos+12, {align:'center'});
+  yPos+=22;
+  doc.setDrawColor(0);doc.setLineWidth(0.5);doc.line(15, yPos, pw-15, yPos);
+  return yPos+8;
+}
+
+async function getProfilDefault(){
+  const r = await api('getProfilSekolah');
+  if(r.success && r.data.length > 0) return normJ(r.data[0]);
+  return {namasekolah:'PKBM Baitul Hikmah', alamat:'Jl. Pendidikan No. 1', kepalasekolah:'Ir. Sanny Darman, M.Pd', walikelas:'Wali Kelas'};
+}
+
+async function cetakRaporAkademik(email, nama, kelas) {
+  document.getElementById('glLoader').style.display='flex';
+  const [rT, rC, profil] = await Promise.all([api('getTranskrip',{email,kelas}), api('getCapaianKompetensi'), getProfilDefault()]);
+  document.getElementById('glLoader').style.display='none';
+  
+  const transkrip = rT.success ? rT.data : [];
+  const capaianAll = rC.success ? rC.data.map(normJ) : [];
+  
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const pw=210,ph=297,ml=15,mr=15;
+  let yPos=15;
+
+  yPos = drawPdfHeader(doc, 'Laporan Hasil Belajar (Rapor)', 'PKBM Baitul Hikmah', profil, yPos, pw);
+
+  doc.setFontSize(9);
+  doc.text('Nama', ml, yPos); doc.text(': '+nama, ml+30, yPos);
+  doc.text('Sekolah', ml, yPos+5); doc.text(': '+(profil.namasekolah), ml+30, yPos+5);
+  doc.text('Alamat', ml, yPos+10); doc.text(': '+(profil.alamat), ml+30, yPos+10);
+  
+  doc.text('Kelas', pw/2+20, yPos); doc.text(': '+kelas+' ('+(A.sess.semester==='1'?'Ganjil':'Genap')+')', pw/2+45, yPos);
+  doc.text('Semester', pw/2+20, yPos+5); doc.text(': '+A.sess.semester, pw/2+45, yPos+5);
+  doc.text('Tahun Pelajaran', pw/2+20, yPos+10); doc.text(': '+A.sess.tahunPelajaran, pw/2+45, yPos+10);
+  yPos+=20;
+  
+  doc.setFont('helvetica','bold');
+  doc.text('A. NILAI DAN KETERCAPAIAN KOMPETENSI', ml, yPos); yPos+=4;
+  
+  let tableData = []; let mapUmum = [], mapPemberdayaan = [];
+  
+  transkrip.forEach((t, i) => {
+    let cap = capaianAll.find(c => String(c.matapelajaran).toLowerCase() === String(t.namaMapel).toLowerCase());
+    let kelompok = cap ? (cap.kelompok || 'A. Kelompok Umum') : 'A. Kelompok Umum';
+    let row = {no: i+1, mapel: t.namaMapel, nilai: t.nilaiAkhir, capaian: cap ? cap.deskripsicapaian : 'Peserta didik telah menyelesaikan capaian kompetensi dasar.'};
+    if(kelompok.includes('Pemberdayaan')) mapPemberdayaan.push(row);
+    else mapUmum.push(row);
+  });
+
+  if(mapUmum.length > 0) {
+    tableData.push([{content: 'A. Kelompok Umum', colSpan: 4, styles: {fillColor: [230,230,230], fontStyle: 'bold'}}]);
+    mapUmum.forEach((m, idx) => tableData.push([idx+1, m.mapel, m.nilai, m.capaian]));
+  }
+  if(mapPemberdayaan.length > 0) {
+    tableData.push([{content: 'B. Kelompok Pemberdayaan dan Keterampilan Berbasis Profil Pelajar Pancasila', colSpan: 4, styles: {fillColor: [230,230,230], fontStyle: 'bold'}}]);
+    mapPemberdayaan.forEach((m, idx) => tableData.push([idx+1, m.mapel, m.nilai, m.capaian]));
+  }
+
+  doc.autoTable({
+    startY: yPos, margin: {left: ml, right: mr},
+    head: [['No', 'Mata Pelajaran', 'Nilai Akhir', 'Capaian Kompetensi']],
+    body: tableData, theme: 'grid',
+    headStyles: {fillColor: [50,50,50], textColor: 255, fontSize: 8},
+    bodyStyles: {fontSize: 8},
+    columnStyles: {0:{cellWidth:10, halign:'center'}, 1:{cellWidth:35}, 2:{cellWidth:20, halign:'center'}, 3:{cellWidth:'auto'}}
+  });
+
+  yPos = doc.lastAutoTable.finalY + 15;
+  if(yPos > ph-45) { doc.addPage(); yPos = 20; }
+  
+  // Penempatan Tanda Tangan
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  let sigY = yPos;
+  
+  // Kiri: Orang Tua
+  doc.text('Mengetahui,', ml+10, sigY);
+  doc.text('Orang Tua/Wali,', ml+10, sigY+5);
+  doc.text('____________________', ml+10, sigY+25);
+  
+  // Kanan: Wali Kelas
+  doc.text('Bandung, ' + new Date().toLocaleDateString('id-ID',{month:'long', year:'numeric'}), pw-mr-40, sigY);
+  doc.text('Wali Kelas,', pw-mr-40, sigY+5);
+  doc.text(profil.walikelas || '____________________', pw-mr-40, sigY+25);
+
+  // Tengah Bawah: Kepala Sekolah
+  let kepsekY = sigY + 35;
+  doc.text('Mengetahui,', pw/2, kepsekY, {align:'center'});
+  doc.text('Kepala Sekolah', pw/2, kepsekY+5, {align:'center'});
+  doc.text(profil.kepalasekolah || '____________________', pw/2, kepsekY+25, {align:'center'});
+
+  const fn='Rapor_Akademik_'+nama.replace(/\s+/g,'_')+'.pdf';
+  const u=URL.createObjectURL(doc.output('blob'));
+  document.getElementById('pdfTi').textContent='Preview Rapor Akademik';
+  document.getElementById('pdfPreview').innerHTML=`<iframe src="${u}" style="width:100%;height:100%;border:none"></iframe>`;
+  document.getElementById('pdfDlBtn').onclick=()=>doc.save(fn);
+  document.getElementById('pdfModal').classList.add('on');
+}
+
+async function cetakRaporKarakter(email, nama) {
+  document.getElementById('glLoader').style.display='flex';
+  const [rt, rn, profil] = await Promise.all([api('getTargetKarakter',{semua:true, semester:A.sess.semester}), api('getNilaiKarakter',{emailSiswa:email, semua:true, semester:A.sess.semester, tahunPelajaran:A.sess.tahunPelajaran}), getProfilDefault()]);
+  document.getElementById('glLoader').style.display='none';
+  
+  const tG=rt.success?rt.dataGuru:[]; const tO=rt.success?rt.dataOrtu:[];
+  const nilais=rn.success?rn.data.map(normJ):[];
+
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('p','mm','a4');
+  const pw=210,ph=297,ml=15,mr=15;
+  let yPos=15;
+
+  yPos = drawPdfHeader(doc, 'Laporan Penilaian Karakter Siswa', 'Atomic School', profil, yPos, pw);
+
+  doc.setFontSize(9);
+  doc.text('Nama Siswa : '+nama, ml, yPos);
+  doc.text('Semester   : '+A.sess.semester, pw/2+20, yPos);
+  doc.text('Tahun Ajaran: '+A.sess.tahunPelajaran, pw/2+20, yPos+5);
+  yPos+=15;
+
+  doc.setFont('helvetica','bold');
+  doc.text('A. Penilaian Karakter oleh Guru (Skala 1-4)', ml, yPos); yPos+=4;
+  let tbGuru = [];
+  tG.forEach((t, i) => {
+    let idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+    let nObj=nilais.find(n=>n.idtarget===idT && n.penilai==='Guru');
+    let v=nObj?nObj.nilai:'-';
+    let label = v==1?'Perlu Bimbingan (PB)':v==2?'Mulai Berkembang (MB)':v==3?'Berkembang Sesuai Harapan (BSH)':v==4?'Sangat Berkembang (SB)':'Belum Dinilai';
+    tbGuru.push([i+1, t.Bidang, t.Target, v, label]);
+  });
+  doc.autoTable({
+    startY: yPos, margin: {left: ml, right: mr},
+    head: [['No', 'Bidang', 'Target', 'Nilai', 'Keterangan']],
+    body: tbGuru, theme: 'grid', headStyles: {fillColor: [29,78,216], fontSize: 8}, bodyStyles: {fontSize: 8}
+  });
+
+  yPos = doc.lastAutoTable.finalY + 15;
+  doc.setFont('helvetica','bold');
+  doc.text('B. Penilaian Karakter oleh Orang Tua (Rata-rata Semester)', ml, yPos); yPos+=4;
+  
+  let tbOrtu = [];
+  tO.forEach((t, i) => {
+    let idT=t.ID||t.IDTargetKarakter||t.IDKarakter;
+    let nVals = nilais.filter(n=>n.idtarget===idT && n.penilai==='Ortu').map(n=>Number(n.nilai));
+    let avg = nVals.length ? (nVals.reduce((a,b)=>a+b,0)/nVals.length).toFixed(1) : '-';
+    let label = avg==='-'? 'Belum Dinilai' : (avg<=1.5?'Tidak Pernah':avg<=2.5?'Kadang-kadang':avg<=3.5?'Sering':'Selalu');
+    tbOrtu.push([i+1, t.Target, avg, label]);
+  });
+  doc.autoTable({
+    startY: yPos, margin: {left: ml, right: mr},
+    head: [['No', 'Target Sikap / Kebiasaan', 'Rata-Rata Nilai', 'Keterangan']],
+    body: tbOrtu, theme: 'grid', headStyles: {fillColor: [245,158,11], textColor:255, fontSize: 8}, bodyStyles: {fontSize: 8}
+  });
+  
+  yPos = doc.lastAutoTable.finalY + 15;
+  if(yPos > ph-45) { doc.addPage(); yPos = 20; }
+  
+  // Penempatan Tanda Tangan
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  let sigY = yPos;
+  
+  doc.text('Mengetahui,', ml+10, sigY);
+  doc.text('Orang Tua/Wali,', ml+10, sigY+5);
+  doc.text('____________________', ml+10, sigY+25);
+  
+  doc.text('Bandung, ' + new Date().toLocaleDateString('id-ID',{month:'long', year:'numeric'}), pw-mr-40, sigY);
+  doc.text('Wali Kelas,', pw-mr-40, sigY+5);
+  doc.text(profil.walikelas || '____________________', pw-mr-40, sigY+25);
+
+  let kepsekY = sigY + 35;
+  doc.text('Mengetahui,', pw/2, kepsekY, {align:'center'});
+  doc.text('Kepala Sekolah', pw/2, kepsekY+5, {align:'center'});
+  doc.text(profil.kepalasekolah || '____________________', pw/2, kepsekY+25, {align:'center'});
+
+  const fn='Rapor_Karakter_'+nama.replace(/\s+/g,'_')+'.pdf';
+  const u=URL.createObjectURL(doc.output('blob'));
+  document.getElementById('pdfTi').textContent='Preview Rapor Karakter';
+  document.getElementById('pdfPreview').innerHTML=`<iframe src="${u}" style="width:100%;height:100%;border:none"></iframe>`;
+  document.getElementById('pdfDlBtn').onclick=()=>doc.save(fn);
+  document.getElementById('pdfModal').classList.add('on');
+}
+
+/* ===== MODUL YAYASAN (Diperbarui) ===== */
+async function pYG(){
+  const r=await api('getJurnal',{});
+  if(!r.success) return empty('fa-exclamation',r.message);
+  A._ygData = r.data.map(normJ);
+  A.ygPage = 1;
+  setTimeout(ldYG, 100);
+  return `<div class="fi-in"><div class="flex justify-between mb-5"><div><h1 class="font-h font-800 text-xl">Kehadiran Guru</h1><p class="text-xs text-gray-500">Berdasarkan data Jurnal Mengajar</p></div></div><div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Dari Tanggal</label><input type="date" id="ygD" class="fi"></div><div><label class="fl">Sampai</label><input type="date" id="ygS" class="fi"></div></div><button class="bt bt1 mt-3" onclick="A.ygPage=1; ldYG()"><i class="fas fa-search"></i> Terapkan Filter</button></div><div id="ygC"></div></div>`;
+}
+function ldYG(){
+  const d=document.getElementById('ygD').value, s=document.getElementById('ygS').value, c=document.getElementById('ygC');
+  let data = A._ygData; 
+  if(d) data = data.filter(j=>j.tanggal >= d);
+  if(s) data = data.filter(j=>j.tanggal <= s);
+  if(!data.length){c.innerHTML=empty('fa-users','Tidak ada data jurnal / kehadiran');return;}
+  
+  const mapG = {};
+  data.forEach(j=>{
+    const n = j.namaguru || j.emailguru; if(!mapG[n]) mapG[n]={h:0,s:0,i:0,t:0};
+    const st = (j.statusguru||'Hadir').toLowerCase();
+    if(st==='hadir') mapG[n].h++; else if(st==='sakit') mapG[n].s++; else if(st==='izin') mapG[n].i++;
+    mapG[n].t++;
+  });
+  
+  const rows = Object.keys(mapG).map(n=>({n, ...mapG[n]}));
+  const lim = 10, tp = Math.ceil(rows.length/lim);
+  if(A.ygPage > tp && tp > 0) A.ygPage = tp;
+  const pData = rows.slice((A.ygPage-1)*lim, A.ygPage*lim);
+
+  let h=`<div class="cd"><table class="tb w-full"><thead><tr><th>Nama Guru</th><th class="text-center">Hadir</th><th class="text-center">Sakit</th><th class="text-center">Izin</th><th class="text-center">Total Mengajar</th></tr></thead><tbody>`;
+  pData.forEach(g=>{
+    h+=`<tr><td class="font-600 text-sm">${g.n}</td><td class="text-center"><span class="bd bgg">${g.h}</span></td><td class="text-center"><span class="bd bgy">${g.s}</span></td><td class="text-center"><span class="bd bg3">${g.i}</span></td><td class="text-center font-bold">${g.t}</td></tr>`;
+  }); h+=`</tbody></table>`;
+  
+  if(tp>1){
+    h+=`<div class="flex items-center justify-center gap-1 mt-4"><button class="pag-btn" onclick="ygPg(${A.ygPage-1})" ${A.ygPage<=1?'disabled':''}><i class="fas fa-chevron-left text-[10px]"></i></button>`;
+    for(let p=1; p<=tp; p++) {
+       if(p === 1 || p === tp || (p >= A.ygPage - 1 && p <= A.ygPage + 1)) {
+           h += `<button class="pag-btn ${p===A.ygPage?'act':''}" onclick="ygPg(${p})">${p}</button>`;
+       } else if (p === A.ygPage - 2 || p === A.ygPage + 2) {
+           h += `<span class="px-1 text-gray-400">...</span>`;
+       }
+    }
+    h+=`<button class="pag-btn" onclick="ygPg(${A.ygPage+1})" ${A.ygPage>=tp?'disabled':''}><i class="fas fa-chevron-right text-[10px]"></i></button></div>`;
+  }
+  h+=`</div>`; c.innerHTML=h;
+}
+function ygPg(p){ if(p<1)return; A.ygPage=p; ldYG(); }
+
+async function pYM(){
+  const r=await api('getJurnal',{});
+  if(!r.success) return empty('fa-exclamation',r.message);
+  A._ymData = r.data.map(normJ);
+  A.ymPage = 1;
+  setTimeout(ldYM, 100);
+  return `<div class="fi-in"><h1 class="font-h font-800 text-xl mb-5">Materi Terajarkan</h1>
+  <div class="cd mb-3"><div class="grid grid-cols-2 gap-3"><div><label class="fl">Dari Tanggal</label><input type="date" id="ymD" class="fi"></div><div><label class="fl">Sampai</label><input type="date" id="ymS" class="fi"></div></div><button class="bt bt1 mt-3" onclick="A.ymPage=1; ldYM()"><i class="fas fa-search"></i> Terapkan Filter</button></div>
+  <div id="ymC"></div></div>`;
+}
+function ldYM(){
+  const d = document.getElementById('ymD').value;
+  const s = document.getElementById('ymS').value;
+  let data = A._ymData;
+  if(d) data = data.filter(j=>j.tanggal >= d);
+  if(s) data = data.filter(j=>j.tanggal <= s);
+  data.sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||''));
+
+  const c = document.getElementById('ymC');
+  if(!data.length){ c.innerHTML = empty('fa-book','Belum ada data materi'); return; }
+  
+  const lim = 10, tp = Math.ceil(data.length/lim);
+  if(A.ymPage > tp && tp > 0) A.ymPage = tp;
+  const pData = data.slice((A.ymPage-1)*lim, A.ymPage*lim);
+
+  let h=`<div class="cd"><div class="overflow-x-auto"><table class="tb w-full"><thead><tr><th>Tanggal</th><th>Kelas</th><th>Mapel</th><th>Materi</th><th>Guru</th></tr></thead><tbody>`;
+  pData.forEach(j=>{
+    h+=`<tr><td class="text-xs text-gray-500 whitespace-nowrap">${fmtDS(j.tanggal)}</td><td><span class="bd bg4">${j.kelas}</span></td><td class="text-xs font-600">${j.namamapel}</td><td class="text-sm">${j.materiyangdiajarkan}</td><td class="text-xs">${j.namaguru}</td></tr>`;
+  }); h+=`</tbody></table></div>`;
+  
+  if(tp>1){
+     h+=`<div class="flex items-center justify-center gap-1 mt-4"><button class="pag-btn" onclick="ymPg(${A.ymPage-1})" ${A.ymPage<=1?'disabled':''}><i class="fas fa-chevron-left text-[10px]"></i></button>`;
+     for(let p=1; p<=tp; p++) {
+         if(p === 1 || p === tp || (p >= A.ymPage - 1 && p <= A.ymPage + 1)) {
+             h += `<button class="pag-btn ${p===A.ymPage?'act':''}" onclick="ymPg(${p})">${p}</button>`;
+         } else if (p === A.ymPage - 2 || p === A.ymPage + 2) {
+             h += `<span class="px-1 text-gray-400">...</span>`;
+         }
+     }
+     h+=`<button class="pag-btn" onclick="ymPg(${A.ymPage+1})" ${A.ymPage>=tp?'disabled':''}><i class="fas fa-chevron-right text-[10px]"></i></button></div>`;
+  }
+  h+=`</div>`; c.innerHTML = h;
+}
+function ymPg(p){ if(p<1)return; A.ymPage=p; ldYM(); }
+
+async function pYS(){
+  const [ra, rnk, rt, rk] = await Promise.all([
+    api('getRiwayatAbsen',{}), 
+    api('getNilaiKarakter',{semua:true, semester:A.sess.semester, tahunPelajaran:A.sess.tahunPelajaran}), 
+    api('getJawabanTugas',{}),
+    api('getNilaiKuis',{})
+  ]);
+  
+  const abs = ra.success?ra.data.map(normJ):[]; 
+  const kar = rnk.success?rnk.data.map(normJ):[]; 
+  const jwb = rt.success?rt.data.map(normJ):[];
+  const kuis = rk.success?rk.data.map(normJ):[];
+
+  // 1. CHART DATA (Attendance Grouped by Date)
+  const dtMap = {};
+  abs.forEach(a=>{
+      if(!a.tanggal) return;
+      const t = a.tanggal.substring(0,10);
+      if(!dtMap[t]) dtMap[t] = {h:0,s:0,i:0,a:0};
+      const st = (a.status||'').toLowerCase();
+      if(st==='hadir') dtMap[t].h++; else if(st==='sakit') dtMap[t].s++; else if(st==='izin') dtMap[t].i++; else if(st==='alpha') dtMap[t].a++;
+  });
+  const sortedDates = Object.keys(dtMap).sort();
+  A._chartData = {
+      labels: sortedDates.map(fmtDS),
+      h: sortedDates.map(d=>dtMap[d].h),
+      s: sortedDates.map(d=>dtMap[d].s),
+      i: sortedDates.map(d=>dtMap[d].i),
+      a: sortedDates.map(d=>dtMap[d].a)
+  };
+
+  // 2. Rata-rata Akademik (Tugas + Kuis)
+  let sumAk = 0, countAk = 0;
+  jwb.forEach(j=>{ if(j.nilai!==''&&j.nilai!==null){ sumAk+=Number(j.nilai); countAk++; } });
+  kuis.forEach(k=>{ if(k.skor!==''&&k.skor!==null){ sumAk+=Number(k.skor); countAk++; } });
+  const avgAk = countAk>0 ? Math.round(sumAk/countAk) : 0;
+
+  // 3. Rata-rata Karakter
+  let sumKG = 0, cKG = 0, sumKO = 0, cKO = 0;
+  kar.forEach(k=>{
+      const v = Number(k.nilai);
+      if(isNaN(v)) return;
+      if(k.penilai==='Guru') { sumKG+=v; cKG++; }
+      else if(k.penilai==='Ortu') { sumKO+=v; cKO++; }
+  });
+  const avgKG = cKG>0 ? (sumKG/cKG).toFixed(2) : 0;
+  const avgKO = cKO>0 ? (sumKO/cKO).toFixed(2) : 0;
+
+  let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-5">Statistik Global Siswa</h1>`;
+  
+  h+=`<div class="cd mb-4"><h3 class="font-h font-700 text-sm mb-3">Grafik Kehadiran Siswa</h3><div style="height:300px; width:100%"><canvas id="ygChart"></canvas></div></div>`;
+  
+  h+=`<div class="grid grid-cols-1 md:grid-cols-3 gap-4">`;
+  h+=`<div class="cd flex flex-col items-center justify-center text-center"><h3 class="font-h font-700 text-sm mb-2 text-indigo-800">Rata-rata Akademik</h3><div class="w-20 h-20 rounded-full border-4 border-indigo-100 flex items-center justify-center mb-2"><span class="font-h font-800 text-2xl text-indigo-600">${avgAk}</span></div><p class="text-xs text-gray-500">Tugas & Kuis (${countAk} data)</p></div>`;
+  h+=`<div class="cd flex flex-col items-center justify-center text-center"><h3 class="font-h font-700 text-sm mb-2 text-emerald-800">Karakter (Penilaian Guru)</h3><div class="w-20 h-20 rounded-full border-4 border-emerald-100 flex items-center justify-center mb-2"><span class="font-h font-800 text-2xl text-emerald-600">${avgKG}</span></div><p class="text-xs text-gray-500">Rata-rata Skala 1 - 4</p></div>`;
+  h+=`<div class="cd flex flex-col items-center justify-center text-center"><h3 class="font-h font-700 text-sm mb-2 text-amber-800">Karakter (Penilaian Ortu)</h3><div class="w-20 h-20 rounded-full border-4 border-amber-100 flex items-center justify-center mb-2"><span class="font-h font-800 text-2xl text-amber-600">${avgKO}</span></div><p class="text-xs text-gray-500">Rata-rata Skala 1 - 4</p></div>`;
+  h+=`</div></div>`;
+
+  setTimeout(drawChartYS, 200);
+  return h;
+}
+
+function drawChartYS(){
+  const ctx = document.getElementById('ygChart');
+  if(!ctx) return;
+  if(window.ysChartInst) window.ysChartInst.destroy();
+  
+  if(!A._chartData.labels.length) {
+    ctx.parentElement.innerHTML = `<div class="text-center py-12"><p class="text-sm text-gray-500"><i class="fas fa-chart-line text-2xl mb-2 text-gray-300 block"></i>Belum ada data kehadiran siswa</p></div>`;
+    return;
+  }
+  
+  window.ysChartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: A._chartData.labels,
+          datasets: [
+              { label: 'Hadir', data: A._chartData.h, borderColor: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.1)', fill: true, tension: 0.3 },
+              { label: 'Sakit', data: A._chartData.s, borderColor: '#F59E0B', backgroundColor: 'transparent', tension: 0.3 },
+              { label: 'Izin', data: A._chartData.i, borderColor: '#3B82F6', backgroundColor: 'transparent', tension: 0.3 },
+              { label: 'Alpha', data: A._chartData.a, borderColor: '#EF4444', backgroundColor: 'transparent', tension: 0.3 }
+          ]
+      },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+  });
+}
+
+</script>
+</body>
+</html>
