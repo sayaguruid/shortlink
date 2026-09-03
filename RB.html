@@ -233,7 +233,7 @@ const NV={
 
 /* ===== HELPER ===== */
 function gv(obj,...keys){if(!obj||typeof obj!=='object')return'';for(const k of keys){if(obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k]}return''}
-const _JM={idtugas:'IDTugas',emailpengumpul:'EmailPengumpul',namapengumpul:'NamaPengumpul',tipe:'Tipe',listemailanggota:'ListEmailAnggota',listnamaanggota:'ListNamaAnggota',linkjawaban:'LinkJawaban',nilai:'Nilai',catatanguru:'CatatanGuru',tanggal:'Tanggal',id:'ID',idmapel:'IDMapel',kelas:'Kelas',judul:'Judul',deskripsi:'Deskripsi',tenggat:'Tenggat',bab:'Bab',pertanyaan:'Pertanyaan',opsia:'OpsiA',opsib:'OpsiB',opsic:'OpsiC',opsid:'OpsiD',kuncijawaban:'KunciJawaban',skor:'Skor',emailsiswa:'EmailSiswa',namasiswa:'NamaSiswa',status:'Status',namamapel:'NamaMapel',password:'Password',role:'Role',nama:'Nama',email:'Email',materiyangdiajarkan:'MateriYangDiajarkan',waktumulai:'WaktuMulai',waktuselesai:'WaktuSelesai',emailguru:'EmailGuru',namaguru:'NamaGuru',pdfurl:'PdfUrl',youtubeurl:'YoutubeUrl',idmateri:'IDMateri',idsoal:'IDSoal',idjurnal:'IDJurnal'};
+const _JM={idtugas:'IDTugas',emailpengumpul:'EmailPengumpul',namapengumpul:'NamaPengumpul',tipe:'Tipe',listemailanggota:'ListEmailAnggota',listnamaanggota:'ListNamaAnggota',linkjawaban:'LinkJawaban',nilai:'Nilai',catatanguru:'CatatanGuru',tanggal:'Tanggal',id:'ID',idmapel:'IDMapel',kelas:'Kelas',judul:'Judul',deskripsi:'Deskripsi',tenggat:'Tenggat',bab:'Bab',pertanyaan:'Pertanyaan',opsia:'OpsiA',opsib:'OpsiB',opsic:'OpsiC',opsid:'OpsiD',kuncijawaban:'KunciJawaban',skor:'Skor',emailsiswa:'EmailSiswa',namasiswa:'NamaSiswa',status:'Status',namamapel:'NamaMapel',password:'Password',role:'Role',nama:'Nama',email:'Email',materiyangdiajarkan:'MateriYangDiajarkan',waktumulai:'WaktuMulai',waktuselesai:'WaktuSelesai',emailguru:'EmailGuru',namaguru:'NamaGuru',pdfurl:'PdfUrl',youtubeurl:'YoutubeUrl',idmateri:'IDMateri',idsoal:'IDSoal',idjurnal:'IDJurnal',linkreferensi:'LinkReferensi'};
 function normJ(j){if(!j||typeof j!=='object')return j;if(j.NamaPengumpul!==undefined||j.IDTugas!==undefined)return j;for(const k of Object.keys(j)){const lk=k.toLowerCase().replace(/[\s_\-]+/g,'');if(_JM[lk]&&_JM[lk]!==k)j[_JM[lk]]=j[k]}return j}
 function fmtDate(iso){if(!iso)return'-';if(typeof iso!=='string')return String(iso);let d;if(/^\d{4}-\d{2}-\d{2}$/.test(iso)){const p=iso.split('-');d=new Date(+p[0],+p[1]-1,+p[2],23,59)}else d=new Date(iso);if(isNaN(d.getTime()))return iso;const bl=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];return d.getDate()+' '+bl[d.getMonth()]+' '+d.getFullYear()+' — '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function fmtDS(iso){if(!iso)return'-';if(typeof iso!=='string')return String(iso);let d;if(/^\d{4}-\d{2}-\d{2}$/.test(iso)){const p=iso.split('-');d=new Date(+p[0],+p[1]-1,+p[2])}else d=new Date(iso);if(isNaN(d.getTime()))return iso;const bl=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];return d.getDate()+' '+bl[d.getMonth()]+' '+d.getFullYear()}
@@ -423,6 +423,8 @@ async function smK(id,bab){
 }
 
 /* ===== TUGAS SISWA ===== */
+
+/* GANTI FUNGSI pTg */
 async function pTg(){
   const[rt,rj]=await Promise.all([api('getTugas',{kelas:A.u.Kelas}),api('getJawabanTugas',{email:A.u.Email})]);
   if(!rt.success)return empty('fa-triangle-exclamation',rt.message);
@@ -431,9 +433,20 @@ async function pTg(){
   let h=`<div class="fi-in"><h1 class="font-h font-800 text-xl mb-0.5" style="color:var(--tx)">Tugas</h1><p class="text-xs mb-5" style="color:var(--tx3)">Kumpulkan tugas sesuai tenggat</p><div class="space-y-2.5">`;
   rt.data.forEach(t=>{
     const sub=A.d.jawaban.find(j=>j.IDTugas===t.IDTugas);const sn=sub&&sub.Nilai!==''&&sub.Nilai!==undefined&&sub.Nilai!==null;const bn=sub&&!sn;const tp=t.Tipe||'Individu';
-    h+=`<div class="cd" ${bn?'style="border-color:var(--yl)"':''}><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span>${sub?(sn?'<span class="bd bg1"><i class="fas fa-check-double mr-0.5"></i>Dinilai</span>':'<span class="bd bgy"><i class="fas fa-check mr-0.5"></i>Sudah Mengisi</span>'):''}</div>${t.Deskripsi?`<p class="text-[11px]" style="color:var(--tx3)">${t.Deskripsi}</p>`:''}<p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>${fmtDS(t.Tenggat)}</p>${sub?`<p class="text-[11px] font-600 mt-0.5" style="color:${sn?'var(--g1)':'var(--y3)'}"><i class="fas fa-${sn?'star':'clock'} mr-0.5"></i>${sn?'Nilai: '+sub.Nilai:'Menunggu penilaian'}${sub.CatatanGuru?' — '+sub.CatatanGuru:''}</p>`:''}</div><div class="flex-shrink-0">${sub?`<button class="bt bt2 bts" onclick="opST('${t.IDTugas}','${tp}','${t.Kelas}',true)"><i class="fas fa-rotate"></i> Perbarui</button>`:`<button class="bt bt1 bts" onclick="opST('${t.IDTugas}','${tp}','${t.Kelas}',false)"><i class="fas fa-paper-plane"></i> Kumpulkan</button>`}</div></div></div>`;
+    h+=`<div class="cd" ${bn?'style="border-color:var(--yl)"':''}><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span>${sub?(sn?'<span class="bd bg1"><i class="fas fa-check-double mr-0.5"></i>Dinilai</span>':'<span class="bd bgy"><i class="fas fa-check mr-0.5"></i>Sudah Mengisi</span>'):''}</div>${t.Deskripsi?`<p class="text-[11px] mb-1" style="color:var(--tx3)">${t.Deskripsi}</p>`:''}${t.LinkReferensi?`<a href="${t.LinkReferensi}" target="_blank" class="text-[11px] inline-flex items-center gap-1 mb-1 font-600 hover:underline" style="color:var(--g1)"><i class="fas fa-link"></i> Buka Link Referensi Tugas</a><br>`:''}<p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>${fmtDS(t.Tenggat)}</p>${sub?`<p class="text-[11px] font-600 mt-0.5" style="color:${sn?'var(--g1)':'var(--y3)'}"><i class="fas fa-${sn?'star':'clock'} mr-0.5"></i>${sn?'Nilai: '+sub.Nilai:'Menunggu penilaian'}${sub.CatatanGuru?' — '+sub.CatatanGuru:''}</p>`:''}</div><div class="flex-shrink-0">${sub?`<button class="bt bt2 bts" onclick="opST('${t.IDTugas}','${tp}','${t.Kelas}',true)"><i class="fas fa-rotate"></i> Perbarui</button>`:`<button class="bt bt1 bts" onclick="opST('${t.IDTugas}','${tp}','${t.Kelas}',false)"><i class="fas fa-paper-plane"></i> Kumpulkan</button>`}</div></div></div>`;
   });
   return h+'</div></div>';
+}
+
+/* GANTI FUNGSI rNlCards */
+function rNlCards(tugas,mm,ugCount){
+  let h='';
+  tugas.forEach(t=>{
+    const ug=ugCount[t.IDTugas]||0;
+    const tp=t.Tipe||'Individu';
+    h+=`<div class="cd mb-2 cursor-pointer hover:shadow-sm transition" onclick="togNlSub('${t.IDTugas}')" id="nlH_${t.IDTugas}"><div class="flex items-center justify-between gap-3"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd bg1">${mm[t.IDMapel]||'-'}</span><span class="bd bg4">${t.Kelas}</span><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span></div><p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>Tenggat: ${fmtDS(t.Tenggat)}${t.LinkReferensi?` &bull; <a href="${t.LinkReferensi}" target="_blank" class="font-600 hover:underline" style="color:var(--g1)" onclick="event.stopPropagation()"><i class="fas fa-external-link-alt"></i> Referensi</a>`:''}</p></div><div class="flex items-center gap-2 flex-shrink-0">${ug>0?`<span class="bd bg3"><i class="fas fa-exclamation-circle mr-0.5"></i>${ug} belum</span>`:`<span class="bd bgg"><i class="fas fa-check-circle mr-0.5"></i>Selesai</span>`}<i class="fas fa-chevron-down text-xs transition-transform duration-200" style="color:var(--tx3)" id="nlA_${t.IDTugas}"></i></div></div></div><div id="nlS_${t.IDTugas}" class="hidden"></div>`;
+  });
+  return h;
 }
 let _ms=[];
 async function opST(id,tipe,kelas,isEdit){
@@ -746,50 +759,54 @@ async function ldTg(){
   let h=`<div class="space-y-2">`;
   tgs.forEach(t=>{
     const tp=t.Tipe||'Individu';
-    h+=`<div class="cd"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span><span class="bd bg1">${mm[t.IDMapel]||t.IDMapel}</span><span class="bd bg4">${t.Kelas}</span></div>${t.Deskripsi?`<p class="text-[11px]" style="color:var(--tx3)">${t.Deskripsi}</p>`:''}<p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>Tenggat: ${fmtDS(t.Tenggat)}</p></div><div class="flex gap-1 flex-shrink-0"><button class="ibtn" title="Edit" onclick="mETg('${t.IDTugas}')"><i class="fas fa-pen"></i></button><button class="ibtn del" title="Hapus" onclick="cfDelTugas('${t.IDTugas}')"><i class="fas fa-trash"></i></button></div></div></div>`;
+    h+=`<div class="cd"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap mb-0.5"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span><span class="bd bg1">${mm[t.IDMapel]||t.IDMapel}</span><span class="bd bg4">${t.Kelas}</span></div>${t.Deskripsi?`<p class="text-[11px] mb-1" style="color:var(--tx3)">${t.Deskripsi}</p>`:''}${t.LinkReferensi?`<a href="${t.LinkReferensi}" target="_blank" class="text-[11px] inline-flex items-center gap-1 mb-1 font-600" style="color:var(--g1)"><i class="fas fa-external-link-alt"></i> Buka Link Referensi</a><br>`:''}<p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>Tenggat: ${fmtDS(t.Tenggat)}</p></div><div class="flex gap-1 flex-shrink-0"><button class="ibtn" title="Edit" onclick="mETg('${t.IDTugas}')"><i class="fas fa-pen"></i></button><button class="ibtn del" title="Hapus" onclick="cfDelTugas('${t.IDTugas}')"><i class="fas fa-trash"></i></button></div></div></div>`;
   });
   h+=`</div>`;c.innerHTML=h;
 }
 function cfDelTugas(id){cfDel('Hapus tugas ini?',async()=>{const r=await api('deleteTugas',{id});if(r.success){cc();invCache(['deleteTugas']);toast(r.message);ldTg()}else toast(r.message,'error')})}
+
 function mETg(id){
   const t=A._tugasList.find(x=>x.IDTugas===id);
   if(!t){toast('Data tidak ditemukan','error');return}
   const rk=api('getKelasList');
   rk.then(r=>{
     const kl=r.success?r.data:[];
-    opM('Edit Tugas',`<div class="space-y-3"><div><label class="fl">Mata Pelajaran</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi">${soK(kl)}</select></div><div id="tgNK" class="hidden"><label class="fl">Nama Kelas Baru</label><input id="tgNKI" class="fi" placeholder="Contoh: XII IPA 3"></div><div><label class="fl">Judul Tugas</label><input id="tgJ" class="fi"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi"></textarea></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi"><option value="Individu">Individu</option><option value="Kelompok">Kelompok</option></select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smETg('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
+    opM('Edit Tugas',`<div class="space-y-3"><div><label class="fl">Mata Pelajaran</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi">${soK(kl)}</select></div><div id="tgNK" class="hidden"><label class="fl">Nama Kelas Baru</label><input id="tgNKI" class="fi" placeholder="Contoh: XII IPA 3"></div><div><label class="fl">Judul Tugas</label><input id="tgJ" class="fi"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi"></textarea></div><div><label class="fl">Link Referensi (Opsional)</label><input id="tgL" class="fi" placeholder="https://..."></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi"><option value="Individu">Individu</option><option value="Kelompok">Kelompok</option></select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smETg('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
     document.getElementById('tgK').addEventListener('change',function(){document.getElementById('tgNK').classList.toggle('hidden',this.value!=='__new__')});
     document.getElementById('tgM').value=t.IDMapel||'';
     document.getElementById('tgK').value=t.Kelas||'';
     document.getElementById('tgJ').value=t.Judul||'';
     document.getElementById('tgD').value=t.Deskripsi||'';
+    document.getElementById('tgL').value=t.LinkReferensi||'';
     document.getElementById('tgT').value=t.Tenggat||'';
     document.getElementById('tgTp').value=t.Tipe||'Individu';
   });
 }
+
 async function smETg(id){
   const idMapel=document.getElementById('tgM').value,kv=document.getElementById('tgK').value;
   let kelas=kv;if(kv==='__new__'){kelas=document.getElementById('tgNKI').value.trim();if(!kelas){toast('Nama kelas baru wajib','warning');return}}
-  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value;
+  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value,linkRef=document.getElementById('tgL').value.trim();
   if(!idMapel||!kelas||!judul){toast('Mapel, kelas, dan judul wajib','warning');return}
-  const r=await api('updateTugas',{id,idMapel,kelas,judul,deskripsi:desk,tenggat,tipe});
+  const r=await api('updateTugas',{id,idMapel,kelas,judul,deskripsi:desk,tenggat,tipe,linkReferensi:linkRef});
   if(r.success){clM();cc();invCache(['updateTugas']);toast(r.message);ldTg()}else toast(r.message,'error');
 }
 function mATg(){
   const rk=api('getKelasList');
   rk.then(r=>{
     const kl=r.success?r.data:[];
-    opM('Tambah Tugas',`<div class="space-y-3"><div><label class="fl">Mata Pelajaran</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi">${soK(kl)}</select></div><div id="tgNK" class="hidden"><label class="fl">Nama Kelas Baru</label><input id="tgNKI" class="fi" placeholder="Contoh: XII IPA 3"></div><div><label class="fl">Judul Tugas</label><input id="tgJ" class="fi" placeholder="Judul tugas"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi" placeholder="Deskripsi tugas"></textarea></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi"><option value="Individu">Individu</option><option value="Kelompok">Kelompok</option></select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smATg()"><i class="fas fa-save"></i> Simpan</button>`);
+    opM('Tambah Tugas',`<div class="space-y-3"><div><label class="fl">Mata Pelajaran</label><select id="tgM" class="fi">${so(A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})))}</select></div><div><label class="fl">Kelas</label><select id="tgK" class="fi">${soK(kl)}</select></div><div id="tgNK" class="hidden"><label class="fl">Nama Kelas Baru</label><input id="tgNKI" class="fi" placeholder="Contoh: XII IPA 3"></div><div><label class="fl">Judul Tugas</label><input id="tgJ" class="fi" placeholder="Judul tugas"></div><div><label class="fl">Deskripsi</label><textarea id="tgD" class="fi" placeholder="Deskripsi tugas"></textarea></div><div><label class="fl">Link Referensi (Opsional)</label><input id="tgL" class="fi" placeholder="https://..."></div><div><label class="fl">Tenggat</label><input id="tgT" type="date" class="fi"></div><div><label class="fl">Tipe</label><select id="tgTp" class="fi"><option value="Individu">Individu</option><option value="Kelompok">Kelompok</option></select></div></div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smATg()"><i class="fas fa-save"></i> Simpan</button>`);
     document.getElementById('tgK').addEventListener('change',function(){document.getElementById('tgNK').classList.toggle('hidden',this.value!=='__new__')});
   });
 }
+
 async function smATg(){
   const idMapel=document.getElementById('tgM').value,kv=document.getElementById('tgK').value;
   let kelas=kv;if(kv==='__new__'){kelas=document.getElementById('tgNKI').value.trim();if(!kelas){toast('Nama kelas baru wajib','warning');return}}
-  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value;
+  const judul=document.getElementById('tgJ').value.trim(),desk=document.getElementById('tgD').value.trim(),tenggat=document.getElementById('tgT').value,tipe=document.getElementById('tgTp').value,linkRef=document.getElementById('tgL').value.trim();
   if(!idMapel||!kelas||!judul){toast('Mapel, kelas, dan judul wajib','warning');return}
   if(!tenggat){toast('Tenggat wajib dipilih','warning');return}
-  const r=await api('addTugas',{idMapel,kelas,judul,deskripsi:desk,tenggat,tipe});
+  const r=await api('addTugas',{idMapel,kelas,judul,deskripsi:desk,tenggat,tipe,linkReferensi:linkRef});
   if(r.success){clM();cc();invCache(['addTugas']);toast(r.message);ldTg()}else toast(r.message,'error');
 }
 
@@ -821,15 +838,7 @@ async function pNl(){
   }
   return h+'</div></div>';
 }
-function rNlCards(tugas,mm,ugCount){
-  let h='';
-  tugas.forEach(t=>{
-    const ug=ugCount[t.IDTugas]||0;
-    const tp=t.Tipe||'Individu';
-    h+=`<div class="cd mb-2 cursor-pointer hover:shadow-sm transition" onclick="togNlSub('${t.IDTugas}')" id="nlH_${t.IDTugas}"><div class="flex items-center justify-between gap-3"><div class="flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><h3 class="font-h font-700 text-sm" style="color:var(--tx)">${t.Judul}</h3><span class="bd bg1">${mm[t.IDMapel]||'-'}</span><span class="bd bg4">${t.Kelas}</span><span class="bd ${tp==='Kelompok'?'bgy':'bg2'}">${tp}</span></div><p class="text-[11px] mt-0.5" style="color:var(--tx3)"><i class="fas fa-calendar mr-0.5"></i>Tenggat: ${fmtDS(t.Tenggat)}</p></div><div class="flex items-center gap-2 flex-shrink-0">${ug>0?`<span class="bd bg3"><i class="fas fa-exclamation-circle mr-0.5"></i>${ug} belum</span>`:`<span class="bd bgg"><i class="fas fa-check-circle mr-0.5"></i>Selesai</span>`}<i class="fas fa-chevron-down text-xs transition-transform duration-200" style="color:var(--tx3)" id="nlA_${t.IDTugas}"></i></div></div></div><div id="nlS_${t.IDTugas}" class="hidden"></div>`;
-  });
-  return h;
-}
+
 function nlFilter(){
   const fv=document.getElementById('nlF').value;
   let filtered=A._nl.tugas;
