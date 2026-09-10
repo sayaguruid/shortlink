@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Penulis Surat LDII – DPD Garut</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{--green:#08783f;--green2:#0b5e37;--soft:#eaf5ef;--bg:#f2f5f3;--line:#dce4df;--text:#18201b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,Arial,sans-serif}
+header{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 2px 12px #0002}
+.brand b{font-size:17px}.brand small{display:block;opacity:.8;margin-top:2px}
+nav{display:flex;gap:6px;flex-wrap:wrap}.nav{background:#ffffff20;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}.nav.active,.primary{background:#fff;color:var(--green)}
+.wrap{max-width:1500px;margin:18px auto;padding:0 14px}.tab{display:none}.show{display:block}
+.grid{display:grid;grid-template-columns:430px minmax(0,1fr);gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:15px}
+h3{margin:0 0 12px;font-size:16px}.form{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}
+label{font-size:11px;color:#65716a;font-weight:700;display:block;margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5ce;border-radius:7px;font:inherit;background:#fff}
+textarea{min-height:130px;resize:vertical}.small{min-height:70px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+button{border:0;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}.green{background:var(--green);color:#fff}.soft{background:var(--soft);color:var(--green)}.danger{background:#fee;color:#a11}.blue{background:#0056b3;color:#fff}
+.status{font-size:12px;background:var(--soft);padding:8px;border-radius:7px;margin-bottom:10px}.hint{font-size:11px;color:#66736b;line-height:1.45}
+
+/* AREA PREVIEW KERTAS (Kunci Perbaikan Font & Tata Letak) */
+.preview-container { background:#dfe4e2; padding:16px; overflow:auto; display:flex; justify-content:center; min-height:820px; }
+.paper { 
+  width:210mm; min-height:297mm; background:#fff; padding:15mm 20mm; 
+  font-family: Arial, sans-serif !important; font-size: 11pt !important; 
+  box-shadow:0 3px 15px #0002; color:#111; position:relative; box-sizing: border-box;
+}
+
+.kop { display:grid; grid-template-columns:26mm 1fr; border-bottom:3px solid #111; padding-bottom:4mm; gap:4mm; align-items:center; margin-bottom: 2mm; }
+.kop img { width:23mm; height:23mm; object-fit:contain; }
+.kt { text-align:center; line-height:1.1; }
+.kt b { display:block; }
+.k1 { font-size:14pt; } .k2 { font-size:16pt; } .k3 { font-size:14pt; } .k4 { font-size:14pt; }
+.ks { font-size:9pt; margin-top:3px; line-height:1.25; }
+
+.meta { margin-top:4mm; display:grid; grid-template-columns:27mm 1fr 25mm 62mm; gap:1.7mm; font-size:11pt; line-height:1.25; }
+.to { grid-column:1/-1; margin-top:2mm; }
+.body { margin-top:4mm; white-space:pre-wrap; text-align:justify; font-size:11pt; line-height:1.5; min-height:85mm; }
+.date { text-align:right; margin-top:5mm; font-size:11pt; }
+
+/* PERBAIKAN TATA LETAK STEMPEL TENGAH */
+.sigs-wrapper { position: relative; margin-top: 10mm; display: flex; justify-content: space-between; align-items: flex-start; min-height: 45mm; font-size:11pt;}
+.sig-box { width: 45%; text-align: center; position: relative; z-index: 2; }
+.sig-box img { height: 23mm; max-width: 50mm; object-fit: contain; display: block; margin: 2mm auto; }
+.sig-box .name { font-weight: bold; text-decoration: underline; }
+.stamp-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 34mm; height: 34mm; z-index: 1; opacity: 0.9; }
+
+.cc { margin-top:5mm; font-size:10pt; }
+.note { font-size:8pt; color:#666; margin-top:7mm; border-top:1px solid #ddd; padding-top:3mm; font-family: Inter, sans-serif; }
+.tablewrap { overflow:auto; }
+.data { width:100%; border-collapse:collapse; font-size:12px; }
+.data th, .data td { border:1px solid #d4ddd7; padding:7px; text-align:left; vertical-align:top; }
+.data th { background:#f0f5f2; }
+.toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.badge { display:inline-block; padding:3px 7px; border-radius:99px; background:var(--soft); color:var(--green); font-size:11px; font-weight:700; }
+
+.modal { position:fixed; inset:0; background:#0008; display:none; align-items:center; justify-content:center; z-index:50; padding:18px; }
+.modal.show { display:flex; }
+.modalbox { background:#fff; border-radius:12px; max-width:700px; width:100%; max-height:90vh; overflow:auto; padding:18px; }
+.modalbox textarea { min-height:280px; }
+
+/* Trik Responsif: Kita menskala BUNGKUSANNYA, BUKAN KERTASNYA, 
+   sehingga saat di PDF-kan ukuran resolusinya tetap jernih & proporsional */
+.scale-wrap { transform-origin: top center; transition: transform 0.2s; }
+@media(max-width:1050px) { .grid{grid-template-columns:1fr;} .scale-wrap{transform:scale(.80); margin-bottom:-60mm;} }
+@media(max-width:650px) {
+  header{flex-direction:column;align-items:flex-start}
+  nav{overflow-x:auto;width:100%;flex-wrap:nowrap;padding-bottom:5px;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .form{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .actions button{width:100%}
+  .preview-container{padding:10px; min-height:480px; justify-content:flex-start;}
+  .scale-wrap{transform:scale(.42); transform-origin: top left; margin-bottom:-170mm; margin-right:-120mm;}
+}
+
+/* Saat mengekspor PDF, matikan semua skala agar format tidak berantakan */
+body.exporting .scale-wrap { transform: none !important; margin: 0 !important; }
+body.exporting .preview-container { padding: 0 !important; background: transparent; }
+
+@media print {
+  body * { visibility: hidden; }
+  .preview-container, .preview-container * { visibility: visible; }
+  .preview-container { position: absolute; left: 0; top: 0; padding: 0; margin: 0; width: 100%; background: #fff; }
+  .scale-wrap { transform: scale(1) !important; margin: 0 !important; }
+  .paper { box-shadow: none !important; border: none; }
+  .note { display: none !important; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>Penulis Surat LDII</b><small>DPD Lembaga Dakwah Islam Indonesia Kabupaten Garut</small></div>
+  <nav>
+    <button class="nav active" onclick="tab('buat',this)">Buat Surat</button>
+    <button class="nav" onclick="tab('masuk',this)">Surat Masuk</button>
+    <button class="nav" onclick="tab('arsip',this)">Arsip</button>
+    <button class="nav" onclick="tab('set',this)">Pengaturan</button>
+  </nav>
+</header>
+
+<main class="wrap">
+<section id="buat" class="tab show">
+<div class="grid">
+<div>
+<div class="card">
+<h3>Data Surat</h3>
+<div id="status" class="status">Memuat data dari server...</div>
+<div class="form">
+<div><label>Template Surat</label><select id="template" onchange="changeTemplate()">
+<option value="surat_biasa">Surat Biasa</option>
+<option value="undangan">Undangan</option>
+<option value="surat_edaran">Surat Edaran</option>
+<option value="surat_keterangan">Surat Keterangan</option>
+<option value="surat_tugas">Surat Tugas / Mandat</option>
+<option value="surat_pengantar">Surat Pengantar</option>
+<option value="surat_rekomendasi">Surat Rekomendasi</option>
+<option value="berita_acara">Berita Acara</option>
+<option value="laporan">Laporan</option>
+</select></div>
+<div><label>Kode Jenis</label><select id="jenis" onchange="newNo()">
+<option>SUM</option><option>UND</option><option>SE</option><option>SKET</option><option>ST</option><option>MDT</option><option>SP</option><option>REK</option><option>BA</option><option>LP</option>
+</select></div>
+<div><label>Nomor</label><input id="nomor" placeholder="Terisi Otomatis"></div>
+<div><label>Tanggal Surat</label><input id="tanggal" type="date" onchange="newNo()"></div>
+<div><label>Sifat</label><select id="sifat"><option>Biasa</option><option>Segera</option><option>Sangat Segera</option><option>Rahasia</option></select></div>
+<div><label>Lampiran</label><input id="lampiran" placeholder="-"></div>
+<div class="full"><label>Perihal</label><input id="perihal"></div>
+<div class="full"><label>Kepada Yth.</label><textarea id="tujuan" class="small"></textarea></div>
+<div class="full"><label>Isi / Naskah Surat</label><textarea id="isi"></textarea></div>
+<div><label>Kota</label><input id="kota" value="Garut"></div>
+<div><label>Penandatangan</label><select id="ttd"><option value="ketua_sekretaris">Ketua & Sekretaris</option><option value="sekretaris">Sekretaris</option><option value="ketua">Ketua</option></select></div>
+<div><label>Nama Ketua</label><input id="nk" placeholder="Otomatis dari Pengaturan"></div>
+<div><label>Nama Sekretaris</label><input id="ns" placeholder="Otomatis dari Pengaturan"></div>
+<div class="full"><label>Tembusan</label><textarea id="tembusan" class="small" placeholder="Satu pihak per baris"></textarea></div>
+</div>
+
+<div class="actions">
+<button class="soft" onclick="openAI()">Bantu AI</button>
+<button class="soft" onclick="saveDraft()">Simpan Draft</button>
+</div>
+<hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+<label>Tindakan Akhir / Download:</label>
+<div class="actions">
+<button class="green" onclick="downloadPdf(true)">PDF Digital (Ada TTD & Cap)</button>
+<button class="danger" onclick="downloadPdf(false)">PDF Cetak (Kosong)</button>
+<button class="blue" onclick="doPrint()">🖨️ Cetak Langsung</button>
+</div>
+
+</div>
+</div>
+
+<div class="card">
+<h3>Preview Kertas A4</h3>
+<p class="hint">Preview ini menampilkan margin dan ukuran pasti 1:1 saat diekspor.</p>
+<div class="preview-container">
+  <div class="scale-wrap">
+    <div id="paper" class="paper"></div>
+  </div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- SECTION SURAT MASUK & ARSIP & PENGATURAN TETAP SAMA -->
+<section id="masuk" class="tab">
+<div class="card">
+<h3>Registrasi Surat Masuk</h3>
+<div class="form">
+<div><label>Tanggal Diterima</label><input id="it" type="date"></div>
+<div><label>Nomor Surat Asal</label><input id="ino"></div>
+<div><label>Tanggal Surat Asal</label><input id="ita" type="date"></div>
+<div><label>Pengirim</label><input id="ip"></div>
+<div class="full"><label>Perihal</label><input id="iper"></div>
+<div><label>Sifat</label><select id="isifat"><option>Biasa</option><option>Segera</option></select></div>
+<div><label>Diteruskan Kepada</label><input id="idisp"></div>
+<div><label>Status</label><select id="istat"><option>DITERIMA</option><option>DIDISPOSISIKAN</option><option>SELESAI</option></select></div>
+<div class="full"><label>Catatan</label><textarea id="icat" class="small"></textarea></div>
+</div>
+<div class="actions"><button class="green" onclick="saveIncoming()">Simpan Surat Masuk</button></div>
+</div>
+<div class="card"><div id="intable" class="tablewrap"></div></div>
+</section>
+
+<section id="arsip" class="tab">
+<div class="card">
+<h3>Arsip Surat Keluar</h3>
+<div class="toolbar"><input id="q" placeholder="Cari..." oninput="renderArchives()" style="flex:1"><button class="soft" onclick="loadArchives()">Refresh</button></div>
+<div id="outtable" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="set" class="tab">
+<div class="card">
+<h3>Pengaturan</h3>
+<div class="form">
+<div class="full"><label>URL Web App Apps Script (/exec)</label><input id="api" placeholder="https://script.google.com/macros/s/.../exec"></div>
+<div><label>Kode tingkat</label><input id="tingkat" value="DPD LDII"></div>
+<div><label>Nama organisasi</label><input id="org" value="DPD LDII Kabupaten Garut"></div>
+<div class="full"><label>Format nomor</label><input id="fmt" value="{JENIS}-{NO}/{TINGKAT}/{BULAN}/{TAHUN}"></div>
+<div><label>Kota default</label><input id="kotaCfg" value="Garut"></div>
+<div><label>Nama folder Drive</label><input id="folder" value="Arsip Surat LDII Garut"></div>
+<hr class="full" style="border:0; border-top:1px solid #eee; margin:10px 0;">
+<div><label>Nama Ketua (Default)</label><input id="cfgKetua" placeholder="H. Nama Ketua"></div>
+<div><label>Nama Sekretaris (Default)</label><input id="cfgSekretaris" placeholder="Nama Sekretaris, S.Pd."></div>
+</div>
+<div class="actions"><button class="green" onclick="saveSettings()">Simpan Pengaturan</button><button class="soft" onclick="testApi()">Tes Koneksi</button></div>
+</div>
+</section>
+</main>
+
+<div id="aiModal" class="modal">
+<div class="modalbox">
+<h3>Bantuan AI</h3>
+<textarea id="aiprompt" placeholder="Tuliskan tujuan surat..."></textarea>
+<div class="actions"><button onclick="closeAI()">Batal</button><button class="green" onclick="runAI()">Buat Draf</button></div>
+</div>
+</div>
+
+<script>
+const IMG={
+ logo:'https://i.imgur.com/lhuZXVi.png',
+ ketua:'https://i.imgur.com/NR2MYyn.png',
+ sekretaris:'https://i.imgur.com/T7rkcec.png',
+ cap:'https://i.imgur.com/OiOsyjc.png'
+};
+let api=localStorage.getItem('ldii_api')||'', cfg={}, currentId='';
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const today=()=>new Date().toISOString().slice(0,10);
+
+function tab(id,btn){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('show'));
+  $(id).classList.add('show');
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='arsip'||id==='masuk') loadArchives();
+}
+
+async function call(action,data={}){
+  if(!api) throw new Error('URL API Apps Script belum diisi.');
+  const r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});
+  const x=await r.json();
+  if(!x.ok) throw new Error(x.error||'API error');
+  return x;
+}
+
+function setStatus(text,ok=true){$('status').textContent=text;$('status').style.background=ok?'#eaf5ef':'#fff1f1';$('status').style.color=ok?'#08783f':'#a11'}
+
+function formatDateID(v){
+  if(!v) return '';
+  const d=new Date(v+'T00:00:00');
+  const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// LOGIKA PENGISIAN OTOMATIS TEMPLATE TABEL
+function changeTemplate() {
+  const t = $('template').value;
+  if(t === 'surat_pengantar') {
+    $('jenis').value = 'SUM';
+    $('perihal').value = 'Surat Pengantar';
+    $('isi').value = `<table style="width:100%; border-collapse:collapse; margin-top:10px;" border="1">
+  <tr>
+    <th style="padding:8px; text-align:center; width:5%;">NO</th>
+    <th style="padding:8px; text-align:center; width:45%;">URAIAN</th>
+    <th style="padding:8px; text-align:center; width:20%;">BANYAKNYA</th>
+    <th style="padding:8px; text-align:center; width:30%;">KETERANGAN</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; text-align:center;">1</td>
+    <td style="padding:8px;">Majalah Nuansa Persada<br>Edisi: ...</td>
+    <td style="padding:8px; text-align:center;">1 (satu)<br>Eksemplar</td>
+    <td style="padding:8px;">Disampaikan dengan hormat, untuk dijadikan informasi seperlunya.</td>
+  </tr>
+</table>`;
+  } else if (t === 'surat_tugas') {
+    $('jenis').value = 'MDT';
+    $('perihal').value = 'Surat Mandat / Tugas';
+    $('isi').value = `<b>MEMBERIKAN MANDAT KEPADA:</b>
+<table style="width:100%; margin-top:10px; border:none;">
+  <tr>
+    <td style="width:20%; vertical-align:top;">Nama</td>
+    <td style="width:2%; vertical-align:top;">:</td>
+    <td style="vertical-align:top;">1. Nama Utusan Satu<br>2. Nama Utusan Dua</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top; padding-top:10px;">Jabatan</td>
+    <td style="vertical-align:top; padding-top:10px;">:</td>
+    <td style="vertical-align:top; padding-top:10px;">Pengurus DPD LDII</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top; padding-top:10px;">Untuk</td>
+    <td style="vertical-align:top; padding-top:10px;">:</td>
+    <td style="vertical-align:top; padding-top:10px;">Mengikuti kegiatan...</td>
+  </tr>
+</table>
+<br>
+Demikian surat mandat/tugas ini dibuat untuk dapat dipergunakan sebagaimana mestinya, dan apabila dikemudian hari terdapat kekeliruan akan diadakan perbaikan.`;
+  }
+  newNo();
+}
+
+function refreshPreview(withSig = true){
+  const date=formatDateID($('tanggal').value)||formatDateID(today());
+  const sign=$('ttd').value;
+  
+  // Opsi Tanda Tangan
+  const imgKetua = withSig ? `<img src="${IMG.ketua}">` : `<div style="height:27mm"></div>`;
+  const imgSekretaris = withSig ? `<img src="${IMG.sekretaris}">` : `<div style="height:27mm"></div>`;
+  // Cap berada persis ditengah
+  const stampCenter = withSig ? `<img class="stamp-center" src="${IMG.cap}">` : ``;
+
+  let sig='';
+  if(sign==='ketua_sekretaris'){
+    sig=`<div class="sigs-wrapper">
+           ${stampCenter}
+           <div class="sig-box">
+             <div>Ketua,</div>
+             ${imgKetua}
+             <div class="name">${esc($('nk').value||'NAMA KETUA')}</div>
+           </div>
+           <div class="sig-box">
+             <div>Sekretaris,</div>
+             ${imgSekretaris}
+             <div class="name">${esc($('ns').value||'NAMA SEKRETARIS')}</div>
+           </div>
+         </div>`;
+  }else if(sign==='ketua'){
+    sig=`<div class="sigs-wrapper">
+           <div style="width:45%;"></div>
+           <div class="sig-box">
+             <div>Ketua,</div>
+             ${imgKetua}
+             <div class="name">${esc($('nk').value||'NAMA KETUA')}</div>
+             ${stampCenter}
+           </div>
+         </div>`;
+  }
+
+  const template=$('template').value;
+  let heading='';
+  if(template==='undangan') heading='<div style="text-align:center;font-weight:bold;margin-bottom:5mm;text-decoration:underline;">UNDANGAN</div>';
+  if(template==='surat_edaran') heading='<div style="text-align:center;font-weight:bold;margin-bottom:5mm;text-decoration:underline;">SURAT EDARAN</div>';
+  if(template==='surat_keterangan') heading='<div style="text-align:center;font-weight:bold;margin-bottom:5mm;text-decoration:underline;">SURAT KETERANGAN</div>';
+  if(template==='surat_tugas') heading='<div style="text-align:center;font-weight:bold;margin-bottom:2mm;font-size:12pt;text-decoration:underline;">SURAT TUGAS / MANDAT</div>';
+  if(template==='surat_pengantar') heading='<div style="text-align:center;font-weight:bold;margin-bottom:2mm;font-size:12pt;text-decoration:underline;">SURAT PENGANTAR</div>';
+
+  const cc=$('tembusan').value.trim();
+  
+  // Teks Arab Pembuka & Penutup
+  const arabBuka = `<div style="text-align:center; font-family:'Times New Roman',serif; font-size:16pt; font-weight:bold; margin-bottom:12px;">السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ</div>`;
+  const arabTutup = `<div style="text-align:center; font-family:'Times New Roman',serif; font-size:16pt; font-weight:bold; margin-top:15px; margin-bottom:5px;">وَالسَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ</div>`;
+
+  $('paper').innerHTML=`
+  <div class="kop">
+    <img src="${IMG.logo}">
+    <div class="kt">
+      <b class="k1">DEWAN PIMPINAN DAERAH</b>
+      <b class="k2">LEMBAGA DAKWAH ISLAM INDONESIA</b>
+      <b class="k3">( L D I I )</b>
+      <b class="k4">KABUPATEN GARUT</b>
+      <div class="ks">Sekretariat : Jl. Pataruman Gg Sukasari 1 No 354 Pataruman - Tarogong Kidul - Garut<br>
+      Telp : 0823 1663 3896 – 0852 2175 4560 &nbsp; e-mail : ldiigarut354@gmail.com</div>
+    </div>
+  </div>
+  
+  <div class="date">${esc($('kota').value||'Garut')}, ${date}</div>
+
+  <div class="meta">
+    <b>Nomor</b><div>: ${esc($('nomor').value||'—')}</div>
+    <b>Sifat</b><div>: ${esc($('sifat').value)}</div>
+    <b>Lampiran</b><div>: ${esc($('lampiran').value||'-')}</div>
+    <b>Perihal</b><div>: <b>${esc($('perihal').value||'-')}</b></div>
+    <div class="to"><b>Kepada Yth.</b><br>${esc($('tujuan').value||'-').replace(/\n/g,'<br>')}</div>
+  </div>
+  
+  <div class="body">
+    ${arabBuka}
+    ${heading}
+    ${$('isi').value||'Isi surat...'}
+    ${arabTutup}
+  </div>
+  
+  <div style="margin-top:5mm; font-weight:bold; text-align:center;">
+      DEWAN PIMPINAN DAERAH<br>
+      LEMBAGA DAKWAH ISLAM INDONESIA<br>
+      KABUPATEN GARUT
+  </div>
+
+  ${sig}
+
+  ${cc?`<div class="cc"><b>Tembusan:</b><br>${esc(cc).replace(/\n/g,'<br>')}</div>`:''}
+  ${withSig ? `<div class="note">Digital Signature (Draft Mode). Dokumen keluar eksternal tetap memerlukan stempel asli.</div>` : ``}`;
+}
+
+function formData(){
+  return {
+    id:currentId, template:$('template').value, jenis:$('jenis').value,
+    nomor:$('nomor').value, tanggal:$('tanggal').value, sifat:$('sifat').value,
+    lampiran:$('lampiran').value, perihal:$('perihal').value, tujuan:$('tujuan').value,
+    isi:$('isi').value, kota:$('kota').value, penandatangan:$('ttd').value,
+    namaKetua:$('nk').value, namaSekretaris:$('ns').value, tembusan:$('tembusan').value
+  };
+}
+
+async function newNo(){
+  try{
+    $('nomor').value = "Mengambil...";
+    const x=await call('nextNumber',{jenis:$('jenis').value,tanggal:$('tanggal').value});
+    $('nomor').value=x.nomor; refreshPreview();
+  }catch(e){$('nomor').value = "";}
+}
+
+async function saveDraft(){
+  try{
+    refreshPreview(); const x=await call('saveOutgoing',{data:formData()});
+    currentId=x.id; $('nomor').value=x.nomor; refreshPreview();
+    setStatus('Draft tersimpan.'); alert('Tersimpan.');
+  }catch(e){alert(e.message)}
+}
+
+// SOLUSI UKURAN PDF BERANTAKAN DI MOBILE
+async function downloadPdf(isDigital = true){
+  try{
+    if(!currentId){
+      const x=await call('saveOutgoing',{data:formData()});
+      currentId=x.id;$('nomor').value=x.nomor;
+    }else{
+      await call('updateOutgoing',{id:currentId,data:formData()});
+    }
+    
+    refreshPreview(isDigital);
+    const statusType = isDigital ? 'Digital' : 'Cetak';
+    const filename=($('nomor').value||'surat').replace(/[^\w.-]+/g,'_') + `_${statusType}.pdf`;
+    
+    // Kunci Perbaikan: Tambahkan class exporting ke body.
+    // CSS akan secara instan menghapus fungsi transform: scale() pada preview layar kecil
+    // Sehingga PDF di-render utuh 210mm x 297mm tanpa terlipat/berantakan.
+    document.body.classList.add('exporting');
+    
+    // Memberi jeda kecil agar DOM browser merender ulang (reflow) CSS tanpa skala
+    await new Promise(r => setTimeout(r, 200));
+
+    const opt={
+      margin: 0, filename,
+      image: {type:'jpeg',quality:0.99},
+      html2canvas: {scale:4, useCORS:true, letterRendering:true}, // Skala HD
+      jsPDF: {unit:'mm',format:'a4',orientation:'portrait'}
+    };
+    
+    const blob=await html2pdf().set(opt).from($('paper')).outputPdf('blob');
+    
+    // Kembalikan ke tampilan responsif mobile
+    document.body.classList.remove('exporting');
+    
+    const b64=await new Promise((resolve,reject)=>{
+      const f=new FileReader();f.onload=()=>resolve(f.result.split(',')[1]);f.readAsDataURL(blob);
+    });
+    await call('savePdf',{id:currentId,nomor:$('nomor').value,filename,base64:b64});
+    
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+    refreshPreview(true); 
+    alert(`PDF (${statusType}) berhasil dibuat.`);
+  }catch(e){
+    document.body.classList.remove('exporting');
+    alert(e.message); refreshPreview(true); 
+  }
+}
+
+function doPrint() {
+  const pakaiTtd = confirm("Cetak Dokumen:\n\n[OK] = Cetak dengan TTD & Cap\n[Batal] = Kosong (Untuk ditandatangani basah)");
+  refreshPreview(pakaiTtd);
+  setTimeout(() => { window.print(); refreshPreview(true); }, 500);
+}
+
+function openAI(){
+  $('aiprompt').value=`Jenis: ${$('template').value}\nPerihal: ${$('perihal').value}\nTujuan: ${$('tujuan').value}\nPoin:\n${$('isi').value}`;
+  $('aiModal').classList.add('show');
+}
+function closeAI(){$('aiModal').classList.remove('show')}
+async function runAI(){
+  try{
+    const x=await call('aiDraft',{prompt:$('aiprompt').value});
+    $('isi').value=x.text; closeAI(); refreshPreview();
+  }catch(e){alert(e.message)}
+}
+
+// FUNGSI ARSIP & SETTINGS
+async function saveIncoming(){
+  try{
+    await call('saveIncoming',{data:{
+      tanggalDiterima:$('it').value,nomorAsal:$('ino').value,tanggalAsal:$('ita').value,
+      pengirim:$('ip').value,perihal:$('iper').value,sifat:$('isifat').value,
+      disposisi:$('idisp').value,status:$('istat').value,catatan:$('icat').value
+    }});
+    alert('Tersimpan.'); loadArchives();
+  }catch(e){alert(e.message)}
+}
+
+let archives={outgoing:[],incoming:[]};
+async function loadArchives(){
+  try{ const x=await call('listArchives'); archives=x; renderArchives(); renderIncoming(); }catch(e){}
+}
+function renderArchives(){
+  const q=($('q')?.value||'').toLowerCase();
+  const rows=(archives.outgoing||[]).filter(r=>JSON.stringify(r).toLowerCase().includes(q));
+  $('outtable').innerHTML=`<table class="data"><tr><th>Nomor</th><th>Tanggal</th><th>Perihal</th><th>Aksi</th></tr>
+  ${rows.map(r=>`<tr><td>${esc(r.nomor)}</td><td>${esc(r.tanggal)}</td><td>${esc(r.perihal)}</td>
+  <td><button class="soft" onclick='editOutgoing(${JSON.stringify(r)})'>Edit</button></td></tr>`).join('')}</table>`;
+}
+function renderIncoming(){
+  const rows=archives.incoming||[];
+  $('intable').innerHTML=`<table class="data"><tr><th>Diterima</th><th>Nomor</th><th>Pengirim</th><th>Perihal</th></tr>
+  ${rows.map(r=>`<tr><td>${esc(r.tanggalDiterima)}</td><td>${esc(r.nomorAsal)}</td><td>${esc(r.pengirim)}</td><td>${esc(r.perihal)}</td></tr>`).join('')}</table>`;
+}
+function editOutgoing(r){
+  currentId=r.id||'';
+  const map={template:'template',jenis:'jenis',nomor:'nomor',tanggal:'tanggal',sifat:'sifat',lampiran:'lampiran',perihal:'perihal',tujuan:'tujuan',isi:'isi',kota:'kota',penandatangan:'ttd',namaKetua:'nk',namaSekretaris:'ns',tembusan:'tembusan'};
+  Object.keys(map).forEach(k=>{if($(map[k]) && r[k]!==undefined) $(map[k]).value=r[k]});
+  refreshPreview(); tab('buat',document.querySelector('.nav'));
+}
+
+async function saveSettings(){
+  api=$('api').value.trim();localStorage.setItem('ldii_api',api);
+  try{
+    const x=await call('saveConfig',{data:{
+      kodeTingkat:$('tingkat').value,namaOrganisasi:$('org').value, formatNomor:$('fmt').value,kota:$('kotaCfg').value,
+      folderNama:$('folder').value, namaKetua:$('cfgKetua').value,namaSekretaris:$('cfgSekretaris').value
+    }});
+    cfg=x.config; alert('Tersimpan.'); testApi();
+  }catch(e){alert(e.message)}
+}
+
+async function testApi(){
+  try{
+    const x=await call('ping'); cfg=x.config; setStatus('Terhubung.');
+    if($('tingkat')) $('tingkat').value = cfg.kodeTingkat || '';
+    if($('cfgKetua')) $('cfgKetua').value = cfg.namaKetua || '';
+    if($('cfgSekretaris')) $('cfgSekretaris').value = cfg.namaSekretaris || '';
+    if(!$('nk').value) $('nk').value = cfg.namaKetua || '';
+    if(!$('ns').value) $('ns').value = cfg.namaSekretaris || '';
+    refreshPreview();
+  }
+  catch(e){setStatus(e.message,false)}
+}
+
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input', () => refreshPreview(true)));
+$('tanggal').value=today();$('it').value=today();$('ita').value=today();$('api').value=api;
+refreshPreview();
+if(api) testApi();
+</script>
+</body>
+</html>
