@@ -13,6 +13,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
   <!-- Library SheetJS untuk Export ke Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Library Chart.js untuk Grafik Statistik -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{h:['Outfit','sans-serif'],b:['DM Sans','sans-serif']}}}}</script>
   <style>
     :root{--g1:#1D4ED8;--g2:#1E40AF;--g3:#1E3A5F;--g4:#3B82F6;--g5:#60A5FA;--gl:#DBEAFE;--gxl:#EFF6FF;--gxxl:#F0F7FF;--y1:#F59E0B;--y2:#FBBF24;--y3:#D97706;--yl:#FEF3C7;--bg:#EFF3F8;--bd:#D1DBE8;--tx:#0F172A;--tx2:#334155;--tx3:#64748B}
@@ -84,7 +86,7 @@
     .bt1{background:var(--g1);color:#fff}.bt1:hover{background:var(--g2);box-shadow:0 4px 14px rgba(29,78,216,.3)}
     .bt2{background:#fff;color:var(--tx2);border:1.5px solid var(--bd)}.bt2:hover{border-color:var(--g1);color:var(--g1);background:var(--gxxl)}
     .btd{background:#fff;color:#EF4444;border:1.5px solid #FECACA}.btd:hover{background:#FEF2F2;border-color:#EF4444}
-    .bte{background:#fff;color:var(--y3);border:1.5px solid #FDE68A}.bte:hover{background:var(--yl);border-color:var(--y1)}
+    .bte{background:#fff;color:var(--y3);border:1.5px solid #FDE68A}.bte:hover{background:#yl;border-color:var(--y1)}
     .bty{background:var(--y1);color:#fff;border:none}.bty:hover{background:var(--y3);box-shadow:0 4px 14px rgba(245,158,11,.3)}
     .bts{padding:6px 12px;font-size:12px;border-radius:8px}
     .btg{background:#059669;color:#fff;border:none}.btg:hover{background:#047857;box-shadow:0 4px 14px rgba(5,150,105,.3)}
@@ -225,10 +227,10 @@ const A={u:null,p:'dashboard',d:{mapel:[],kelas:[],tugas:[],jawaban:[],nk:[],pro
 const _c={};
 const _sk=['addMateri','updateMateri','deleteMateri','addSoal','updateSoal','deleteSoal','addTugas','updateTugas','deleteTugas','submitKuis','submitTugas','nilaiTugas','deleteNilaiTugas','submitAbsensi','addSiswa','updateSiswa','deleteSiswa','updateProgress','addJurnal','updateJurnal','deleteJurnal','addMapel','updateMapel','deleteMapel'];
 
-// MENU GURU DITAMBAHKAN "TRANSKRIP KELAS"
+// MENU GURU DITAMBAHKAN "STATISTIK KEHADIRAN" DAN "TRANSKRIP KELAS"
 const NV={
   Siswa:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'materi',c:'fa-book-open',l:'Materi'},{i:'latihan',c:'fa-pen-to-square',l:'Latihan'},{i:'tugas',c:'fa-file-lines',l:'Tugas'},{i:'nilai',c:'fa-chart-column',l:'Nilai'},{i:'transkrip',c:'fa-graduation-cap',l:'Transkrip'}],
-  Guru:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'kelola-mapel',c:'fa-layer-group',l:'Kelola Mapel'},{i:'kelola-siswa',c:'fa-users',l:'Kelola Siswa'},{i:'kelola-materi',c:'fa-book-open',l:'Kelola Materi'},{i:'kelola-soal',c:'fa-list-check',l:'Kelola Soal'},{i:'kelola-tugas',c:'fa-file-circle-plus',l:'Kelola Tugas'},{i:'penilaian',c:'fa-star',l:'Penilaian'},{i:'absensi',c:'fa-clipboard-check',l:'Absensi'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Riwayat Absen'},{i:'jurnal',c:'fa-book-journal-whills',l:'Jurnal Guru'},{i:'transkrip-kelas',c:'fa-file-excel',l:'Transkrip Kelas'}]
+  Guru:[{i:'dashboard',c:'fa-house',l:'Dashboard'},{i:'kelola-mapel',c:'fa-layer-group',l:'Kelola Mapel'},{i:'kelola-siswa',c:'fa-users',l:'Kelola Siswa'},{i:'kelola-materi',c:'fa-book-open',l:'Kelola Materi'},{i:'kelola-soal',c:'fa-list-check',l:'Kelola Soal'},{i:'kelola-tugas',c:'fa-file-circle-plus',l:'Kelola Tugas'},{i:'penilaian',c:'fa-star',l:'Penilaian'},{i:'absensi',c:'fa-clipboard-check',l:'Absensi'},{i:'riwayat-absen',c:'fa-clock-rotate-left',l:'Riwayat Absen'},{i:'statistik-absen',c:'fa-chart-pie',l:'Statistik Kehadiran'},{i:'jurnal',c:'fa-book-journal-whills',l:'Jurnal Guru'},{i:'transkrip-kelas',c:'fa-file-excel',l:'Transkrip Kelas'}]
 };
 
 /* ===== HELPER ===== */
@@ -247,7 +249,7 @@ function soK(a,s='',p='-- Pilih --'){return `<option value="">${p}</option>`+a.m
 function invCache(actions){for(const k in _c){for(const a of actions){if(k.includes('"'+a+'"')){delete _c[k];break}}}}
 
 /* ===== SESSION RESTORE ===== */
-(function(){try{const s=sessionStorage.getItem('edu_u');if(s){A.u=JSON.parse(s);document.getElementById('loginPage').style.display='none';document.getElementById('appPage').classList.remove('hidden');rSB();nav('dashboard')}}catch(e){}})();
+(function(){try{const s=localStorage.getItem('edu_u');if(s){A.u=JSON.parse(s);document.getElementById('loginPage').style.display='none';document.getElementById('appPage').classList.remove('hidden');rSB();nav('dashboard')}}catch(e){}})();
 
 /* ===== API DENGAN LOADING OVERLAY ===== */
 async function api(a,d={}){
@@ -303,14 +305,48 @@ function previewPdf(doc,filename){
 function clPDF(){document.getElementById('pdfModal').classList.remove('on')}
 
 /* ===== NAVIGASI ===== */
-async function nav(p){A.p=p;clsSB();uAN();const m=document.getElementById('mc');m.innerHTML=skC();try{const fn={dashboard:pD,materi:pMt,latihan:pKu,tugas:pTg,nilai:pNi,transkrip:pTr,'kelola-mapel':pKP,'kelola-siswa':pKS,'kelola-materi':pKM,'kelola-soal':pKSo,'kelola-tugas':pKT,penilaian:pNl,absensi:pAb,'riwayat-absen':pRA,jurnal:pJG,'transkrip-kelas':pTK};m.innerHTML=await(fn[p]||pD)()}catch(e){m.innerHTML=empty('fa-triangle-exclamation','Gagal: '+e.message)}}
+async function nav(p){
+  A.p=p;clsSB();uAN();
+  const m=document.getElementById('mc');
+  m.innerHTML=skC();
+  try{
+    const fn={
+      dashboard:pD,materi:pMt,latihan:pKu,tugas:pTg,nilai:pNi,transkrip:pTr,
+      'kelola-mapel':pKP,'kelola-siswa':pKS,'kelola-materi':pKM,'kelola-soal':pKSo,
+      'kelola-tugas':pKT,penilaian:pNl,absensi:pAb,'riwayat-absen':pRA,
+      'statistik-absen':pStatAb,jurnal:pJG,'transkrip-kelas':pTK
+    };
+    m.innerHTML=await(fn[p]||pD)();
+  }catch(e){
+    m.innerHTML=empty('fa-triangle-exclamation','Gagal: '+e.message);
+  }
+}
 
 /* ===== AUTH ===== */
 async function doLogin(){const e=document.getElementById('lE').value.trim(),p=document.getElementById('lP').value,er=document.getElementById('lErr');if(!e||!p){er.textContent='Email dan password wajib';er.classList.remove('hidden');return}er.classList.add('hidden');const b=document.getElementById('lBtn');b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memproses...';const r=await api('login',{email:e,password:p});b.disabled=false;b.innerHTML='<i class="fas fa-arrow-right-to-bracket"></i> Masuk';if(!r.success){er.textContent=r.message;er.classList.remove('hidden');return}A.u=r.user;entApp()}
 document.getElementById('lP').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 document.getElementById('lE').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lP').focus()});
-function entApp(){sessionStorage.setItem('edu_u',JSON.stringify(A.u));document.getElementById('loginPage').style.display='none';document.getElementById('appPage').classList.remove('hidden');document.getElementById('sbN').textContent=A.u.Nama;document.getElementById('sbR').textContent=A.u.Role+(A.u.Kelas?' — '+A.u.Kelas:'');document.getElementById('avI').textContent=A.u.Nama.charAt(0).toUpperCase();rSB();nav('dashboard')}
-function doLogout(){A.u=null;A.p='dashboard';cc();sessionStorage.removeItem('edu_u');document.getElementById('loginPage').style.display='';document.getElementById('appPage').classList.add('hidden');document.getElementById('lE').value='';document.getElementById('lP').value=''}
+function entApp(){
+  localStorage.setItem('edu_u',JSON.stringify(A.u));
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('appPage').classList.remove('hidden');
+  document.getElementById('sbN').textContent=A.u.Nama;
+  document.getElementById('sbR').textContent=A.u.Role+(A.u.Kelas?' — '+A.u.Kelas:'');
+  document.getElementById('avI').textContent=A.u.Nama.charAt(0).toUpperCase();
+  rSB();
+  nav('dashboard');
+}
+
+function doLogout(){
+  A.u=null;
+  A.p='dashboard';
+  cc();
+  localStorage.removeItem('edu_u');
+  document.getElementById('loginPage').style.display='';
+  document.getElementById('appPage').classList.add('hidden');
+  document.getElementById('lE').value='';
+  document.getElementById('lP').value='';
+}
 
 /* ===== DASHBOARD ===== */
 async function pD(){
@@ -423,8 +459,6 @@ async function smK(id,bab){
 }
 
 /* ===== TUGAS SISWA ===== */
-
-/* GANTI FUNGSI pTg */
 async function pTg(){
   const[rt,rj]=await Promise.all([api('getTugas',{kelas:A.u.Kelas}),api('getJawabanTugas',{email:A.u.Email})]);
   if(!rt.success)return empty('fa-triangle-exclamation',rt.message);
@@ -438,7 +472,6 @@ async function pTg(){
   return h+'</div></div>';
 }
 
-/* GANTI FUNGSI rNlCards */
 function rNlCards(tugas,mm,ugCount){
   let h='';
   tugas.forEach(t=>{
@@ -1010,8 +1043,8 @@ function dlAbsPdf(){
   doc.setDrawColor(29,78,216);doc.setLineWidth(0.5);doc.line(ml,yPos,pw-mr,yPos);yPos+=8;
   doc.setFontSize(9);doc.setTextColor(100);
   doc.text('Mata Pelajaran : '+mapelNama,ml,yPos);yPos+=5;
-  doc.text('Kelas          : '+kelasNama,ml,yPos);yPos+=5;
-  doc.text('Periode        : '+dari+' s/d '+sampai,ml,yPos);yPos+=8;
+  doc.text('Kelas         : '+kelasNama,ml,yPos);yPos+=5;
+  doc.text('Periode       : '+dari+' s/d '+sampai,ml,yPos);yPos+=8;
   doc.setTextColor(0);
   for(const[kelas,items]of Object.entries(byKelas)){
     if(yPos>ph-mb-30){doc.addPage();yPos=mt}
@@ -1055,6 +1088,225 @@ function dlAbsPdf(){
   previewPdf(doc,'Laporan_Absensi_'+todayISO()+'.pdf');
 }
 
+/* ============================================= */
+/* ========== FITUR BARU: STATISTIK ABSEN ===== */
+/* ============================================= */
+async function pStatAb(){
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);
+  if(!rm.success)return empty('fa-triangle-exclamation',rm.message);
+  A.d.mapel=rm.data;const kl=rk.success?rk.data:[];
+  return `<div class="fi-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+      <div>
+        <h1 class="font-h font-800 text-xl mb-0.5">Statistik Kehadiran Siswa</h1>
+        <p class="text-xs" style="color:var(--tx3)">Analisis dan grafik kehadiran siswa berdasarkan mapel, kelas, dan rentang tanggal</p>
+      </div>
+    </div>
+    <div class="cd mb-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div><label class="fl">Mata Pelajaran</label><select class="fi" id="stM"><option value="">Semua Mapel</option>${rm.data.map(m=>`<option value="${m.IDMapel}">${m.NamaMapel}</option>`).join('')}</select></div>
+        <div><label class="fl">Kelas</label><select id="stK" class="fi">${soK(kl)}</select></div>
+        <div><label class="fl">Dari Tanggal</label><input type="date" id="stD" class="fi"></div>
+        <div><label class="fl">Sampai Tanggal</label><input type="date" id="stS" class="fi"></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="bt bt1" onclick="ldStatAb()"><i class="fas fa-chart-pie"></i> Tampilkan Statistik</button>
+        <button class="bt bt2" onclick="ldStatAbAll()"><i class="fas fa-rotate"></i> Reset Filter</button>
+      </div>
+    </div>
+    <div id="stC">${empty('fa-chart-pie','Gunakan filter di atas dan klik "Tampilkan Statistik"')}</div>
+  </div>`;
+}
+
+async function ldStatAbAll(){
+  document.getElementById('stM').value='';
+  document.getElementById('stK').value='';
+  document.getElementById('stD').value='';
+  document.getElementById('stS').value='';
+  await ldStatAb();
+}
+
+async function ldStatAb(){
+  const c=document.getElementById('stC');
+  c.innerHTML=skC();
+  const idMapel=document.getElementById('stM').value;
+  const kv=document.getElementById('stK').value;
+  const dari=document.getElementById('stD').value;
+  const sampai=document.getElementById('stS').value;
+
+  const d={};
+  if(idMapel)d.idMapel=idMapel;
+  if(kv&&kv!=='__new__')d.kelas=kv;
+  if(dari)d.tanggalDari=dari;
+  if(sampai)d.tanggalSampai=sampai;
+
+  const r=await api('getRiwayatAbsen',d);
+  const data=r.success?r.data.map(normJ):[];
+
+  if(!data.length){
+    c.innerHTML=empty('fa-chart-pie','Tidak ada data kehadiran untuk filter yang dipilih');
+    return;
+  }
+
+  let total=data.length;
+  let hadir=data.filter(x=>x.Status==='Hadir').length;
+  let sakit=data.filter(x=>x.Status==='Sakit').length;
+  let izin=data.filter(x=>x.Status==='Izin').length;
+  let alpha=data.filter(x=>x.Status==='Alpha').length;
+  let pctHadir=total>0?Math.round((hadir/total)*100):0;
+
+  const byDate={};
+  data.forEach(x=>{
+    const dt=x.Tanggal?x.Tanggal.substring(0,10):'Lainnya';
+    if(!byDate[dt])byDate[dt]={Hadir:0,Total:0};
+    byDate[dt].Total++;
+    if(x.Status==='Hadir')byDate[dt].Hadir++;
+  });
+
+  const sortedDates=Object.keys(byDate).sort();
+
+  let h=`<div class="space-y-4 fi-in">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      ${st('fa-users','Total Record',total,'var(--g1)')}
+      ${st('fa-check-circle','Hadir',hadir+' ('+pctHadir+'%)','#059669')}
+      ${st('fa-bed-pulse','Sakit',sakit,'var(--y1)')}
+      ${st('fa-envelope-open-text','Izin',izin,'var(--g4)')}
+      ${st('fa-triangle-exclamation','Alpha',alpha,'#EF4444')}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="cd">
+        <h3 class="font-h font-700 text-sm mb-3" style="color:var(--tx)"><i class="fas fa-chart-pie mr-1.5 text-xs" style="color:var(--g1)"></i>Distribusi Status Kehadiran</h3>
+        <div style="position:relative; height:260px; width:100%;">
+          <canvas id="chartPie"></canvas>
+        </div>
+      </div>
+      <div class="cd">
+        <h3 class="font-h font-700 text-sm mb-3" style="color:var(--tx)"><i class="fas fa-chart-line mr-1.5 text-xs" style="color:var(--g1)"></i>Tren Persentase Kehadiran per Hari (%)</h3>
+        <div style="position:relative; height:260px; width:100%;">
+          <canvas id="chartTrend"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <h3 class="font-h font-700 text-sm mb-3" style="color:var(--tx)"><i class="fas fa-table mr-1.5 text-xs" style="color:var(--g1)"></i>Rekapitulasi Kehadiran per Siswa</h3>
+      <div class="overflow-x-auto">
+        <table class="tb">
+          <thead>
+            <tr>
+              <th>Nama Siswa</th>
+              <th>Kelas</th>
+              <th>Hadir</th>
+              <th>Sakit</th>
+              <th>Izin</th>
+              <th>Alpha</th>
+              <th>Total</th>
+              <th>% Hadir</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+  const byStudent={};
+  data.forEach(x=>{
+    const key=x.EmailSiswa||x.NamaSiswa||'Unknown';
+    if(!byStudent[key]){
+      byStudent[key]={nama:x.NamaSiswa||x.EmailSiswa,kelas:x.Kelas||'-',Hadir:0,Sakit:0,Izin:0,Alpha:0,Total:0};
+    }
+    byStudent[key].Total++;
+    if(byStudent[key][x.Status]!==undefined)byStudent[key][x.Status]++;
+  });
+
+  Object.values(byStudent).forEach(s=>{
+    const p=s.Total>0?Math.round((s.Hadir/s.Total)*100):0;
+    h+=`<tr>
+      <td class="font-600 text-sm">${s.nama}</td>
+      <td><span class="bd bg2">${s.kelas}</span></td>
+      <td><span class="bd bgg">${s.Hadir}</span></td>
+      <td><span class="bd bgy">${s.Sakit}</span></td>
+      <td><span class="bd bg2">${s.Izin}</span></td>
+      <td><span class="bd bg3">${s.Alpha}</span></td>
+      <td>${s.Total}</td>
+      <td><span class="font-700 text-xs" style="color:${p>=75?'var(--g1)':'#EF4444'}">${p}%</span></td>
+    </tr>`;
+  });
+
+  h+=`</tbody></table></div></div></div>`;
+  c.innerHTML=h;
+
+  setTimeout(()=>{
+    const ctxPie=document.getElementById('chartPie')?.getContext('2d');
+    if(ctxPie){
+      new Chart(ctxPie,{
+        type:'doughnut',
+        data:{
+          labels:['Hadir','Sakit','Izin','Alpha'],
+          datasets:[{
+            data:[hadir,sakit,izin,alpha],
+            backgroundColor:['#059669','#F59E0B','#3B82F6','#EF4444'],
+            borderWidth:2,
+            borderColor:'#ffffff'
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{legend:{position:'bottom'}}
+        }
+      });
+    }
+
+    const ctxTrend=document.getElementById('chartTrend')?.getContext('2d');
+    if(ctxTrend){
+      const trendLabels=sortedDates.map(d=>fmtDS(d));
+      const trendPercentages=sortedDates.map(d=>{
+        const item=byDate[d];
+        return item.Total>0?Math.round((item.Hadir/item.Total)*100):0;
+      });
+
+      new Chart(ctxTrend,{
+        type:'line',
+        data:{
+          labels:trendLabels,
+          datasets:[{
+            label:'% Kehadiran',
+            data:trendPercentages,
+            borderColor:'#1D4ED8',
+            backgroundColor:'rgba(29,78,216,0.08)',
+            borderWidth:2.5,
+            fill:true,
+            tension:0.35,
+            pointRadius:4.5,
+            pointBackgroundColor:'#1D4ED8',
+            pointHoverRadius:6
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            y:{
+              beginAtZero:true,
+              max:100,
+              ticks:{
+                callback:function(value){return value+'%';}
+              }
+            }
+          },
+          plugins:{
+            legend:{display:false},
+            tooltip:{
+              callbacks:{
+                label:function(context){return ' Tingkat Kehadiran: '+context.parsed.y+'%';}
+              }
+            }
+          }
+        }
+      });
+    }
+  },50);
+}
+
 /* ===== JURNAL GURU ===== */
 async function pJG(){
   const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);
@@ -1073,7 +1325,6 @@ function rJGList(data){
   
   const sorted=[...data].sort((a,b)=>(b.Tanggal||'').localeCompare(a.Tanggal||''));
   
-  // Logic Pagination
   const limit = 10;
   const totalPages = Math.ceil(sorted.length / limit);
   if(A.jgPage > totalPages && totalPages > 0) A.jgPage = totalPages;
@@ -1192,8 +1443,8 @@ function dlJgPdf(){
   doc.setDrawColor(29,78,216);doc.setLineWidth(0.5);doc.line(ml,yPos,pw-mr,yPos);yPos+=8;
   doc.setFontSize(9);doc.setTextColor(100);
   doc.text('Mata Pelajaran : '+mapelNama,ml,yPos);yPos+=5;
-  doc.text('Kelas          : '+kelasNama,ml,yPos);yPos+=5;
-  doc.text('Total Record   : '+filtered.length+' jurnal',ml,yPos);yPos+=8;
+  doc.text('Kelas         : '+kelasNama,ml,yPos);yPos+=5;
+  doc.text('Total Record  : '+filtered.length+' jurnal',ml,yPos);yPos+=8;
   doc.setTextColor(0);
 
   const sorted=[...filtered].sort((a,b)=>(a.Tanggal||'').localeCompare(b.Tanggal||''));
@@ -1229,7 +1480,7 @@ function dlJgPdf(){
 }
 
 /* ============================================= */
-/* ========== FITUR BARU: TRANSKRIP KELAS ====== */
+/* ========== FITUR: TRANSKRIP KELAS ========== */
 /* ============================================= */
 async function pTK(){
   const rk=await api('getKelasList');
@@ -1261,11 +1512,10 @@ async function ldTK(){
   const siswa=rs.data.filter(u=>u.Role==='Siswa');
   if(!siswa.length){c.innerHTML=empty('fa-users','Tidak ada data siswa (Hanya akun guru)');return;}
 
-  // Progress UI
   c.innerHTML=`<div class="text-center py-10 fi-in"><div class="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style="background:var(--gl)"><i class="fas fa-spinner fa-spin text-xl" style="color:var(--g1)"></i></div><p class="text-sm font-600" style="color:var(--tx)">Memuat transkrip ${siswa.length} siswa...</p><p class="text-xs mt-1" style="color:var(--tx3)">Mohon tunggu sebentar, sedang mengkalkulasi nilai.</p><div class="w-full bg-gray-200 rounded-full h-2 mt-5 max-w-md mx-auto overflow-hidden"><div class="h-2 rounded-full transition-all duration-300" id="tkProg" style="background:var(--g1);width:0%"></div></div></div>`;
   
   let allData=[];
-  const chunkSize=4; // Fetch data concurrently per 4 siswa
+  const chunkSize=4;
   for(let i=0;i<siswa.length;i+=chunkSize){
     const chunk=siswa.slice(i,i+chunkSize);
     const promises=chunk.map(s=>api('getTranskrip',{email:s.Email,kelas:k}).then(res=>({siswa:s,transkrip:res.success?res.data:[]})));
@@ -1349,10 +1599,7 @@ function dlTKExcel(){
   
   const ws=XLSX.utils.json_to_sheet(rows);
   const wb=XLSX.utils.book_new();
-  
-  // Set lebar kolom Excel agar rapi saat dibuka
   ws['!cols']=[{wch:25},{wch:30},{wch:25},{wch:15},{wch:12},{wch:12},{wch:12},{wch:10},{wch:15}];
-  
   XLSX.utils.book_append_sheet(wb,ws,"Transkrip "+A._tkData.kelas);
   XLSX.writeFile(wb, `Transkrip_Nilai_${A._tkData.kelas.replace(/[^a-z0-9]/gi,'_')}_${todayISO()}.xlsx`);
 }
