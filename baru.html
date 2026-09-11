@@ -254,6 +254,9 @@ function invCache(actions){for(const k in _c){for(const a of actions){if(k.inclu
 
 function toast(m,t='success'){const e=document.getElementById('toast'),ic=document.getElementById('tIc'),ms=document.getElementById('tMs');e.style.background=t==='error'?'#EF4444':t==='warning'?'#F59E0B':'#1D4ED8';ic.className='fas '+(t==='error'?'fa-times-circle':t==='warning'?'fa-exclamation-triangle':'fa-check-circle');ms.textContent=m;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),3200)}
 function sk(h=13){return`<div class="sk" style="height:${h}px;width:80%;margin-bottom:8px"></div><div class="sk" style="height:${h}px;width:60%"></div>`}
+function skC() {
+  return '<div class="cd text-center py-8"><div class="spinner mx-auto mb-2"></div><p class="text-xs text-slate-400">Memuat data...</p></div>';
+}
 function empty(ic,m){return`<div class="text-center py-10"><div class="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style="background:var(--gxxl)"><i class="fas ${ic} text-xl" style="color:var(--g4)"></i></div><p class="text-sm font-500" style="color:var(--tx3)">${m}</p></div>`}
 function st(ic,l,v,c1='var(--g1)'){return`<div class="sc"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:${c1}"><i class="fas ${ic} text-white text-sm"></i></div><div><p class="text-[11px] font-500" style="color:var(--tx3)">${l}</p><p class="text-lg font-h font-800 leading-tight" style="color:var(--tx)">${v}</p></div></div></div>`}
 function opM(ti,bo,fo='',lg){document.getElementById('mTi').textContent=ti;document.getElementById('mBo').innerHTML=bo;document.getElementById('mFo').innerHTML=fo;document.getElementById('mBox').className='mb '+(lg||'');document.getElementById('modal').classList.add('on');setTimeout(()=>{const f=document.querySelector('#mBo input,#mBo select,#mBo textarea');if(f)f.focus()},100)}
