@@ -40,7 +40,7 @@
     .btw{background:#25D366;color:#fff}.btw:hover{background:#128C7E}
 
     .cd{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:16px}
-    .sc{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px}
+    .sc{background:#fff;border:1.5px solid var(--bd);border-radius:14px;padding:14px}
     .tb{width:100%;border-collapse:collapse;font-size:12.5px}
     .tb th{text-align:left;padding:8px 10px;background:var(--gxxl);color:var(--tx3);font-weight:600;font-size:10.5px;border-bottom:1px solid var(--bd)}
     .tb td{padding:8px 10px;border-bottom:1px solid #F0F4F8;vertical-align:middle}
@@ -87,14 +87,17 @@
     .kar-score:hover:not(.sel){border-color:var(--g4);color:var(--g4);background:var(--gxxl)}
     .kar-desc{font-size:10px;color:var(--tx3);margin-top:2px}
 
-    .ms-wrap{border:1.5px solid var(--bd);border-radius:10px;padding:8px;min-height:44px;background:#fff;cursor:pointer;display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start}
+    /* Modern & Proportional Multi-Select Component */
+    .ms-wrap{border:1.5px solid var(--bd);border-radius:10px;padding:6px 10px;min-height:42px;background:#fff;cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:relative;transition:all .15s}
     .ms-wrap:focus-within{border-color:var(--g1);box-shadow:0 0 0 3px rgba(29,78,216,.08)}
-    .ms-pill{background:var(--gl);color:var(--g2);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px}
-    .ms-pill .rm{cursor:pointer;color:var(--g3);font-size:9px}
+    .ms-pill{background:var(--gl);color:var(--g2);padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border:1px solid #BFDBFE}
+    .ms-pill .rm{cursor:pointer;color:var(--g3);font-size:11px;font-weight:bold;transition:color .1s}
     .ms-pill .rm:hover{color:#EF4444}
-    .ms-dropdown{border:1.5px solid var(--bd);border-radius:10px;background:#fff;max-height:180px;overflow-y:auto;margin-top:4px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
-    .ms-opt{padding:8px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
-    .ms-opt:hover{background:var(--gxxl)}.ms-opt.selected{background:var(--gl)}
+    .ms-dropdown{border:1.5px solid var(--bd);border-radius:10px;background:#fff;max-height:190px;overflow-y:auto;margin-top:6px;box-shadow:0 10px 25px rgba(0,0,0,.08);position:absolute;left:0;right:0;z-index:50;display:none}
+    .ms-dropdown.on{display:block}
+    .ms-opt{padding:9px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+    .ms-opt:hover{background:var(--gxxl)}
+    .ms-opt.selected{background:var(--gl);font-weight:600;color:var(--g2)}
 
     .jurnal-card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px;display:flex;gap:12px;margin-bottom:8px}
     .jurnal-date-badge{min-width:50px;text-align:center;background:var(--g1);color:#fff;border-radius:8px;padding:6px 4px;font-family:'Outfit',sans-serif}
@@ -201,6 +204,24 @@ const A = {u:null, p:'dashboard', sess:{semester:'1', tahunPelajaran:''}, d:{map
 const _c = {};
 const _sk = ['addMateri','updateMateri','deleteMateri','addSoal','updateSoal','deleteSoal','addTugas','updateTugas','deleteTugas','submitKuis','submitTugas','nilaiTugas','deleteNilaiTugas','submitAbsensi','addSiswa','updateSiswa','deleteSiswa','updateProgress','addJurnal','updateJurnal','deleteJurnal','addMapel','updateMapel','deleteMapel','submitKarakter','addKeuangan','updateKeuangan','deleteKeuangan','addSPP','deleteSPP','addPrestasi','deletePrestasi','addCapaian','updateCapaian','deleteCapaian','addTargetKarakter','updateTargetKarakter','deleteTargetKarakter','addKelas','deleteKelas'];
 
+let _autoRefreshTimer = null;
+
+function startAutoRefresh(viewName, fetchFunction, intervalSeconds = 15) {
+  stopAutoRefresh();
+  _autoRefreshTimer = setInterval(async () => {
+    if (A.p === viewName && !document.hidden) {
+      await fetchFunction(true);
+    }
+  }, intervalSeconds * 1000);
+}
+
+function stopAutoRefresh() {
+  if (_autoRefreshTimer) {
+    clearInterval(_autoRefreshTimer);
+    _autoRefreshTimer = null;
+  }
+}
+
 const NV = {
   Siswa:[
     {s:'Beranda'},{i:'dashboard',c:'fa-house',l:'Dashboard'},
@@ -274,29 +295,57 @@ function previewPdf(d,f){const u=URL.createObjectURL(d.output('blob'));document.
 function clPDF(){document.getElementById('pdfModal').classList.remove('on')}
 async function toBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.readAsDataURL(file);r.onload=()=>resolve(r.result);r.onerror=e=>reject(e)})}
 
+/* Proportional and Clean Multi-Select Dropdown Component */
 function createMultiSelect(containerId, options, selectedVals=[], placeholder='Pilih...'){
   const cont = document.getElementById(containerId); if(!cont)return;
   let sel = [...selectedVals];
-  function render(){
-    cont.innerHTML=`<div class="ms-wrap" id="${containerId}_wrap">
-      ${sel.map(v=>{const o=options.find(x=>x.v==v);return o?`<span class="ms-pill">${o.l}<span class="rm" data-v="${v}" onclick="msRemove('${containerId}','${v}')">&times;</span></span>`:''}).join('')}
-      <span class="text-xs text-slate-400 ml-1">${sel.length===0?placeholder:''}</span>
-    </div>
-    <div class="ms-dropdown" id="${containerId}_dd">
-      ${options.map(o=>`<div class="ms-opt${sel.includes(String(o.v))?'selected':''}" onclick="msToggle('${containerId}','${o.v}','${esc(o.l)}')">${sel.includes(String(o.v))?'<i class="fas fa-check text-blue-600 text-xs"></i>':''}<span>${o.l}</span></div>`).join('')}
-    </div>`;
-    cont.dataset.sel=JSON.stringify(sel);
-  }
+  
   window[containerId+'_opts']=options;
-  window.msToggle=function(cid,v,l){
-    const c=document.getElementById(cid);const s=JSON.parse(c.dataset.sel||'[]');const idx=s.indexOf(String(v));
-    if(idx>-1)s.splice(idx,1);else s.push(String(v));c.dataset.sel=JSON.stringify(s);sel=s;
-    window[cid+'_sel']=s;render();
+  window[containerId+'_get']=()=>sel;
+
+  function render(){
+    cont.innerHTML=`<div class="relative w-full">
+      <div class="ms-wrap" id="${containerId}_wrap" onclick="toggleMsDD('${containerId}')">
+        ${sel.length===0?`<span class="text-xs text-slate-400 py-1">${placeholder}</span>`:''}
+        ${sel.map(v=>{const o=options.find(x=>x.v==v);return o?`<span class="ms-pill">${o.l}<span class="rm" onclick="event.stopPropagation();msRemove('${containerId}','${v}')"><i class="fas fa-times"></i></span></span>`:''}).join('')}
+        <div class="ml-auto text-slate-400 text-xs pl-2"><i class="fas fa-chevron-down"></i></div>
+      </div>
+      <div class="ms-dropdown" id="${containerId}_dd">
+        ${options.map(o=>`<div class="ms-opt${sel.includes(String(o.v))?' selected':''}" onclick="msToggle('${containerId}','${o.v}','${esc(o.l)}')">${sel.includes(String(o.v))?'<i class="fas fa-check text-blue-600 text-xs"></i>':'<span class="w-3"></span>'}<span>${o.l}</span></div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  window.toggleMsDD = function(cid){
+    const dd = document.getElementById(cid+'_dd');
+    if(dd) dd.classList.toggle('on');
   };
-  window.msRemove=function(cid,v){window.msToggle(cid,v,'')};
-  window[containerId+'_get']=()=>JSON.parse(cont.dataset.sel||'[]');
+
+  window.msToggle=function(cid,v,l){
+    const idx=sel.indexOf(String(v));
+    if(idx>-1)sel.splice(idx,1);else sel.push(String(v));
+    render();
+    document.getElementById(cid+'_dd')?.classList.add('on');
+  };
+
+  window.msRemove=function(cid,v){
+    const idx=sel.indexOf(String(v));
+    if(idx>-1)sel.splice(idx,1);
+    render();
+    document.getElementById(cid+'_dd')?.classList.add('on');
+  };
+
   render();
 }
+
+// Close multi-select dropdown when clicking outside
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.ms-dropdown').forEach(dd=>{
+    if(!dd.contains(e.target) && !dd.previousElementSibling.contains(e.target)){
+      dd.classList.remove('on');
+    }
+  });
+});
 
 let _pendingCount=0;
 async function api(a,d={}){
@@ -307,7 +356,15 @@ async function api(a,d={}){
   document.getElementById('glLoaderText').textContent=d.fileData?'Mengunggah file...':'Memproses...';
   try{
     const r=await fetch(SU,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)});
-    const j=await r.json(); if(!isMut)_c[k]=j;
+    const text = await r.text();
+    let j;
+    try {
+      j = JSON.parse(text);
+    } catch(err) {
+      _pendingCount--; if(_pendingCount<=0){_pendingCount=0;gl.classList.remove('on')}
+      return { success: false, message: 'Respon server bukan JSON valid: ' + text.substring(0, 100) };
+    }
+    if(!isMut)_c[k]=j;
     _pendingCount--; if(_pendingCount<=0){_pendingCount=0;gl.classList.remove('on')}
     return j;
   }catch(e){_pendingCount--;if(_pendingCount<=0){_pendingCount=0;gl.classList.remove('on')};return{success:false,message:'Koneksi gagal: '+e.message}}
@@ -357,18 +414,49 @@ function rSB(){
 }
 function uAN(){document.querySelectorAll('#sbNav .ni').forEach(e=>e.classList.toggle('on',e.getAttribute('onclick')?.includes("'"+A.p+"'")))}
 
-async function nav(p){A.p=p;clsSB();uAN();rSB();const m=document.getElementById('mc');m.innerHTML=skC();
-  try{
-    const fn={
-      dashboard:pD,'kelola-kelas':pKelolaKelas,'kelola-mapel':pKP,'kelola-cp':pKelolaCP,'kelola-target-karakter':pKelolaTargetKarakter,
-      'kelola-siswa':pKS,'kelola-materi':pKM,'kelola-soal':pKSo,'kelola-tugas':pKT,
-      penilaian:pNl,absensi:pAb,'riwayat-absen':pRA,jurnal:pJG,'jurnal-pantau':pJG,
-      'transkrip-kelas':pTK,'jurnal-anak':pJgAnak,'karakter-guru':pKarGuru,'karakter-ortu':pKarOrtu,
-      'karakter-pantau-ortu':pKarPantauOrtu,'spp-anak':pSPPAnak,keuangan:pYKeuangan,
-      prestasi:pPrestasi,spp:pSPP,materi:pMt,latihan:pKu,tugas:pTg,nilai:pNi,transkrip:pTr
+async function nav(p) {
+  A.p = p; 
+  clsSB(); 
+  uAN(); 
+  rSB(); 
+  stopAutoRefresh();
+
+  const m = document.getElementById('mc'); 
+  m.innerHTML = skC();
+  
+  try {
+    const fn = {
+      dashboard: pD, 'kelola-kelas': pKelolaKelas, 'kelola-mapel': pKP, 
+      'kelola-cp': pKelolaCP, 'kelola-target-karakter': pKelolaTargetKarakter,
+      'kelola-siswa': pKS, 'kelola-materi': pKM, 'kelola-soal': pKSo, 
+      'kelola-tugas': pKT, penilaian: pNl, absensi: pAb, 'riwayat-absen': pRA, 
+      jurnal: pJG, 'jurnal-pantau': pJG, 'transkrip-kelas': pTK, 
+      'jurnal-anak': pJgAnak, 'karakter-guru': pKarGuru, 'karakter-ortu': pKarOrtu,
+      'karakter-pantau-ortu': pKarPantauOrtu, 'spp-anak': pSPPAnak, 
+      keuangan: pYKeuangan, prestasi: pPrestasi, spp: pSPP, materi: pMt, 
+      latihan: pKu, tugas: pTg, nilai: pNi, transkrip: pTr
     };
-    m.innerHTML=await(fn[p]||pD)();
-  }catch(e){m.innerHTML=empty('fa-triangle-exclamation','Error: '+e.message);console.error(e)}
+    
+    m.innerHTML = await (fn[p] || pD)();
+
+    if (p === 'keuangan') startAutoRefresh('keuangan', async (silent) => {
+      const r = await api('getKeuangan');
+      if(r.success) { A._keuanganData = r.data.map(normJ); ldKeuangan(); }
+    }, 10);
+    
+    if (p === 'spp') startAutoRefresh('spp', async () => {
+      const r = await api('getSPP');
+      if(r.success) { A._sppData = r.data.map(normJ); ldSPP(); }
+    }, 15);
+
+    if (p === 'jurnal' || p === 'jurnal-pantau') startAutoRefresh(p, async () => {
+      const r = await api('getJurnal', ['Yayasan','Admin','Kepala Sekolah','Bendahara'].includes(A.u.Role)?{}:{emailGuru:A.u.Email});
+      if(r.success) { A._jgData = r.data; const el = document.getElementById('jgC'); if(el) el.innerHTML = rJGList(r.data, ['Kepala Sekolah','Yayasan','Admin','Bendahara'].includes(A.u.Role)); }
+    }, 15);
+
+  } catch(e) { 
+    m.innerHTML = empty('fa-triangle-exclamation', 'Error: ' + e.message); 
+  }
 }
 
 async function pD(){
@@ -886,38 +974,50 @@ async function togNlSub(id){const sub=document.getElementById('nlS_'+id);if(!sub
 async function nlSm(idTugas,em,id){const v=document.getElementById('nv_'+id).value;if(v===''||isNaN(v)||Number(v)<0||Number(v)>100){toast('Nilai 0-100','warning');return}const r=await api('nilaiTugas',{idTugas,emailPengumpul:em,nilai:Number(v),catatanGuru:''});if(r.success){invCache(['getJawabanTugas']);toast(r.message);nav('penilaian')}else toast(r.message,'error')}
 
 async function pAb(){
-  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);A.d.mapel=rm.success?rm.data:[];const kl=rk.success?rk.data:[];
-  return`<div><h1 class="font-h font-800 text-xl mb-4">Input Absensi Siswa</h1>
+  const [rm, rk] = await Promise.all([api('getMapel'), api('getKelasList')]);
+  A.d.mapel = rm.success ? rm.data.map(normJ) : [];
+  const kl = rk.success ? rk.data : [];
+
+  setTimeout(()=>{
+    createMultiSelect('abMapelMS', A.d.mapel.map(m=>({v:m.idmapel||m.IDMapel||m.id, l:m.namamapel||m.NamaMapel||m.namaMapel})), [], 'Pilih satu atau lebih mapel...');
+  }, 50);
+
+  return `<div><h1 class="font-h font-800 text-xl mb-4">Input Absensi Siswa</h1>
   <div class="cd mb-3">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
       <div><label class="fl">Tanggal</label><input type="date" id="abT" class="fi" value="${todayISO()}"></div>
       <div><label class="fl">Kelas</label><select id="abK" class="fi"><option value="">-- Pilih --</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
-      <div><label class="fl">Mapel (bisa lebih dari satu)</label><div id="abMapelMS"></div></div>
+      <div><label class="fl">Mapel (bisa pilih beberapa sekaligus)</label><div id="abMapelMS"></div></div>
     </div>
     <button class="bt bt1" onclick="ldAbSiswa()"><i class="fas fa-users"></i> Muat Siswa</button>
   </div>
   <div id="abC"></div></div>`;
-  setTimeout(()=>{createMultiSelect('abMapelMS',A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})),[],'Pilih satu atau lebih mapel...')},50);
 }
 async function ldAbSiswa(){
   const k=document.getElementById('abK').value,t=document.getElementById('abT').value,c=document.getElementById('abC');
   const mapelSel=window['abMapelMS_get']?window['abMapelMS_get']():[];
-  if(!k||!t||!mapelSel.length){toast('Pilih kelas, tanggal, dan mapel','warning');return}
+  if(!k||!t||!mapelSel.length){toast('Pilih kelas, tanggal, dan minimal 1 mapel','warning');return}
   c.innerHTML=skC();
-  const m=mapelSel[0];
+  const m=mapelSel.join(', ');
   const cd=await api('checkAbsenDuplikat',{idMapel:m,kelas:k,tanggal:t});
   if(cd.success&&cd.duplicate){c.innerHTML=`<div class="danger-box"><i class="fas fa-ban"></i><p>${cd.message}</p></div>`;return}
   const rs=await api('getSiswaByKelas',{kelas:k});const siswa=rs.success?rs.data.filter(u=>u.Role==='Siswa'):[];
   if(!siswa.length){c.innerHTML=empty('fa-users','Tidak ada siswa');return}
-  let h=`<div class="cd"><div class="flex justify-between items-center mb-3"><h3 class="font-h font-700 text-sm">Kehadiran Siswa - ${t}</h3><button class="bt btg" onclick="smAb(${JSON.stringify(mapelSel)},'${k}','${t}')"><i class="fas fa-save"></i> Simpan Absensi</button></div><div class="space-y-1.5">`;
+  let h=`<div class="cd"><div class="flex justify-between items-center mb-3"><h3 class="font-h font-700 text-sm">Kehadiran Siswa - ${t}</h3><button class="bt btg" onclick="smAb('${m}','${k}','${t}')"><i class="fas fa-save"></i> Simpan Absensi</button></div><div class="space-y-1.5">`;
   siswa.forEach(s=>{h+=`<div class="flex items-center gap-3 p-2 rounded-lg border"><div class="flex-1"><p class="text-sm font-500">${s.Nama}</p></div><select class="fi ab-st" data-e="${s.Email}" data-n="${esc(s.Nama)}" style="width:100px"><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Alpha">Alpha</option></select></div>`});
   c.innerHTML=h+`</div></div>`;
 }
-async function smAb(mapelList,kelas,tanggal){
+async function smAb(idMapelCombined,kelas,tanggal){
   const list=[];document.querySelectorAll('.ab-st').forEach(s=>list.push({email:s.dataset.e,nama:s.dataset.n,status:s.value}));
-  let ok=0;
-  for(const idMapel of mapelList){const r=await api('submitAbsensi',{idMapel,kelas,tanggal,list});if(r.success)ok++}
-  if(ok>0){invCache(['getRiwayatAbsen']);toast('Absensi tersimpan untuk '+ok+' mapel');document.getElementById('abC').innerHTML=`<div class="info-box"><i class="fas fa-check-circle"></i><p>Absensi berhasil disimpan untuk ${ok} mata pelajaran.</p></div>`}else toast('Gagal menyimpan','error');
+  // Simpan dalam 1 baris/data ke Google Sheet
+  const r=await api('submitAbsensi',{idMapel:idMapelCombined,kelas,tanggal,list});
+  if(r.success){
+    invCache(['getRiwayatAbsen']);
+    toast('Absensi berhasil disimpan');
+    document.getElementById('abC').innerHTML=`<div class="info-box"><i class="fas fa-check-circle"></i><p>Absensi berhasil disimpan dalam satu baris data.</p></div>`;
+  }else{
+    toast(r.message||'Gagal menyimpan','error');
+  }
 }
 
 async function pRA(){
@@ -966,7 +1066,7 @@ async function dlAbsPdf(){
 
 async function pJG(){
   const isMonitor=['Kepala Sekolah','Yayasan','Admin','Bendahara'].includes(A.u.Role);
-  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);A.d.mapel=rm.success?rm.data:[];const kl=rk.success?rk.data:[];
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);A.d.mapel=rm.success?rm.data.map(normJ):[];const kl=rk.success?rk.data:[];
   invCache(['getJurnal']);
   const req=isMonitor?{}:{emailGuru:A.u.Email};
   const rj=await api('getJurnal',req);A._jgData=rj.success?rj.data:[];
@@ -979,7 +1079,7 @@ async function pJG(){
   </div>
   ${isMonitor?`<div class="grid grid-cols-3 gap-3 mb-4" id="jgStatCards">${buildJgStats(A._jgData)}</div>`:''}
   <div class="cd mb-3"><div class="grid grid-cols-2 gap-3">
-    <div><label class="fl">Mapel</label><select class="fi" id="jgFM" onchange="ldJGFilter()"><option value="">Semua</option>${A.d.mapel.map(m=>`<option value="${m.IDMapel}">${m.NamaMapel}</option>`).join('')}</select></div>
+    <div><label class="fl">Mapel</label><select class="fi" id="jgFM" onchange="ldJGFilter()"><option value="">Semua</option>${A.d.mapel.map(m=>`<option value="${m.IDMapel||m.idmapel}">${m.NamaMapel||m.namamapel}</option>`).join('')}</select></div>
     <div><label class="fl">Kelas</label><select class="fi" id="jgFK" onchange="ldJGFilter()"><option value="">Semua</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
   </div></div>
   <div id="jgC">${rJGList(A._jgData,isMonitor)}</div></div>`;
@@ -992,13 +1092,20 @@ function buildJgStats(data){
 }
 function rJGList(data,isMonitor){
   if(!data.length)return empty('fa-book','Belum ada jurnal');
+  let mm={};(A.d.mapel||[]).forEach(m=>mm[m.IDMapel||m.idmapel||m.id]=m.NamaMapel||m.namamapel);
   let h=`<div class="space-y-2">`;
   data.forEach(j=>{
     const jid=j.IDJurnal||j.ID||j.id||'';
     const tgl=fmtDS(j.Tanggal||j.tanggal);const tglParts=tgl.split(' ');
     const wM=fmtTime(j.WaktuMulai||j.waktumulai);const wS=fmtTime(j.WaktuSelesai||j.waktuselesai);
     const status=j.StatusGuru||j.statusguru||'Hadir';
-    const mapelNm=j.NamaMapel||j.namamapel||'-';const kelas=j.Kelas||j.kelas||'-';const materi=j.MateriYangDiajarkan||j.materiyangdiajarkan||'-';const namaGuru=j.NamaGuru||j.namaguru||'';
+    
+    // Support multiple mapel comma separated in a single row
+    const rawMapel = String(j.IDMapel||j.idmapel||j.NamaMapel||j.namamapel||'-');
+    const mIds = rawMapel.split(',').map(x=>x.trim());
+    const mapelNm = mIds.map(id=>mm[id]||id).join(', ');
+
+    const kelas=j.Kelas||j.kelas||'-';const materi=j.MateriYangDiajarkan||j.materiyangdiajarkan||'-';const namaGuru=j.NamaGuru||j.namaguru||'';
     h+=`<div class="jurnal-card">
       <div class="jurnal-date-badge"><div class="text-xl font-800 leading-none">${tglParts[0]||'-'}</div><div class="text-[10px] leading-none mt-0.5">${(tglParts[1]||'').substring(0,3)}</div><div class="text-[10px]">${tglParts[2]||''}</div></div>
       <div class="flex-1">
@@ -1017,7 +1124,7 @@ function rJGList(data,isMonitor){
 }
 function ldJGFilter(){
   const fm=document.getElementById('jgFM').value,fk=document.getElementById('jgFK').value;let f=A._jgData;
-  if(fm)f=f.filter(j=>String(j.IDMapel||j.idmapel)===String(fm));if(fk)f=f.filter(j=>(j.Kelas||j.kelas)===fk);
+  if(fm)f=f.filter(j=>String(j.IDMapel||j.idmapel).includes(fm));if(fk)f=f.filter(j=>(j.Kelas||j.kelas)===fk);
   document.getElementById('jgC').innerHTML=rJGList(f,['Kepala Sekolah','Yayasan','Admin','Bendahara'].includes(A.u.Role));
 }
 function mAJG(){
@@ -1026,21 +1133,31 @@ function mAJG(){
     opM('Tambah Jurnal Guru',`<div class="space-y-3">
       <div><label class="fl">Tanggal</label><input type="date" id="jgT" class="fi" value="${todayISO()}"></div>
       <div><label class="fl">Status Kehadiran</label><select id="jgSG" class="fi"><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option></select></div>
-      <div><label class="fl">Mapel (bisa lebih dari satu)</label><div id="jgMapelMS"></div></div>
+      <div><label class="fl">Mapel (bisa pilih beberapa sekaligus)</label><div id="jgMapelMS"></div></div>
       <div><label class="fl">Kelas</label><select id="jgK" class="fi"><option value="">-- Pilih --</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
       <div><label class="fl">Materi yang Diajarkan</label><input id="jgMt" class="fi" placeholder="Topik/materi hari ini..."></div>
       <div class="grid grid-cols-2 gap-3"><div><label class="fl">Waktu Mulai</label><input type="time" id="jgWM" class="fi"></div><div><label class="fl">Waktu Selesai</label><input type="time" id="jgWS" class="fi"></div></div>
     </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAJG()"><i class="fas fa-save"></i> Simpan</button>`);
-    setTimeout(()=>{createMultiSelect('jgMapelMS',A.d.mapel.map(m=>({v:m.IDMapel,l:m.NamaMapel})),[],'Pilih mapel...')},50);
+    setTimeout(()=>{createMultiSelect('jgMapelMS',A.d.mapel.map(m=>({v:m.IDMapel||m.idmapel||m.id,l:m.NamaMapel||m.namamapel})),[],'Pilih satu atau lebih mapel...')},50);
   });
 }
 async function smAJG(){
   const t=document.getElementById('jgT').value,k=document.getElementById('jgK').value,sg=document.getElementById('jgSG').value,m=document.getElementById('jgMt').value.trim(),wm=document.getElementById('jgWM').value,ws=document.getElementById('jgWS').value;
   const mapelSel=window['jgMapelMS_get']?window['jgMapelMS_get']():[];
-  if(!t||!k||!m||!mapelSel.length){toast('Lengkapi form dan pilih mapel','warning');return}
-  let ok=0;
-  for(const idM of mapelSel){const r=await api('addJurnal',{tanggal:t,idMapel:idM,kelas:k,materi:m,waktuMulai:wm||'00:00',waktuSelesai:ws||'00:00',emailGuru:A.u.Email,namaGuru:A.u.Nama,statusGuru:sg});if(r.success)ok++}
-  if(ok>0){clM();invCache(['getJurnal']);toast(ok+' jurnal ditambahkan');nav('jurnal')}else toast('Gagal menyimpan','error');
+  if(!t||!k||!m||!mapelSel.length){toast('Lengkapi form dan pilih minimal 1 mapel','warning');return}
+  
+  // Simpan dalam satu baris data dengan idMapel digabung koma
+  const idMapelCombined = mapelSel.join(', ');
+  const r=await api('addJurnal',{tanggal:t,idMapel:idMapelCombined,kelas:k,materi:m,waktuMulai:wm||'00:00',waktuSelesai:ws||'00:00',emailGuru:A.u.Email,namaGuru:A.u.Nama,statusGuru:sg});
+  
+  if(r.success){
+    clM();
+    invCache(['getJurnal']);
+    toast('Jurnal berhasil ditambahkan');
+    nav('jurnal');
+  }else{
+    toast(r.message||'Gagal menyimpan','error');
+  }
 }
 function dlJgPdf(){
   const d=A._jgData;if(!d.length){toast('Tidak ada data','warning');return}
