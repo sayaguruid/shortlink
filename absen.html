@@ -101,7 +101,7 @@
         </div>
     </div>
 
-    <!-- Statistik Ringkas -->
+    <!-- Statistik Ringkas (Hari Ini) -->
     <div class="grid grid-cols-4 gap-2 mb-2">
         <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
             <div id="stat-total" class="text-base font-bold text-brand-500">-</div>
@@ -125,7 +125,7 @@
         <div id="progress-bar" class="h-full bg-gradient-to-r from-brand-500 to-ok-500 rounded-full transition-all duration-500" style="width:0%"></div>
     </div>
 
-    <!-- Kolom Scan Barcode (Auto Check-In Cepat) -->
+    <!-- Kolom Scan Barcode -->
     <section id="section-scan" class="mb-3">
         <div class="scan-field bg-white border-2 border-brand-200 rounded-2xl p-1 shadow-lg shadow-brand-500/8" id="scan-field-wrap">
             <div class="flex items-center gap-2 px-3">
@@ -174,17 +174,17 @@
     <section class="mb-3">
         <div class="flex bg-white rounded-xl p-1 mb-2.5 border border-slate-100 shadow-sm text-xs">
             <button onclick="switchTab('log')" id="tab-log" class="tab-btn active flex-1 py-2 rounded-lg flex items-center justify-center gap-1">
-                <i class="fas fa-clock-rotate-left text-[10px]"></i> Riwayat
+                <i class="fas fa-clock-rotate-left text-[10px]"></i> Riwayat Hari Ini
             </button>
             <button onclick="switchTab('rekap')" id="tab-rekap" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
-                <i class="fas fa-chart-pie text-[10px]"></i> Rekap
+                <i class="fas fa-chart-pie text-[10px]"></i> Rekap Kehadiran
             </button>
             <button onclick="switchTab('search')" id="tab-search" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
                 <i class="fas fa-search text-[10px]"></i> Cari
             </button>
         </div>
 
-        <!-- Panel 1: Riwayat dengan Filter -->
+        <!-- Panel 1: Riwayat Hari Ini dengan Filter -->
         <div id="panel-log">
             <div class="flex gap-1.5 mb-2 overflow-x-auto pb-1 text-[11px]">
                 <button onclick="filterLog('all')" id="flt-all" class="px-2.5 py-1 rounded-lg bg-brand-500 text-white font-medium shrink-0 transition-all">Semua</button>
@@ -195,12 +195,17 @@
             </div>
             <div id="recent-log" class="space-y-1.5 max-h-[45vh] overflow-y-auto"></div>
             <div id="log-empty" class="text-center py-6 text-slate-400 text-xs hidden">
-                <i class="fas fa-inbox text-base mb-1 block opacity-50"></i> Belum ada data riwayat
+                <i class="fas fa-inbox text-base mb-1 block opacity-50"></i> Belum ada absensi hari ini
             </div>
         </div>
 
-        <!-- Panel 2: Rekap Kehadiran -->
-        <div id="panel-rekap" class="hidden space-y-2">
+        <!-- Panel 2: Rekap dengan Filter Tanggal -->
+        <div id="panel-rekap" class="hidden space-y-2.5">
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700">Pilih Tanggal Rekap:</span>
+                <input type="date" id="filter-rekap-date" onchange="updateRekap()" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-xs focus:border-brand-500">
+            </div>
+
             <div class="grid grid-cols-2 gap-2">
                 <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
                     <div id="rekap-ontime" class="text-lg font-bold text-ok-600">0</div>
@@ -244,6 +249,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyrX-228Q5twj4pdrEmdnmn
 let allPeserta = [];
 let hadirMap = {};
 let hadirList = [];
+let masterHadirData = []; // Menyimpan seluruh data historis mentah dari server
 let html5Qr = null;
 let cameraActive = false;
 let processing = false;
@@ -255,7 +261,10 @@ const AUTO_DETECT_DELAY = 300;
 document.addEventListener('DOMContentLoaded', () => {
     html5Qr = new Html5Qrcode('reader');
     
-    // Sinkronisasi jam dari Cloud terlebih dahulu, kemudian muat data peserta
+    // Set default tanggal filter rekap ke hari ini (format YYYY-MM-DD untuk input date)
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('filter-rekap-date').value = today;
+
     loadConfig().then(() => {
         loadData();
     });
@@ -263,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => document.getElementById('scan-input').focus(), 300);
 });
 
-// Ambil konfigurasi jam dari server saat aplikasi dimuat
 async function loadConfig() {
     try {
         const res = await fetch(`${API_URL}?action=getConfig`);
@@ -274,16 +282,13 @@ async function loadConfig() {
                 document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
             }
         }
-    } catch(e) { 
-        console.error(e); 
-    }
+    } catch(e) { console.error(e); }
 }
 
-// Fungsi konfirmasi saat perangkat ingin mengubah waktu
 async function konfirmasiUbahWaktu(newTime) {
     const pin = prompt("Pengaturan waktu sudah terkunci/disinkronkan.\nMasukkan PIN Admin untuk mengubah jam:");
     if (!pin) {
-        loadConfig(); // Kembalikan ke nilai semula dari server jika dibatalkan
+        loadConfig();
         return;
     }
 
@@ -291,19 +296,15 @@ async function konfirmasiUbahWaktu(newTime) {
         const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                action: 'saveConfig',
-                targetTime: newTime,
-                pin: pin
-            })
+            body: JSON.stringify({ action: 'saveConfig', targetTime: newTime, pin: pin })
         });
         const r = await res.json();
         if(r.status === 'success') {
-            toast('Jam berhasil diubah & disinkronkan ke semua device!', 'success');
+            toast('Jam berhasil diubah & disinkronkan!', 'success');
             document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
         } else {
             alert(r.message || "PIN Salah!");
-            loadConfig(); // Kembalikan nilai ke server jika PIN salah
+            loadConfig();
         }
     } catch(e) {
         toast('Gagal menyimpan pengaturan waktu', 'error');
@@ -318,16 +319,23 @@ async function loadData() {
             fetch(`${API_URL}?action=hadir`).then(r => r.json()).catch(() => ({data:[]}))
         ]);
         allPeserta = pRes.data || [];
-        const hData = hRes.data || [];
-        hadirMap = {}; hadirList = [];
+        masterHadirData = hRes.data || [];
         
-        hData.forEach(h => {
-            const kid = String(h['ID']||'').trim();
-            const status = String(h['Status']||'').trim();
-            if (kid && status !== 'tidak hadir') {
-                hadirMap[kid] = h;
+        hadirMap = {}; 
+        hadirList = [];
+        
+        const todayStr = new Date().toLocaleDateString('id-ID');
+        
+        masterHadirData.forEach(h => {
+            const ts = String(h['Timestamp']||'');
+            if (ts.includes(todayStr)) {
+                const kid = String(h['ID']||'').trim();
+                const status = String(h['Status']||'').trim();
+                if (kid && status !== 'tidak hadir') {
+                    hadirMap[kid] = h;
+                }
+                hadirList.push(h);
             }
-            hadirList.push(h);
         });
         
         cekOtomatisTidakHadir();
@@ -408,7 +416,7 @@ function processScan() {
 
     if (already) {
         setScanStatus('warning');
-        toast(`${person['Nama']} sudah tercatat hadir`, 'warning');
+        toast(`${person['Nama']} sudah tercatat hadir hari ini`, 'warning');
         setTimeout(() => { input.value = ''; input.focus(); setScanStatus('idle'); processing = false; }, 1200);
         return;
     }
@@ -425,6 +433,7 @@ async function doCheckin(person) {
     const entry = {Timestamp: ts, ID: id, Nama: person['Nama']||'-', Jabatan: person['Jabatan']||'-', Status: statusKehadiran};
     hadirMap[id] = entry;
     hadirList.unshift(entry);
+    masterHadirData.unshift(entry);
     
     setScanStatus('success');
     toast(`${person['Nama']} (${statusKehadiran})`, 'success');
@@ -531,15 +540,28 @@ function renderLog() {
     }).join('');
 }
 
+// Rekap Kehadiran dengan Filter Tanggal Pilihan
 function updateRekap() {
+    const dateInput = document.getElementById('filter-rekap-date').value; // format "YYYY-MM-DD"
+    if (!dateInput) return;
+    
+    // Ubah format "YYYY-MM-DD" ke "DD/MM/YYYY" agar cocok dengan format Timestamp Indonesia ("14/09/2026")
+    const parts = dateInput.split('-');
+    const formattedDateFilter = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
     let ontime = 0, intime = 0, terlambat = 0, tidakHadir = 0;
-    hadirList.forEach(h => {
-        const s = String(h['Status']||'').toLowerCase();
-        if(s === 'on time') ontime++;
-        else if(s === 'in time') intime++;
-        else if(s === 'terlambat') terlambat++;
-        else if(s === 'tidak hadir') tidakHadir++;
+    
+    masterHadirData.forEach(h => {
+        const ts = String(h['Timestamp']||'');
+        if (ts.includes(formattedDateFilter)) {
+            const s = String(h['Status']||'').toLowerCase();
+            if(s === 'on time') ontime++;
+            else if(s === 'in time') intime++;
+            else if(s === 'terlambat') terlambat++;
+            else if(s === 'tidak hadir') tidakHadir++;
+        }
     });
+
     document.getElementById('rekap-ontime').textContent = ontime;
     document.getElementById('rekap-intime').textContent = intime;
     document.getElementById('rekap-terlambat').textContent = terlambat;
