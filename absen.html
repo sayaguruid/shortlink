@@ -90,7 +90,7 @@
         <p class="text-brand-500 font-semibold text-xs">Konsolidasi Organisasi</p>
     </header>
 
-    <!-- Pengaturan Waktu Absen Terpusat -->
+    <!-- Pengaturan Waktu Terpusat -->
     <div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
         <div>
             <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
@@ -101,7 +101,7 @@
         </div>
     </div>
 
-    <!-- Statistik Ringkas (Hari Ini) -->
+    <!-- Statistik Ringkas -->
     <div class="grid grid-cols-4 gap-2 mb-2">
         <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
             <div id="stat-total" class="text-base font-bold text-brand-500">-</div>
@@ -125,7 +125,7 @@
         <div id="progress-bar" class="h-full bg-gradient-to-r from-brand-500 to-ok-500 rounded-full transition-all duration-500" style="width:0%"></div>
     </div>
 
-    <!-- Kolom Scan Barcode -->
+    <!-- Scan Barcode -->
     <section id="section-scan" class="mb-3">
         <div class="scan-field bg-white border-2 border-brand-200 rounded-2xl p-1 shadow-lg shadow-brand-500/8" id="scan-field-wrap">
             <div class="flex items-center gap-2 px-3">
@@ -144,9 +144,12 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-end mt-2 mb-2 px-1">
+        <div class="flex items-center justify-between mt-2 mb-2 px-1">
+            <button onclick="loadData()" class="text-xs text-slate-500 hover:text-brand-600 font-medium flex items-center gap-1">
+                <i class="fas fa-sync-alt text-[10px]"></i> Refresh Data Live
+            </button>
             <button onclick="openCameraScanner()" class="text-xs text-brand-500 hover:text-brand-600 font-medium flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                <i class="fas fa-camera text-[10px]"></i> Buka Kamera Scanner
+                <i class="fas fa-camera text-[10px]"></i> Kamera Scanner
             </button>
         </div>
 
@@ -170,21 +173,21 @@
         </button>
     </section>
 
-    <!-- Menu Navigasi Tab -->
+    <!-- Tab Navigasi -->
     <section class="mb-3">
         <div class="flex bg-white rounded-xl p-1 mb-2.5 border border-slate-100 shadow-sm text-xs">
             <button onclick="switchTab('log')" id="tab-log" class="tab-btn active flex-1 py-2 rounded-lg flex items-center justify-center gap-1">
                 <i class="fas fa-clock-rotate-left text-[10px]"></i> Riwayat Hari Ini
             </button>
             <button onclick="switchTab('rekap')" id="tab-rekap" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
-                <i class="fas fa-chart-pie text-[10px]"></i> Rekap Kehadiran
+                <i class="fas fa-chart-pie text-[10px]"></i> Rekap & Filter
             </button>
             <button onclick="switchTab('search')" id="tab-search" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
                 <i class="fas fa-search text-[10px]"></i> Cari
             </button>
         </div>
 
-        <!-- Panel 1: Riwayat Hari Ini dengan Filter -->
+        <!-- Panel 1: Riwayat -->
         <div id="panel-log">
             <div class="flex gap-1.5 mb-2 overflow-x-auto pb-1 text-[11px]">
                 <button onclick="filterLog('all')" id="flt-all" class="px-2.5 py-1 rounded-lg bg-brand-500 text-white font-medium shrink-0 transition-all">Semua</button>
@@ -199,7 +202,7 @@
             </div>
         </div>
 
-        <!-- Panel 2: Rekap dengan Filter Tanggal -->
+        <!-- Panel 2: Rekap -->
         <div id="panel-rekap" class="hidden space-y-2.5">
             <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between text-xs">
                 <span class="font-bold text-slate-700">Pilih Tanggal Rekap:</span>
@@ -226,7 +229,7 @@
             </div>
         </div>
 
-        <!-- Panel 3: Cari Peserta -->
+        <!-- Panel 3: Cari -->
         <div id="panel-search" class="hidden">
             <div class="relative mb-2">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -249,7 +252,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyrX-228Q5twj4pdrEmdnmn
 let allPeserta = [];
 let hadirMap = {};
 let hadirList = [];
-let masterHadirData = []; // Menyimpan seluruh data historis mentah dari server
+let masterHadirData = [];
 let html5Qr = null;
 let cameraActive = false;
 let processing = false;
@@ -261,13 +264,16 @@ const AUTO_DETECT_DELAY = 300;
 document.addEventListener('DOMContentLoaded', () => {
     html5Qr = new Html5Qrcode('reader');
     
-    // Set default tanggal filter rekap ke hari ini (format YYYY-MM-DD untuk input date)
+    // Set default tanggal filter rekap ke hari ini (YYYY-MM-DD)
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('filter-rekap-date').value = today;
 
     loadConfig().then(() => {
         loadData();
     });
+
+    // Auto-refresh data dari cloud setiap 10 detik agar selalu live di semua device
+    setInterval(loadData, 10000);
 
     setTimeout(() => document.getElementById('scan-input').focus(), 300);
 });
@@ -324,11 +330,17 @@ async function loadData() {
         hadirMap = {}; 
         hadirList = [];
         
-        const todayStr = new Date().toLocaleDateString('id-ID');
+        // Ambil tanggal hari ini dalam format standar universal "YYYY-MM-DD"
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayYYYYMMDD = `${yyyy}-${mm}-${dd}`;
         
         masterHadirData.forEach(h => {
             const ts = String(h['Timestamp']||'');
-            if (ts.includes(todayStr)) {
+            // Cek apakah timestamp mengandung tanggal hari ini (cocok dengan format yyyy-mm-dd)
+            if (ts.startsWith(todayYYYYMMDD) || ts.includes(todayYYYYMMDD)) {
                 const kid = String(h['ID']||'').trim();
                 const status = String(h['Status']||'').trim();
                 if (kid && status !== 'tidak hadir') {
@@ -341,7 +353,7 @@ async function loadData() {
         cekOtomatisTidakHadir();
         hadirList.sort((a,b) => new Date(b.Timestamp||0) - new Date(a.Timestamp||0));
         updateStats(); renderLog(); updateRekap();
-    } catch(e) { console.error(e); toast('Gagal memuat data','error'); }
+    } catch(e) { console.error(e); }
 }
 
 function hitungStatusKehadiran() {
@@ -372,7 +384,7 @@ function cekOtomatisTidakHadir() {
         allPeserta.forEach(p => {
             const id = String(p['ID']||'').trim();
             if (!hadirMap[id]) {
-                const entry = {Timestamp: new Date().toLocaleString('id-ID'), ID: id, Nama: p['Nama']||'-', Jabatan: p['Jabatan']||'-', Status: 'tidak hadir'};
+                const entry = {Timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '), ID: id, Nama: p['Nama']||'-', Jabatan: p['Jabatan']||'-', Status: 'tidak hadir'};
                 if (id) hadirMap[id] = entry;
                 hadirList.push(entry);
             }
@@ -428,7 +440,7 @@ async function doCheckin(person) {
     const input = document.getElementById('scan-input');
     const statusKehadiran = hitungStatusKehadiran();
     const id = String(person['ID']||'').trim();
-    const ts = new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
+    const ts = new Date().toISOString().slice(0, 19).replace('T', ' ');
     
     const entry = {Timestamp: ts, ID: id, Nama: person['Nama']||'-', Jabatan: person['Jabatan']||'-', Status: statusKehadiran};
     hadirMap[id] = entry;
@@ -540,20 +552,15 @@ function renderLog() {
     }).join('');
 }
 
-// Rekap Kehadiran dengan Filter Tanggal Pilihan
 function updateRekap() {
     const dateInput = document.getElementById('filter-rekap-date').value; // format "YYYY-MM-DD"
     if (!dateInput) return;
-    
-    // Ubah format "YYYY-MM-DD" ke "DD/MM/YYYY" agar cocok dengan format Timestamp Indonesia ("14/09/2026")
-    const parts = dateInput.split('-');
-    const formattedDateFilter = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
     let ontime = 0, intime = 0, terlambat = 0, tidakHadir = 0;
     
     masterHadirData.forEach(h => {
         const ts = String(h['Timestamp']||'');
-        if (ts.includes(formattedDateFilter)) {
+        if (ts.startsWith(dateInput) || ts.includes(dateInput)) {
             const s = String(h['Status']||'').toLowerCase();
             if(s === 'on time') ontime++;
             else if(s === 'in time') intime++;
@@ -578,7 +585,7 @@ function renderSearchResults(q) {
     if(!q){cnt.classList.add('hidden');box.innerHTML='';return;}
     const ql = q.toLowerCase();
     const res = allPeserta.filter(p => ['ID','Nama','Jabatan'].some(f => String(p[f]||'').toLowerCase().includes(ql)));
-    cnt.classList.remove('hidden'); cnt.textContent = res.length + ' hasil';
+    cnt.classList.add('hidden'); cnt.textContent = res.length + ' hasil';
     if(!res.length){box.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs">Tidak ditemukan</div>`;return;}
     
     box.innerHTML = res.slice(0, 25).map(p => {
