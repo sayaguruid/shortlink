@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daftar Hadir — Konsolidasi Organisasi</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand: { 50:'#EEF4FF', 100:'#D9E6FF', 200:'#BCCFFF', 400:'#5B8DEF', 500:'#3366CC', 600:'#1A4FA0', 700:'#0E3B7A' },
+                    ok:    { 50:'#ECFDF5', 100:'#D1FAE5', 400:'#34D399', 500:'#10B981', 600:'#059669' },
+                    warn:  { 50:'#FFFBEB', 100:'#FEF3C7', 400:'#FBBF24', 500:'#F59E0B' },
+                    err:   { 50:'#FEF2F2', 500:'#EF4444' },
+                },
+                fontFamily: {
+                    display: ['Playfair Display','serif'],
+                    sans: ['DM Sans','sans-serif']
+                }
+            }
+        }
+    }
+    </script>
+
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+        body{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#1E293B;min-height:100dvh;overflow-x:hidden}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:2px}
+        .scan-field{transition:all .2s}
+        .scan-field:focus-within{box-shadow:0 0 0 3px rgba(51,102,204,.18),0 4px 20px rgba(51,102,204,.08)}
+        .scan-field.s-processing{box-shadow:0 0 0 3px rgba(245,158,11,.25);border-color:#FBBF24}
+        .scan-field.s-success{box-shadow:0 0 0 3px rgba(16,185,129,.2);border-color:#10B981}
+        .scan-field.s-error{box-shadow:0 0 0 3px rgba(239,68,68,.2);border-color:#EF4444}
+        .scan-field.s-warning{box-shadow:0 0 0 3px rgba(245,158,11,.2);border-color:#F59E0B}
+        .card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;transition:all .2s}
+        .id-chip{font-family:'DM Sans',monospace;font-weight:700;letter-spacing:.05em}
+        .result-panel{transition:all .3s cubic-bezier(.4,0,.2,1);max-height:0;opacity:0;overflow:hidden}
+        .result-panel.show{max-height:500px;opacity:1}
+        .flash-ok{animation:flashOk .5s ease}
+        @keyframes flashOk{0%{background:#D1FAE5}100%{background:transparent}}
+        .flash-err{animation:flashErr .5s ease}
+        @keyframes flashErr{0%{background:#FEE2E2}100%{background:transparent}}
+        .toast-in{animation:tIn .3s ease}
+        .toast-out{animation:tOut .2s ease forwards}
+        @keyframes tIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes tOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+        .log-in{animation:lIn .25s ease}
+        @keyframes lIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+        .tab-btn{transition:all .2s;position:relative}
+        .tab-btn::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:2px;background:#3366CC;border-radius:2px;transition:all .2s;transform:translateX(-50%)}
+        .tab-btn.active::after{width:60%}
+        .tab-btn.active{color:#3366CC;font-weight:600}
+        .scanner-wrap{position:relative;border-radius:14px;overflow:hidden;background:#000}
+        #reader{border-radius:14px;overflow:hidden}
+        #reader video{border-radius:14px}
+        .vf-corner{position:absolute;width:22px;height:22px;border-color:#3366CC;border-style:solid;z-index:10;pointer-events:none}
+        .vf-tl{top:8%;left:8%;border-width:3px 0 0 3px;border-radius:3px 0 0 0}
+        .vf-tr{top:8%;right:8%;border-width:3px 3px 0 0;border-radius:0 3px 0 0}
+        .vf-bl{bottom:8%;left:8%;border-width:0 0 3px 3px;border-radius:0 0 0 3px}
+        .vf-br{bottom:8%;right:8%;border-width:0 3px 3px 0;border-radius:0 0 3px 0}
+        .scan-line{position:absolute;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,#3366CC,transparent);z-index:10;pointer-events:none;animation:scanL 2s ease-in-out infinite}
+        @keyframes scanL{0%{top:8%;opacity:0}8%{opacity:1}92%{opacity:1}100%{top:87%;opacity:0}}
+        mark{background:#D9E6FF;color:#1A4FA0;padding:1px 2px;border-radius:2px}
+        input:focus{outline:none}
+        .scan-ready-dot{width:6px;height:6px;border-radius:50%;background:#3366CC;animation:blink 1.5s ease-in-out infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    </style>
+</head>
+<body>
+
+<main class="max-w-lg mx-auto px-4 pt-4 pb-20">
+
+    <header class="text-center mb-3">
+        <div class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-brand-500 text-white mb-1.5 shadow-md shadow-brand-500/20">
+            <i class="fas fa-landmark text-sm"></i>
+        </div>
+        <h1 class="font-display text-lg font-black tracking-tight text-slate-900">Daftar Hadir</h1>
+        <p class="text-brand-500 font-semibold text-xs">Konsolidasi Organisasi</p>
+    </header>
+
+    <!-- Pengaturan Waktu Absen -->
+    <div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
+        <div>
+            <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
+            <span class="text-slate-400 text-[10px]">Patokan: on time, in time, terlambat</span>
+        </div>
+        <input type="time" id="target-time" value="08:00" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-sm focus:border-brand-500">
+    </div>
+
+    <!-- Statistik Ringkas -->
+    <div class="grid grid-cols-4 gap-2 mb-2">
+        <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
+            <div id="stat-total" class="text-base font-bold text-brand-500">-</div>
+            <div class="text-[8px] text-slate-400 uppercase tracking-wider">Terdaftar</div>
+        </div>
+        <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
+            <div id="stat-hadir" class="text-base font-bold text-ok-500">-</div>
+            <div class="text-[8px] text-slate-400 uppercase tracking-wider">Hadir</div>
+        </div>
+        <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
+            <div id="stat-belum" class="text-base font-bold text-rose-500">-</div>
+            <div class="text-[8px] text-slate-400 uppercase tracking-wider">Belum</div>
+        </div>
+        <div class="bg-white rounded-xl p-2 text-center border border-slate-100 shadow-sm">
+            <div id="stat-persen" class="text-base font-bold text-slate-700">-</div>
+            <div class="text-[8px] text-slate-400 uppercase tracking-wider">Persen</div>
+        </div>
+    </div>
+
+    <div class="w-full h-1.5 bg-slate-100 rounded-full mb-3 overflow-hidden">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-brand-500 to-ok-500 rounded-full transition-all duration-500" style="width:0%"></div>
+    </div>
+
+    <!-- Kolom Scan Barcode (Auto Check-In Cepat) -->
+    <section id="section-scan" class="mb-3">
+        <div class="scan-field bg-white border-2 border-brand-200 rounded-2xl p-1 shadow-lg shadow-brand-500/8" id="scan-field-wrap">
+            <div class="flex items-center gap-2 px-3">
+                <div class="w-8 h-8 rounded-xl bg-brand-500 flex items-center justify-center shrink-0">
+                    <i class="fas fa-barcode text-white text-xs"></i>
+                </div>
+                <input type="text" id="scan-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                       placeholder="Scan / ketik ID di sini..."
+                       class="flex-1 py-2.5 text-sm font-semibold text-slate-800 placeholder-slate-400 bg-transparent border-none focus:ring-0 focus:outline-none"
+                       onkeydown="handleScanKey(event)"
+                       oninput="handleScanInput()">
+                <div id="scan-status" class="shrink-0 flex items-center gap-1.5">
+                    <span class="text-[9px] text-brand-500 font-bold bg-brand-50 px-1.5 py-0.5 rounded">AUTO</span>
+                    <div class="scan-ready-dot" id="scan-ready-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end mt-2 mb-2 px-1">
+            <button onclick="openCameraScanner()" class="text-xs text-brand-500 hover:text-brand-600 font-medium flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                <i class="fas fa-camera text-[10px]"></i> Buka Kamera Scanner
+            </button>
+        </div>
+
+        <div id="result-panel" class="result-panel">
+            <div id="result-content"></div>
+        </div>
+    </section>
+
+    <!-- Camera Scanner -->
+    <section id="section-camera" class="mb-3 hidden">
+        <div class="scanner-wrap border border-slate-200">
+            <div class="vf-corner vf-tl"></div>
+            <div class="vf-corner vf-tr"></div>
+            <div class="vf-corner vf-bl"></div>
+            <div class="vf-corner vf-br"></div>
+            <div class="scan-line"></div>
+            <div id="reader" style="width:100%"></div>
+        </div>
+        <button onclick="closeCameraScanner()" class="w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2 rounded-xl text-xs transition-all active:scale-[.98]">
+            <i class="fas fa-times mr-1"></i> Tutup Kamera
+        </button>
+    </section>
+
+    <!-- Menu Navigasi Tab -->
+    <section class="mb-3">
+        <div class="flex bg-white rounded-xl p-1 mb-2.5 border border-slate-100 shadow-sm text-xs">
+            <button onclick="switchTab('log')" id="tab-log" class="tab-btn active flex-1 py-2 rounded-lg flex items-center justify-center gap-1">
+                <i class="fas fa-clock-rotate-left text-[10px]"></i> Riwayat
+            </button>
+            <button onclick="switchTab('rekap')" id="tab-rekap" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
+                <i class="fas fa-chart-pie text-[10px]"></i> Rekap
+            </button>
+            <button onclick="switchTab('search')" id="tab-search" class="tab-btn flex-1 py-2 rounded-lg text-slate-400 flex items-center justify-center gap-1">
+                <i class="fas fa-search text-[10px]"></i> Cari
+            </button>
+        </div>
+
+        <!-- Panel 1: Riwayat dengan Filter -->
+        <div id="panel-log">
+            <div class="flex gap-1.5 mb-2 overflow-x-auto pb-1 text-[11px]">
+                <button onclick="filterLog('all')" id="flt-all" class="px-2.5 py-1 rounded-lg bg-brand-500 text-white font-medium shrink-0 transition-all">Semua</button>
+                <button onclick="filterLog('on time')" id="flt-ontime" class="px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all">On Time</button>
+                <button onclick="filterLog('in time')" id="flt-intime" class="px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all">In Time</button>
+                <button onclick="filterLog('terlambat')" id="flt-late" class="px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all">Terlambat</button>
+                <button onclick="filterLog('tidak hadir')" id="flt-absent" class="px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all">Tidak Hadir</button>
+            </div>
+            <div id="recent-log" class="space-y-1.5 max-h-[45vh] overflow-y-auto"></div>
+            <div id="log-empty" class="text-center py-6 text-slate-400 text-xs hidden">
+                <i class="fas fa-inbox text-base mb-1 block opacity-50"></i> Belum ada data riwayat
+            </div>
+        </div>
+
+        <!-- Panel 2: Rekap Kehadiran -->
+        <div id="panel-rekap" class="hidden space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <div id="rekap-ontime" class="text-lg font-bold text-ok-600">0</div>
+                    <div class="text-[10px] text-slate-400 uppercase">On Time</div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <div id="rekap-intime" class="text-lg font-bold text-brand-600">0</div>
+                    <div class="text-[10px] text-slate-400 uppercase">In Time</div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <div id="rekap-terlambat" class="text-lg font-bold text-amber-600">0</div>
+                    <div class="text-[10px] text-slate-400 uppercase">Terlambat</div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <div id="rekap-tidakhadir" class="text-lg font-bold text-rose-600">0</div>
+                    <div class="text-[10px] text-slate-400 uppercase">Tidak Hadir</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Cari Peserta -->
+        <div id="panel-search" class="hidden">
+            <div class="relative mb-2">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="search-input" placeholder="Cari ID, nama, atau jabatan..."
+                       class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-brand-500 transition-all"
+                       oninput="handleSearch(this.value)">
+                <span id="search-count" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded"></span>
+            </div>
+            <div id="search-results" class="space-y-1.5 max-h-[45vh] overflow-y-auto"></div>
+        </div>
+    </section>
+
+</main>
+
+<div id="toast-box" class="fixed top-3 left-3 right-3 z-[60] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbyrX-228Q5twj4pdrEmdnmndk8EJ_1eOvvB2iccrof7sLACdjOGGYe-NikbM2KVQ1M/exec';
+
+let allPeserta = [];
+let hadirMap = {};
+let hadirList = [];
+let html5Qr = null;
+let cameraActive = false;
+let processing = false;
+let searchTimer = null;
+let autoDetectTimer = null;
+let currentFilter = 'all';
+const AUTO_DETECT_DELAY = 300; // Dipercepat agar pembacaan scanner lebih responsif
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (API_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
+        document.querySelector('main').innerHTML = `
+            <div class="text-center py-16">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-50 text-brand-500 mb-3"><i class="fas fa-cog text-xl"></i></div>
+                <h2 class="font-display text-lg font-bold text-slate-900 mb-1">Konfigurasi Diperlukan</h2>
+                <p class="text-slate-500 text-xs max-w-xs mx-auto">Ganti <code class="bg-slate-100 px-1 py-0.5 rounded text-brand-500">MASUKKAN_URL_WEB_APP_ANDA_DISINI</code> dengan URL Web App Anda.</p>
+            </div>`;
+        return;
+    }
+    html5Qr = new Html5Qrcode('reader');
+    loadData();
+    setTimeout(() => document.getElementById('scan-input').focus(), 300);
+});
+
+async function loadData() {
+    try {
+        const [pRes, hRes] = await Promise.all([
+            fetch(`${API_URL}?action=data`).then(r => r.json()),
+            fetch(`${API_URL}?action=hadir`).then(r => r.json()).catch(() => ({data:[]}))
+        ]);
+        allPeserta = pRes.data || [];
+        const hData = hRes.data || [];
+        hadirMap = {}; hadirList = [];
+        
+        hData.forEach(h => {
+            const kid = String(h['ID']||'').trim();
+            const status = String(h['Status']||'').trim();
+            if (kid && status !== 'tidak hadir') {
+                hadirMap[kid] = h;
+            }
+            hadirList.push(h);
+        });
+        
+        cekOtomatisTidakHadir();
+        hadirList.sort((a,b) => new Date(b.Timestamp||0) - new Date(a.Timestamp||0));
+        updateStats(); renderLog(); updateRekap();
+    } catch(e) { console.error(e); toast('Gagal memuat data','error'); }
+}
+
+function hitungStatusKehadiran() {
+    const targetTimeStr = document.getElementById('target-time').value; 
+    if (!targetTimeStr) return "on time";
+
+    const [tHour, tMin] = targetTimeStr.split(':').map(Number);
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const targetMinutes = tHour * 60 + tMin;
+    const diffMinutes = currentMinutes - targetMinutes;
+
+    if (diffMinutes <= 0) return "on time";
+    if (diffMinutes <= 30) return "in time";
+    if (diffMinutes <= 120) return "terlambat";
+    return "tidak hadir";
+}
+
+function cekOtomatisTidakHadir() {
+    const targetTimeStr = document.getElementById('target-time').value;
+    if (!targetTimeStr) return;
+    const [tHour, tMin] = targetTimeStr.split(':').map(Number);
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const targetMinutes = tHour * 60 + tMin;
+
+    if (currentMinutes - targetMinutes > 120) {
+        allPeserta.forEach(p => {
+            const id = String(p['ID']||'').trim();
+            if (!hadirMap[id]) {
+                const entry = {Timestamp: new Date().toLocaleString('id-ID'), ID: id, Nama: p['Nama']||'-', Jabatan: p['Jabatan']||'-', Status: 'tidak hadir'};
+                if (id) hadirMap[id] = entry;
+                hadirList.push(entry);
+            }
+        });
+    }
+}
+
+function handleScanKey(event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    clearTimeout(autoDetectTimer);
+    processScan();
+}
+
+function handleScanInput() {
+    clearTimeout(autoDetectTimer);
+    const val = document.getElementById('scan-input').value.trim();
+    if (!val) return;
+    // Auto-detect cepat 300ms untuk scanner tanpa enter
+    autoDetectTimer = setTimeout(() => { processScan(); }, AUTO_DETECT_DELAY);
+}
+
+// Proses pembacaan cepat & langsung auto check-in
+function processScan() {
+    const input = document.getElementById('scan-input');
+    const code = input.value.trim();
+    if (!code || processing) return;
+
+    processing = true;
+    setScanStatus('processing');
+    
+    // Pencarian instan di memori lokal (tanpa delay network)
+    const person = allPeserta.find(p => String(p['ID']||'').trim() === code || String(p['No HP']||'').trim() === code);
+
+    if (!person) {
+        setScanStatus('error');
+        toast(`Peserta tidak ditemukan: "${code}"`, 'error');
+        setTimeout(() => { input.value = ''; input.focus(); setScanStatus('idle'); processing = false; }, 1000);
+        return;
+    }
+
+    const id = String(person['ID']||'').trim();
+    const already = hadirMap[id] !== undefined && hadirMap[id]['Status'] !== 'tidak hadir';
+
+    if (already) {
+        setScanStatus('warning');
+        toast(`${person['Nama']} sudah tercatat hadir`, 'warning');
+        setTimeout(() => { input.value = ''; input.focus(); setScanStatus('idle'); processing = false; }, 1200);
+        return;
+    }
+
+    doCheckin(person);
+}
+
+async function doCheckin(person) {
+    const input = document.getElementById('scan-input');
+    const statusKehadiran = hitungStatusKehadiran();
+    const id = String(person['ID']||'').trim();
+    const ts = new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
+    
+    // Optimistic UI update (update langsung tampilan tanpa menunggu respons server agar terasa instan)
+    const entry = {Timestamp: ts, ID: id, Nama: person['Nama']||'-', Jabatan: person['Jabatan']||'-', Status: statusKehadiran};
+    hadirMap[id] = entry;
+    hadirList.unshift(entry);
+    
+    setScanStatus('success');
+    toast(`${person['Nama']} (${statusKehadiran})`, 'success');
+    updateStats(); renderLog(); updateRekap();
+
+    input.value = '';
+    setTimeout(() => { input.focus(); setScanStatus('idle'); processing = false; }, 600);
+
+    // Kirim data ke Google Sheets di background
+    try {
+        fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'hadir',
+                id: id,
+                nama: person['Nama']||'-',
+                jabatan: person['Jabatan']||'-',
+                statusAbsen: statusKehadiran
+            })
+        });
+    } catch(e) { console.error(e); }
+}
+
+function setScanStatus(status) {
+    const wrap = document.getElementById('scan-field-wrap');
+    wrap.className = 'scan-field bg-white border-2 rounded-2xl p-1 shadow-lg shadow-brand-500/8';
+    if(status === 'success') wrap.classList.add('border-ok-500', 's-success');
+    else if(status === 'error') wrap.classList.add('border-err-500', 's-error');
+    else if(status === 'warning') wrap.classList.add('border-warn-400', 's-warning');
+    else if(status === 'processing') wrap.classList.add('border-warn-400', 's-processing');
+}
+
+async function openCameraScanner() {
+    if (cameraActive) return;
+    try {
+        document.getElementById('section-camera').classList.remove('hidden');
+        await html5Qr.start({facingMode:'environment'},{fps:15,qrbox:{width:220,height:220},aspectRatio:1.0},onCameraScan,()=>{});
+        cameraActive = true;
+    } catch(e) {
+        document.getElementById('section-camera').classList.add('hidden');
+        toast('Kamera tidak tersedia','error');
+    }
+}
+
+async function closeCameraScanner() {
+    if(!cameraActive) return;
+    try{await html5Qr.stop();}catch(e){}
+    cameraActive = false;
+    document.getElementById('section-camera').classList.add('hidden');
+    document.getElementById('scan-input').focus();
+}
+
+function onCameraScan(txt) {
+    if(navigator.vibrate) navigator.vibrate(50);
+    closeCameraScanner();
+    const input = document.getElementById('scan-input');
+    input.value = txt.trim();
+    processScan();
+}
+
+function filterLog(status) {
+    currentFilter = status;
+    ['all', 'ontime', 'intime', 'late', 'absent'].forEach(k => {
+        const btn = document.getElementById('flt-' + k);
+        if(btn) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all';
+        }
+    });
+    
+    const activeBtnMap = {'all':'all', 'on time':'ontime', 'in time':'intime', 'terlambat':'late', 'tidak hadir':'absent'};
+    const activeBtn = document.getElementById('flt-' + activeBtnMap[status]);
+    if(activeBtn) activeBtn.className = 'px-2.5 py-1 rounded-lg bg-brand-500 text-white font-medium shrink-0 transition-all';
+    
+    renderLog();
+}
+
+function renderLog() {
+    const box = document.getElementById('recent-log');
+    const empty = document.getElementById('log-empty');
+    
+    const filtered = currentFilter === 'all' ? hadirList : hadirList.filter(h => String(h['Status']||'').toLowerCase() === currentFilter);
+    
+    if(!filtered.length){
+        box.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+    
+    box.innerHTML = filtered.slice(0, 30).map(h => {
+        const nama = h['Nama']||'-', id = h['ID']||'', status = h['Status']||'on time', waktu = h.Timestamp||'-';
+        const badgeColor = status === 'on time' ? 'bg-ok-50 text-ok-600' : (status === 'in time' ? 'bg-brand-50 text-brand-600' : (status === 'terlambat' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-600'));
+        return `
+        <div class="log-in flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-slate-100">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1">
+                    <span class="text-xs font-medium text-slate-800 truncate">${esc(nama)}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded ${badgeColor} font-bold">${esc(status)}</span>
+                </div>
+                <div class="text-[10px] text-slate-400">ID: ${esc(id)}</div>
+            </div>
+            <div class="text-[9px] text-slate-400 shrink-0 text-right">${esc(waktu)}</div>
+        </div>`;
+    }).join('');
+}
+
+function updateRekap() {
+    let ontime = 0, intime = 0, terlambat = 0, tidakHadir = 0;
+    hadirList.forEach(h => {
+        const s = String(h['Status']||'').toLowerCase();
+        if(s === 'on time') ontime++;
+        else if(s === 'in time') intime++;
+        else if(s === 'terlambat') terlambat++;
+        else if(s === 'tidak hadir') tidakHadir++;
+    });
+    document.getElementById('rekap-ontime').textContent = ontime;
+    document.getElementById('rekap-intime').textContent = intime;
+    document.getElementById('rekap-terlambat').textContent = terlambat;
+    document.getElementById('rekap-tidakhadir').textContent = tidakHadir;
+}
+
+function handleSearch(q) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => renderSearchResults(q.trim()), 150);
+}
+
+function renderSearchResults(q) {
+    const box = document.getElementById('search-results'), cnt = document.getElementById('search-count');
+    if(!q){cnt.classList.add('hidden');box.innerHTML='';return;}
+    const ql = q.toLowerCase();
+    const res = allPeserta.filter(p => ['ID','Nama','Jabatan'].some(f => String(p[f]||'').toLowerCase().includes(ql)));
+    cnt.classList.remove('hidden'); cnt.textContent = res.length + ' hasil';
+    if(!res.length){box.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs">Tidak ditemukan</div>`;return;}
+    
+    box.innerHTML = res.slice(0, 25).map(p => {
+        const id = String(p['ID']||'').trim();
+        const hadir = hadirMap[id] !== undefined && hadirMap[id]['Status'] !== 'tidak hadir';
+        return `
+        <div class="card px-3 py-2 cursor-pointer ${hadir?'border-l-[3px] border-l-ok-500':''}" onclick="doCheckin(allPeserta.find(x=>String(x['ID'])==='${esc(id)}'))">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="font-semibold text-slate-800 text-xs">${esc(p['Nama'])}</div>
+                    <div class="text-[10px] text-slate-400">ID: ${esc(id)} &middot; ${esc(p['Jabatan']||'-')}</div>
+                </div>
+                ${hadir?'<span class="text-[9px] bg-ok-50 text-ok-600 px-1.5 py-0.5 rounded font-medium">Hadir</span>':'<span class="text-[9px] bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded">Absenkan</span>'}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function switchTab(tab) {
+    ['log', 'rekap', 'search'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+        document.getElementById('tab-' + t).classList.toggle('text-slate-400', t !== tab);
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+    });
+    if(tab === 'search') document.getElementById('search-input').focus();
+    else document.getElementById('scan-input').focus();
+}
+
+function updateStats() {
+    const total = allPeserta.length;
+    const hadirSet = new Set();
+    Object.keys(hadirMap).forEach(k => {
+        if(hadirMap[k]['Status'] !== 'tidak hadir') hadirSet.add(k);
+    });
+    const hadir = hadirSet.size, belum = Math.max(0, total - hadir);
+    const pct = total > 0 ? Math.round((hadir / total) * 100) : 0;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-hadir').textContent = hadir;
+    document.getElementById('stat-belum').textContent = belum;
+    document.getElementById('stat-persen').textContent = pct + '%';
+    document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function toast(msg, type='info') {
+    const box = document.getElementById('toast-box');
+    const el = document.createElement('div');
+    el.className = `toast-in border rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-2 shadow-lg max-w-sm w-full bg-white`;
+    el.innerHTML = `<span>${esc(msg)}</span>`;
+    box.appendChild(el);
+    setTimeout(() => { el.remove(); }, 2500);
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Auto-refocus ke input scan
+document.addEventListener('click', (e) => {
+    const si = document.getElementById('scan-input');
+    if(!si) return;
+    if(e.target.id === 'search-input' || e.target.closest('#panel-search') || e.target.closest('#panel-rekap')) return;
+    if(e.target.closest('button') || e.target.closest('a')) return;
+    si.focus();
+});
+</script>
+</body>
+</html>
