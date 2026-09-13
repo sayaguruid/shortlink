@@ -90,14 +90,16 @@
         <p class="text-brand-500 font-semibold text-xs">Konsolidasi Organisasi</p>
     </header>
 
-    <!-- Pengaturan Waktu Absen -->
-    <div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
-        <div>
-            <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
-            <span class="text-slate-400 text-[10px]">Patokan: on time, in time, terlambat</span>
-        </div>
-        <input type="time" id="target-time" value="08:00" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-sm focus:border-brand-500">
+<!-- Pengaturan Waktu Absen Terpusat -->
+<div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
+    <div>
+        <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
+        <span class="text-slate-400 text-[10px]" id="config-status-label">Sinkron dari Cloud</span>
     </div>
+    <div class="flex items-center gap-1.5">
+        <input type="time" id="target-time" value="08:00" onchange="konfirmasiUbahWaktu(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-sm focus:border-brand-500">
+    </div>
+</div>
 
     <!-- Statistik Ringkas -->
     <div class="grid grid-cols-4 gap-2 mb-2">
@@ -569,7 +571,51 @@ function toast(msg, type='info') {
 }
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+// Ambil konfigurasi jam dari server saat aplikasi dimuat
+async function loadConfig() {
+    try {
+        const res = await fetch(`${API_URL}?action=getConfig`);
+        const r = await res.json();
+        if(r.status === 'success') {
+            document.getElementById('target-time').value = r.targetTime;
+            if(r.isLocked) {
+                document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
+            }
+        }
+    } catch(e) { console.error(e); }
+}
 
+// Fungsi konfirmasi saat perangkat lain ingin mengubah waktu
+async function konfirmasiUbahWaktu(newTime) {
+    const pin = prompt("Pengaturan waktu sudah terkunci/disinkronkan.\nMasukkan PIN Admin untuk mengubah jam:");
+    if (!pin) {
+        loadConfig(); // Kembalikan ke nilai semula jika dibatalkan
+        return;
+    }
+
+    try {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'saveConfig',
+                targetTime: newTime,
+                pin: pin
+            })
+        });
+        const r = await res.json();
+        if(r.status === 'success') {
+            toast('Jam berhasil diubah & disinkronkan ke semua device!', 'success');
+            document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
+        } else {
+            alert(r.message || "PIN Salah!");
+            loadConfig(); // Kembalikan nilai ke server
+        }
+    } catch(e) {
+        toast('Gagal menyimpan pengaturan waktu', 'error');
+        loadConfig();
+    }
+}
 // Auto-refocus ke input scan
 document.addEventListener('click', (e) => {
     const si = document.getElementById('scan-input');
