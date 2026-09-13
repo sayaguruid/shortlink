@@ -90,16 +90,16 @@
         <p class="text-brand-500 font-semibold text-xs">Konsolidasi Organisasi</p>
     </header>
 
-<!-- Pengaturan Waktu Absen Terpusat -->
-<div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
-    <div>
-        <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
-        <span class="text-slate-400 text-[10px]" id="config-status-label">Sinkron dari Cloud</span>
+    <!-- Pengaturan Waktu Absen Terpusat -->
+    <div class="bg-white rounded-xl p-2.5 mb-2.5 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
+        <div>
+            <span class="font-bold text-slate-700 block">Jam Terakhir / Acara Mulai</span>
+            <span class="text-slate-400 text-[10px]" id="config-status-label">Sinkron dari Cloud</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <input type="time" id="target-time" value="08:00" onchange="konfirmasiUbahWaktu(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-sm focus:border-brand-500">
+        </div>
     </div>
-    <div class="flex items-center gap-1.5">
-        <input type="time" id="target-time" value="08:00" onchange="konfirmasiUbahWaktu(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-sm focus:border-brand-500">
-    </div>
-</div>
 
     <!-- Statistik Ringkas -->
     <div class="grid grid-cols-4 gap-2 mb-2">
@@ -250,22 +250,66 @@ let processing = false;
 let searchTimer = null;
 let autoDetectTimer = null;
 let currentFilter = 'all';
-const AUTO_DETECT_DELAY = 300; // Dipercepat agar pembacaan scanner lebih responsif
+const AUTO_DETECT_DELAY = 300;
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (API_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
-        document.querySelector('main').innerHTML = `
-            <div class="text-center py-16">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-50 text-brand-500 mb-3"><i class="fas fa-cog text-xl"></i></div>
-                <h2 class="font-display text-lg font-bold text-slate-900 mb-1">Konfigurasi Diperlukan</h2>
-                <p class="text-slate-500 text-xs max-w-xs mx-auto">Ganti <code class="bg-slate-100 px-1 py-0.5 rounded text-brand-500">MASUKKAN_URL_WEB_APP_ANDA_DISINI</code> dengan URL Web App Anda.</p>
-            </div>`;
-        return;
-    }
     html5Qr = new Html5Qrcode('reader');
-    loadData();
+    
+    // Sinkronisasi jam dari Cloud terlebih dahulu, kemudian muat data peserta
+    loadConfig().then(() => {
+        loadData();
+    });
+
     setTimeout(() => document.getElementById('scan-input').focus(), 300);
 });
+
+// Ambil konfigurasi jam dari server saat aplikasi dimuat
+async function loadConfig() {
+    try {
+        const res = await fetch(`${API_URL}?action=getConfig`);
+        const r = await res.json();
+        if(r.status === 'success') {
+            document.getElementById('target-time').value = r.targetTime;
+            if(r.isLocked) {
+                document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
+            }
+        }
+    } catch(e) { 
+        console.error(e); 
+    }
+}
+
+// Fungsi konfirmasi saat perangkat ingin mengubah waktu
+async function konfirmasiUbahWaktu(newTime) {
+    const pin = prompt("Pengaturan waktu sudah terkunci/disinkronkan.\nMasukkan PIN Admin untuk mengubah jam:");
+    if (!pin) {
+        loadConfig(); // Kembalikan ke nilai semula dari server jika dibatalkan
+        return;
+    }
+
+    try {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'saveConfig',
+                targetTime: newTime,
+                pin: pin
+            })
+        });
+        const r = await res.json();
+        if(r.status === 'success') {
+            toast('Jam berhasil diubah & disinkronkan ke semua device!', 'success');
+            document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
+        } else {
+            alert(r.message || "PIN Salah!");
+            loadConfig(); // Kembalikan nilai ke server jika PIN salah
+        }
+    } catch(e) {
+        toast('Gagal menyimpan pengaturan waktu', 'error');
+        loadConfig();
+    }
+}
 
 async function loadData() {
     try {
@@ -339,11 +383,9 @@ function handleScanInput() {
     clearTimeout(autoDetectTimer);
     const val = document.getElementById('scan-input').value.trim();
     if (!val) return;
-    // Auto-detect cepat 300ms untuk scanner tanpa enter
     autoDetectTimer = setTimeout(() => { processScan(); }, AUTO_DETECT_DELAY);
 }
 
-// Proses pembacaan cepat & langsung auto check-in
 function processScan() {
     const input = document.getElementById('scan-input');
     const code = input.value.trim();
@@ -352,7 +394,6 @@ function processScan() {
     processing = true;
     setScanStatus('processing');
     
-    // Pencarian instan di memori lokal (tanpa delay network)
     const person = allPeserta.find(p => String(p['ID']||'').trim() === code || String(p['No HP']||'').trim() === code);
 
     if (!person) {
@@ -381,7 +422,6 @@ async function doCheckin(person) {
     const id = String(person['ID']||'').trim();
     const ts = new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
     
-    // Optimistic UI update (update langsung tampilan tanpa menunggu respons server agar terasa instan)
     const entry = {Timestamp: ts, ID: id, Nama: person['Nama']||'-', Jabatan: person['Jabatan']||'-', Status: statusKehadiran};
     hadirMap[id] = entry;
     hadirList.unshift(entry);
@@ -393,7 +433,6 @@ async function doCheckin(person) {
     input.value = '';
     setTimeout(() => { input.focus(); setScanStatus('idle'); processing = false; }, 600);
 
-    // Kirim data ke Google Sheets di background
     try {
         fetch(API_URL, {
             method: 'POST',
@@ -571,52 +610,7 @@ function toast(msg, type='info') {
 }
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-// Ambil konfigurasi jam dari server saat aplikasi dimuat
-async function loadConfig() {
-    try {
-        const res = await fetch(`${API_URL}?action=getConfig`);
-        const r = await res.json();
-        if(r.status === 'success') {
-            document.getElementById('target-time').value = r.targetTime;
-            if(r.isLocked) {
-                document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
-            }
-        }
-    } catch(e) { console.error(e); }
-}
 
-// Fungsi konfirmasi saat perangkat lain ingin mengubah waktu
-async function konfirmasiUbahWaktu(newTime) {
-    const pin = prompt("Pengaturan waktu sudah terkunci/disinkronkan.\nMasukkan PIN Admin untuk mengubah jam:");
-    if (!pin) {
-        loadConfig(); // Kembalikan ke nilai semula jika dibatalkan
-        return;
-    }
-
-    try {
-        const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                action: 'saveConfig',
-                targetTime: newTime,
-                pin: pin
-            })
-        });
-        const r = await res.json();
-        if(r.status === 'success') {
-            toast('Jam berhasil diubah & disinkronkan ke semua device!', 'success');
-            document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
-        } else {
-            alert(r.message || "PIN Salah!");
-            loadConfig(); // Kembalikan nilai ke server
-        }
-    } catch(e) {
-        toast('Gagal menyimpan pengaturan waktu', 'error');
-        loadConfig();
-    }
-}
-// Auto-refocus ke input scan
 document.addEventListener('click', (e) => {
     const si = document.getElementById('scan-input');
     if(!si) return;
