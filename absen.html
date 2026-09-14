@@ -6,7 +6,7 @@
     <title>Daftar Hadir — Konsolidasi Organisasi</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="preconnect" href="https://script.google.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
@@ -45,17 +45,12 @@
         .scan-field.s-error{box-shadow:0 0 0 3px rgba(239,68,68,.2);border-color:#EF4444}
         .scan-field.s-warning{box-shadow:0 0 0 3px rgba(245,158,11,.2);border-color:#F59E0B}
         .card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;transition:all .2s}
-        .id-chip{font-family:'DM Sans',monospace;font-weight:700;letter-spacing:.05em}
         .result-panel{transition:all .3s cubic-bezier(.4,0,.2,1);max-height:0;opacity:0;overflow:hidden}
         .result-panel.show{max-height:500px;opacity:1}
-        .flash-ok{animation:flashOk .5s ease}
-        @keyframes flashOk{0%{background:#D1FAE5}100%{background:transparent}}
-        .flash-err{animation:flashErr .5s ease}
-        @keyframes flashErr{0%{background:#FEE2E2}100%{background:transparent}}
-        .toast-in{animation:tIn .3s ease}
+        .toast-in{animation:tIn .3s cubic-bezier(.34,1.56,.64,1)}
         .toast-out{animation:tOut .2s ease forwards}
-        @keyframes tIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes tOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+        @keyframes tIn{from{opacity:0;transform:scale(.8) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        @keyframes tOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.9)}}
         .log-in{animation:lIn .25s ease}
         @keyframes lIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
         .tab-btn{transition:all .2s;position:relative}
@@ -79,6 +74,14 @@
     </style>
 </head>
 <body>
+
+<!-- Loader awal -->
+<div id="loader" class="fixed inset-0 z-[70] bg-[#F8FAFC]/90 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
+    <div class="bg-white border border-slate-200 rounded-2xl px-6 py-4 shadow-xl flex items-center gap-3">
+        <i class="fas fa-circle-notch fa-spin text-brand-500 text-lg"></i>
+        <span class="text-sm font-semibold text-slate-700">Memuat data…</span>
+    </div>
+</div>
 
 <main class="max-w-lg mx-auto px-4 pt-4 pb-20">
 
@@ -121,8 +124,14 @@
         </div>
     </div>
 
-    <div class="w-full h-1.5 bg-slate-100 rounded-full mb-3 overflow-hidden">
+    <div class="w-full h-1.5 bg-slate-100 rounded-full mb-1.5 overflow-hidden">
         <div id="progress-bar" class="h-full bg-gradient-to-r from-brand-500 to-ok-500 rounded-full transition-all duration-500" style="width:0%"></div>
+    </div>
+
+    <!-- Indikator Live Sync -->
+    <div class="flex items-center justify-center gap-1.5 mb-3 text-[10px] text-slate-400">
+        <span id="sync-dot" class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+        <span id="sync-label">Menyambung ke cloud…</span>
     </div>
 
     <!-- Scan Barcode -->
@@ -208,7 +217,6 @@
                 <span class="font-bold text-slate-700">Pilih Tanggal Rekap:</span>
                 <input type="date" id="filter-rekap-date" onchange="updateRekap()" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-bold text-slate-800 text-xs focus:border-brand-500">
             </div>
-
             <div class="grid grid-cols-2 gap-2">
                 <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
                     <div id="rekap-ontime" class="text-lg font-bold text-ok-600">0</div>
@@ -244,13 +252,16 @@
 
 </main>
 
-<div id="toast-box" class="fixed top-3 left-3 right-3 z-[60] flex flex-col items-center gap-2 pointer-events-none"></div>
+<!-- Notifikasi melayang di TENGAH layar -->
+<div id="toast-box" class="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-2.5 pointer-events-none px-8"></div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyrX-228Q5twj4pdrEmdnmndk8EJ_1eOvvB2iccrof7sLACdjOGGYe-NikbM2KVQ1M/exec';
+const POLL_INTERVAL = 2000;      // cek perubahan tiap 2 detik (request SANGAT ringan)
+const FALLBACK_REFRESH = 60000;  // full refresh cadangan tiap 60 detik
 
 let allPeserta = [];
-let hadirMap = {};
+let hadirMap = {};         // kunci memakai idKey()
 let hadirList = [];
 let masterHadirData = [];
 let html5Qr = null;
@@ -259,44 +270,162 @@ let processing = false;
 let searchTimer = null;
 let autoDetectTimer = null;
 let currentFilter = 'all';
+let pendingCheckins = {};  // absensi lokal yang belum terkonfirmasi server
+let lastVersion = null;
+let lastConfigVersion = null;
+let dataLoading = false;
 const AUTO_DETECT_DELAY = 300;
 
+/* ==== UTIL ==== */
+function idKey(v) {
+    const s = String(v == null ? '' : v).trim();
+    if (/^\d+$/.test(s)) return 'n:' + String(parseInt(s, 10));
+    return 's:' + s;
+}
+
+// GET selalu dengan cache-buster agar respons tidak di-cache browser/proxy
+function apiGet(action) {
+    return fetch(`${API_URL}?action=${action}&_t=${Date.now()}`, { cache: 'no-store' })
+        .then(r => r.json());
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function localTimestampStr() {
+    const d = new Date();
+    return `${todayStr()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    html5Qr = new Html5Qrcode('reader');
-    
-    // Set default tanggal filter rekap ke hari ini (YYYY-MM-DD)
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('filter-rekap-date').value = today;
+    document.getElementById('filter-rekap-date').value = todayStr();
 
-    loadConfig().then(() => {
-        loadData();
-    });
+    // SATU request untuk semua data + konfigurasi -> load awal jauh lebih cepat
+    loadData();
 
-    // Auto-refresh data dari cloud setiap 10 detik agar selalu live di semua device
-    setInterval(loadData, 10000);
+    // Cek versi tiap 2 detik; hanya refresh penuh jika ADA perubahan
+    startPolling();
+
+    // Refresh cadangan (menangkap edit manual langsung di sheet)
+    setInterval(() => { if (!document.hidden) loadData(); }, FALLBACK_REFRESH);
+
+    // Langsung refresh saat tab dibuka kembali dari background
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadData(); });
 
     setTimeout(() => document.getElementById('scan-input').focus(), 300);
+    setTimeout(hideLoader, 12000); // jaga-jaga
 });
+
+/* ==== LIVE UPDATE: hanya refresh saat ada perubahan ==== */
+let pollTimer = null;
+function startPolling() {
+    if (pollTimer) clearTimeout(pollTimer);
+    pollTimer = setTimeout(async () => {
+        if (!document.hidden) {
+            try {
+                const r = await apiGet('check'); // endpoint super ringan
+                if (r.status === 'success') {
+                    if (!dataLoading) {
+                        if (lastVersion !== null && r.version !== lastVersion) loadData();
+                        else if (lastConfigVersion !== null && r.configVersion !== lastConfigVersion) loadData();
+                    }
+                    lastVersion = r.version;
+                    lastConfigVersion = r.configVersion;
+                    setSyncDot(true);
+                }
+            } catch (e) {
+                setSyncDot(false);
+            }
+        }
+        startPolling(); // jadwalkan cek berikutnya
+    }, POLL_INTERVAL);
+}
+
+function hideLoader() {
+    const l = document.getElementById('loader');
+    if (l && !l.dataset.done) {
+        l.dataset.done = '1';
+        l.style.opacity = '0';
+        setTimeout(() => l.remove(), 300);
+    }
+}
+
+async function loadData() {
+    if (dataLoading) return;
+    dataLoading = true;
+    try {
+        const r = await apiGet('all'); // 1 request: peserta + absensi + jam + versi
+        if (r.status !== 'success') throw new Error('respons tidak valid');
+
+        allPeserta = r.data || [];
+        masterHadirData = r.hadir || [];
+
+        // Tampilkan jam yang TERSIMPAN sebelumnya begitu aplikasi dibuka
+        if (r.targetTime) document.getElementById('target-time').value = r.targetTime;
+        document.getElementById('config-status-label').textContent =
+            r.isLocked ? "Terkunci (Tersinkronisasi)" : "Sinkron dari Cloud";
+
+        hadirMap = {};
+        hadirList = [];
+        const todayYYYYMMDD = todayStr();
+
+        masterHadirData.forEach(h => {
+            const ts = String(h['Timestamp']||'');
+            if (ts.startsWith(todayYYYYMMDD) || ts.includes(todayYYYYMMDD)) {
+                const idAsli = String(h['ID']||'').trim();
+                const status = String(h['Status']||'').trim().toLowerCase();
+                if (idAsli !== '') {
+    hadirMap[idKey(idAsli)] = h; // simpan semua status, termasuk "tidak hadir"
+}
+hadirList.push(h);
+            }
+        });
+
+        // Gabungkan absensi lokal yang baru di-scan (belum muncul di server)
+        Object.keys(pendingCheckins).forEach(k => {
+            const known = hadirMap[k];
+            if (known && String(known['Status']||'').toLowerCase() !== 'tidak hadir') {
+                delete pendingCheckins[k]; // sudah terkonfirmasi server
+            } else {
+                hadirMap[k] = pendingCheckins[k];
+                hadirList.push(pendingCheckins[k]);
+                masterHadirData.push(pendingCheckins[k]);
+            }
+        });
+
+        cekOtomatisTidakHadir();
+        hadirList.sort((a,b) => new Date(b.Timestamp||0) - new Date(a.Timestamp||0));
+        updateStats(); renderLog(); updateRekap();
+
+        lastVersion = r.version || lastVersion;
+        lastConfigVersion = r.configVersion || lastConfigVersion;
+        setSyncLabel(true);
+        hideLoader();
+    } catch (e) {
+        console.error(e);
+        setSyncLabel(false);
+        hideLoader();
+    } finally {
+        dataLoading = false;
+    }
+}
 
 async function loadConfig() {
     try {
-        const res = await fetch(`${API_URL}?action=getConfig`);
-        const r = await res.json();
-        if(r.status === 'success') {
+        const r = await apiGet('getConfig');
+        if (r.status === 'success') {
             document.getElementById('target-time').value = r.targetTime;
-            if(r.isLocked) {
-                document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
-            }
+            document.getElementById('config-status-label').textContent =
+                r.isLocked ? "Terkunci (Tersinkronisasi)" : "Sinkron dari Cloud";
         }
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
 }
 
 async function konfirmasiUbahWaktu(newTime) {
     const pin = prompt("Pengaturan waktu sudah terkunci/disinkronkan.\nMasukkan PIN Admin untuk mengubah jam:");
-    if (!pin) {
-        loadConfig();
-        return;
-    }
+    if (!pin) { loadConfig(); return; }
 
     try {
         const res = await fetch(API_URL, {
@@ -305,60 +434,22 @@ async function konfirmasiUbahWaktu(newTime) {
             body: JSON.stringify({ action: 'saveConfig', targetTime: newTime, pin: pin })
         });
         const r = await res.json();
-        if(r.status === 'success') {
+        if (r.status === 'success') {
             toast('Jam berhasil diubah & disinkronkan!', 'success');
-            document.getElementById('config-status-label').textContent = "Terkunci (Tersinkronisasi)";
+            // versi config naik -> semua device otomatis ikut berubah
         } else {
-            alert(r.message || "PIN Salah!");
+            toast(r.message || "PIN Salah!", 'error');
             loadConfig();
         }
-    } catch(e) {
+    } catch (e) {
         toast('Gagal menyimpan pengaturan waktu', 'error');
         loadConfig();
     }
 }
 
-async function loadData() {
-    try {
-        const [pRes, hRes] = await Promise.all([
-            fetch(`${API_URL}?action=data`).then(r => r.json()),
-            fetch(`${API_URL}?action=hadir`).then(r => r.json()).catch(() => ({data:[]}))
-        ]);
-        allPeserta = pRes.data || [];
-        masterHadirData = hRes.data || [];
-        
-        hadirMap = {}; 
-        hadirList = [];
-        
-        // Ambil tanggal hari ini dalam format standar universal "YYYY-MM-DD"
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const todayYYYYMMDD = `${yyyy}-${mm}-${dd}`;
-        
-        masterHadirData.forEach(h => {
-            const ts = String(h['Timestamp']||'');
-            // Cek apakah timestamp mengandung tanggal hari ini (cocok dengan format yyyy-mm-dd)
-            if (ts.startsWith(todayYYYYMMDD) || ts.includes(todayYYYYMMDD)) {
-                const kid = String(h['ID']||'').trim();
-                const status = String(h['Status']||'').trim();
-                if (kid && status !== 'tidak hadir') {
-                    hadirMap[kid] = h;
-                }
-                hadirList.push(h);
-            }
-        });
-        
-        cekOtomatisTidakHadir();
-        hadirList.sort((a,b) => new Date(b.Timestamp||0) - new Date(a.Timestamp||0));
-        updateStats(); renderLog(); updateRekap();
-    } catch(e) { console.error(e); }
-}
-
 function hitungStatusKehadiran() {
-    const targetTimeStr = document.getElementById('target-time').value; 
-    if (!targetTimeStr) return "on time";
+    const targetTimeStr = document.getElementById('target-time').value;
+    if (!targetTimeStr) return "in time";
 
     const [tHour, tMin] = targetTimeStr.split(':').map(Number);
     const now = new Date();
@@ -366,10 +457,10 @@ function hitungStatusKehadiran() {
     const targetMinutes = tHour * 60 + tMin;
     const diffMinutes = currentMinutes - targetMinutes;
 
-    if (diffMinutes <= 0) return "on time";
-    if (diffMinutes <= 30) return "in time";
-    if (diffMinutes <= 120) return "terlambat";
-    return "tidak hadir";
+    if (diffMinutes < 0)    return "in time";     // sebelum jam acara
+    if (diffMinutes === 0)  return "on time";     // tepat jam acara
+    if (diffMinutes <= 120) return "terlambat";   // s.d. 2 jam setelah jam acara
+    return "tidak hadir";                          // lebih dari 2 jam setelah jam acara
 }
 
 function cekOtomatisTidakHadir() {
@@ -382,10 +473,10 @@ function cekOtomatisTidakHadir() {
 
     if (currentMinutes - targetMinutes > 120) {
         allPeserta.forEach(p => {
-            const id = String(p['ID']||'').trim();
-            if (!hadirMap[id]) {
-                const entry = {Timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '), ID: id, Nama: p['Nama']||'-', Jabatan: p['Jabatan']||'-', Status: 'tidak hadir'};
-                if (id) hadirMap[id] = entry;
+            const id = String(p['ID'] == null ? '' : p['ID']).trim();
+            if (id !== '' && !hadirMap[idKey(id)]) {
+                const entry = {Timestamp: localTimestampStr(), ID: id, Nama: p['Nama']||'-', Jabatan: p['Jabatan']||'-', Status: 'tidak hadir'};
+                hadirMap[idKey(id)] = entry;
                 hadirList.push(entry);
             }
         });
@@ -413,23 +504,24 @@ function processScan() {
 
     processing = true;
     setScanStatus('processing');
-    
-    const person = allPeserta.find(p => String(p['ID']||'').trim() === code || String(p['No HP']||'').trim() === code);
+
+    const codeKey = idKey(code);
+    const person = allPeserta.find(p => idKey(p['ID']) === codeKey || idKey(p['No HP']) === codeKey);
 
     if (!person) {
         setScanStatus('error');
         toast(`Peserta tidak ditemukan: "${code}"`, 'error');
-        setTimeout(() => { input.value = ''; input.focus(); setScanStatus('idle'); processing = false; }, 1000);
+        setTimeout(() => { input.value=''; input.focus(); setScanStatus('idle'); processing = false; }, 1000);
         return;
     }
 
-    const id = String(person['ID']||'').trim();
-    const already = hadirMap[id] !== undefined && hadirMap[id]['Status'] !== 'tidak hadir';
+    const k = idKey(person['ID']);
+    const already = hadirMap[k] !== undefined && String(hadirMap[k]['Status']||'').toLowerCase() !== 'tidak hadir';
 
     if (already) {
         setScanStatus('warning');
         toast(`${person['Nama']} sudah tercatat hadir hari ini`, 'warning');
-        setTimeout(() => { input.value = ''; input.focus(); setScanStatus('idle'); processing = false; }, 1200);
+        setTimeout(() => { input.value=''; input.focus(); setScanStatus('idle'); processing = false; }, 1200);
         return;
     }
 
@@ -439,14 +531,16 @@ function processScan() {
 async function doCheckin(person) {
     const input = document.getElementById('scan-input');
     const statusKehadiran = hitungStatusKehadiran();
-    const id = String(person['ID']||'').trim();
-    const ts = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    
+    const id = String(person['ID'] == null ? '' : person['ID']).trim();
+    const k = idKey(id);
+    const ts = localTimestampStr();
+
     const entry = {Timestamp: ts, ID: id, Nama: person['Nama']||'-', Jabatan: person['Jabatan']||'-', Status: statusKehadiran};
-    hadirMap[id] = entry;
+    hadirMap[k] = entry;
     hadirList.unshift(entry);
     masterHadirData.unshift(entry);
-    
+    pendingCheckins[k] = entry;
+
     setScanStatus('success');
     toast(`${person['Nama']} (${statusKehadiran})`, 'success');
     updateStats(); renderLog(); updateRekap();
@@ -455,7 +549,7 @@ async function doCheckin(person) {
     setTimeout(() => { input.focus(); setScanStatus('idle'); processing = false; }, 600);
 
     try {
-        fetch(API_URL, {
+        const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
@@ -466,7 +560,18 @@ async function doCheckin(person) {
                 statusAbsen: statusKehadiran
             })
         });
-    } catch(e) { console.error(e); }
+        const r = await res.json();
+        if (r.status !== 'success') throw new Error(r.message || 'Gagal menyimpan');
+        loadData(); // konfirmasi cepat; device lain via version-polling
+    } catch (e) {
+        console.error(e);
+        delete pendingCheckins[k];
+        delete hadirMap[k];
+        hadirList = hadirList.filter(h => h !== entry);
+        masterHadirData = masterHadirData.filter(h => h !== entry);
+        toast('Gagal menyimpan ke server. Silakan scan ulang.', 'error');
+        updateStats(); renderLog(); updateRekap();
+    }
 }
 
 function setScanStatus(status) {
@@ -478,13 +583,28 @@ function setScanStatus(status) {
     else if(status === 'processing') wrap.classList.add('border-warn-400', 's-processing');
 }
 
+/* ==== KAMERA: library dimuat HANYA saat dibuka (load awal lebih ringan) ==== */
+function loadQrLibrary() {
+    return new Promise((resolve, reject) => {
+        if (window.Html5Qrcode) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Library scanner gagal dimuat'));
+        document.head.appendChild(s);
+    });
+}
+
 async function openCameraScanner() {
     if (cameraActive) return;
     try {
         document.getElementById('section-camera').classList.remove('hidden');
+        await loadQrLibrary();
+        if (!html5Qr) html5Qr = new Html5Qrcode('reader');
         await html5Qr.start({facingMode:'environment'},{fps:15,qrbox:{width:220,height:220},aspectRatio:1.0},onCameraScan,()=>{});
         cameraActive = true;
     } catch(e) {
+        cameraActive = false;
         document.getElementById('section-camera').classList.add('hidden');
         toast('Kamera tidak tersedia','error');
     }
@@ -492,7 +612,7 @@ async function openCameraScanner() {
 
 async function closeCameraScanner() {
     if(!cameraActive) return;
-    try{await html5Qr.stop();}catch(e){}
+    try{ if (html5Qr) await html5Qr.stop(); }catch(e){}
     cameraActive = false;
     document.getElementById('section-camera').classList.add('hidden');
     document.getElementById('scan-input').focus();
@@ -514,36 +634,37 @@ function filterLog(status) {
             btn.className = 'px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 shrink-0 transition-all';
         }
     });
-    
+
     const activeBtnMap = {'all':'all', 'on time':'ontime', 'in time':'intime', 'terlambat':'late', 'tidak hadir':'absent'};
     const activeBtn = document.getElementById('flt-' + activeBtnMap[status]);
     if(activeBtn) activeBtn.className = 'px-2.5 py-1 rounded-lg bg-brand-500 text-white font-medium shrink-0 transition-all';
-    
+
     renderLog();
 }
 
 function renderLog() {
     const box = document.getElementById('recent-log');
     const empty = document.getElementById('log-empty');
-    
+
     const filtered = currentFilter === 'all' ? hadirList : hadirList.filter(h => String(h['Status']||'').toLowerCase() === currentFilter);
-    
+
     if(!filtered.length){
         box.innerHTML = '';
         empty.classList.remove('hidden');
         return;
     }
     empty.classList.add('hidden');
-    
+
     box.innerHTML = filtered.slice(0, 30).map(h => {
-        const nama = h['Nama']||'-', id = h['ID']||'', status = h['Status']||'on time', waktu = h.Timestamp||'-';
-        const badgeColor = status === 'on time' ? 'bg-ok-50 text-ok-600' : (status === 'in time' ? 'bg-brand-50 text-brand-600' : (status === 'terlambat' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-600'));
+        const nama = h['Nama']||'-', id = h['ID']||'', waktu = h['Timestamp']||'-';
+        const st = String(h['Status']||'on time').toLowerCase();
+        const badgeColor = st === 'on time' ? 'bg-ok-50 text-ok-600' : (st === 'in time' ? 'bg-brand-50 text-brand-600' : (st === 'terlambat' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-600'));
         return `
         <div class="log-in flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-slate-100">
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1">
                     <span class="text-xs font-medium text-slate-800 truncate">${esc(nama)}</span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded ${badgeColor} font-bold">${esc(status)}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded ${badgeColor} font-bold">${esc(st)}</span>
                 </div>
                 <div class="text-[10px] text-slate-400">ID: ${esc(id)}</div>
             </div>
@@ -553,11 +674,11 @@ function renderLog() {
 }
 
 function updateRekap() {
-    const dateInput = document.getElementById('filter-rekap-date').value; // format "YYYY-MM-DD"
+    const dateInput = document.getElementById('filter-rekap-date').value;
     if (!dateInput) return;
 
     let ontime = 0, intime = 0, terlambat = 0, tidakHadir = 0;
-    
+
     masterHadirData.forEach(h => {
         const ts = String(h['Timestamp']||'');
         if (ts.startsWith(dateInput) || ts.includes(dateInput)) {
@@ -585,14 +706,16 @@ function renderSearchResults(q) {
     if(!q){cnt.classList.add('hidden');box.innerHTML='';return;}
     const ql = q.toLowerCase();
     const res = allPeserta.filter(p => ['ID','Nama','Jabatan'].some(f => String(p[f]||'').toLowerCase().includes(ql)));
-    cnt.classList.add('hidden'); cnt.textContent = res.length + ' hasil';
+    cnt.classList.remove('hidden'); cnt.textContent = res.length + ' hasil';
     if(!res.length){box.innerHTML=`<div class="text-center py-6 text-slate-400 text-xs">Tidak ditemukan</div>`;return;}
-    
+
     box.innerHTML = res.slice(0, 25).map(p => {
         const id = String(p['ID']||'').trim();
-        const hadir = hadirMap[id] !== undefined && hadirMap[id]['Status'] !== 'tidak hadir';
+        const hEntry = hadirMap[idKey(id)];
+        const hadir = hEntry !== undefined && String(hEntry['Status']||'').toLowerCase() !== 'tidak hadir';
+        const idx = allPeserta.indexOf(p);
         return `
-        <div class="card px-3 py-2 cursor-pointer ${hadir?'border-l-[3px] border-l-ok-500':''}" onclick="doCheckin(allPeserta.find(x=>String(x['ID'])==='${esc(id)}'))">
+        <div class="card px-3 py-2 cursor-pointer ${hadir?'border-l-[3px] border-l-ok-500':''}" onclick="doCheckin(allPeserta[${idx}])">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="font-semibold text-slate-800 text-xs">${esc(p['Nama'])}</div>
@@ -618,7 +741,7 @@ function updateStats() {
     const total = allPeserta.length;
     const hadirSet = new Set();
     Object.keys(hadirMap).forEach(k => {
-        if(hadirMap[k]['Status'] !== 'tidak hadir') hadirSet.add(k);
+        if(String(hadirMap[k]['Status']||'').toLowerCase() !== 'tidak hadir') hadirSet.add(k);
     });
     const hadir = hadirSet.size, belum = Math.max(0, total - hadir);
     const pct = total > 0 ? Math.round((hadir / total) * 100) : 0;
@@ -629,13 +752,48 @@ function updateStats() {
     document.getElementById('progress-bar').style.width = pct + '%';
 }
 
+/* ==== TOAST DI TENGAH LAYAR ==== */
 function toast(msg, type='info') {
     const box = document.getElementById('toast-box');
     const el = document.createElement('div');
-    el.className = `toast-in border rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-2 shadow-lg max-w-sm w-full bg-white`;
-    el.innerHTML = `<span>${esc(msg)}</span>`;
+    const map = {
+        success: { icon: 'fa-circle-check',        color: 'text-ok-500',    border: 'border-ok-400' },
+        error:   { icon: 'fa-circle-xmark',        color: 'text-err-500',   border: 'border-err-500' },
+        warning: { icon: 'fa-triangle-exclamation',color: 'text-warn-500',  border: 'border-warn-400' },
+        info:    { icon: 'fa-circle-info',         color: 'text-brand-500', border: 'border-brand-400' }
+    };
+    const c = map[type] || map.info;
+    el.className = `toast-in pointer-events-auto bg-white border-2 ${c.border} rounded-2xl px-5 py-3.5 shadow-2xl shadow-slate-900/20 flex items-center gap-3 max-w-sm`;
+    el.innerHTML = `<i class="fas ${c.icon} ${c.color} text-lg shrink-0"></i><span class="text-sm font-semibold text-slate-800 leading-snug">${esc(msg)}</span>`;
     box.appendChild(el);
-    setTimeout(() => { el.remove(); }, 2500);
+    setTimeout(() => {
+        el.classList.remove('toast-in');
+        el.classList.add('toast-out');
+        setTimeout(() => el.remove(), 200);
+    }, 2200);
+}
+
+function setSyncLabel(ok) {
+    const dot = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-label');
+    if (ok) {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-ok-500 animate-pulse';
+        label.textContent = 'Live · sinkron ' + new Date().toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+    } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-err-500';
+        label.textContent = 'Koneksi terputus — mencoba lagi…';
+    }
+}
+
+function setSyncDot(ok) {
+    const dot = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-label');
+    if (ok) {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-ok-500 animate-pulse';
+    } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-err-500';
+        label.textContent = 'Koneksi terputus — mencoba lagi…';
+    }
 }
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
