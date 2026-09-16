@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#1e3a8a">
+    <title>REALISASI BANTUAN PUSAT DAERAH GARUT KOTA TAHUN 2026</title>
+    <style>
+        :root {
+            --primary: #1e3a8a; --accent: #0d9488; --bg-color: #f1f5f9;
+            --card-bg: #ffffff; --text-main: #1e293b; --text-muted: #64748b;
+            --border-color: #cbd5e1; --success: #16a34a; --warning: #f59e0b; --danger: #dc2626;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Roboto, Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+        }
+        @media (min-width: 768px) { body { padding: 20px; } }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        @media (min-width: 768px) { .container { padding: 40px; } }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px double var(--primary);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+        @media (min-width: 480px) { .header h2 { font-size: 18px; } }
+        @media (min-width: 768px) { .header h2 { font-size: 22px; } }
+
+        .form-group { display: flex; flex-direction: column; margin-bottom: 14px; }
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--primary);
+        }
+        input[type="text"], select, textarea {
+            padding: 11px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+            background: #fff;
+            width: 100%;
+            font-family: inherit;
+        }
+        input:disabled, select:disabled { background: #f8fafc; color: #475569; font-weight: bold; }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(13,148,136,.15);
+        }
+        textarea { resize: vertical; min-height: 60px; }
+
+        .section-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        @media (min-width: 768px) { .section-box { padding: 24px; } }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 14px;
+            font-size: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .grid-2, .grid-3, .photo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .grid-3 { grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
+            .photo-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+        }
+
+        .photo-card {
+            background: #fff;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: border-color .2s, background-color .2s;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        @media (min-width: 600px) { .photo-card { min-height: 200px; } }
+        .photo-card:active { border-color: var(--accent); background: #f0fdf4; }
+        @media (hover: hover) {
+            .photo-card:hover { border-color: var(--accent); background: #f0fdf4; }
+        }
+        .photo-preview {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: none;
+            background: #f8fafc;
+        }
+        @media (min-width: 600px) { .photo-preview { height: 200px; } }
+        .photo-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            gap: 4px;
+        }
+        .photo-card input[type="file"] { display: none; }
+        .remove-photo-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(239,68,68,.92);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+            z-index: 10;
+            padding: 0;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        @media (min-width: 600px) {
+            .actions {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+
+        button {
+            padding: 13px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s, transform .1s;
+            font-family: inherit;
+            touch-action: manipulation;
+        }
+        button:active:not(:disabled) { transform: scale(.98); }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-sheet { background: var(--accent); color: #fff; }
+        .btn-sheet:hover:not(:disabled) { background: #0f766e; }
+        .btn-pdf { background: var(--primary); color: #fff; }
+        .btn-pdf:hover:not(:disabled) { background: #1e40af; }
+        .btn-pdf-all { background: var(--warning); color: #fff; }
+        .btn-pdf-all:hover:not(:disabled) { background: #d97706; }
+        .btn-reload { background: #475569; color: #fff; white-space: nowrap; padding: 11px 14px; font-size: 13px; }
+
+        .select-row { display: flex; gap: 8px; align-items: stretch; }
+        .select-row select { flex: 1; min-width: 0; }
+        @media (max-width: 400px) {
+            .select-row { flex-direction: column; }
+            .select-row .btn-reload { width: 100%; }
+        }
+
+        /* ============ POPUP NOTIFIKASI ============ */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+        .popup-overlay.show { display: flex; opacity: 1; }
+        .popup-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 22px 20px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+            transform: scale(.9);
+            transition: transform .25s cubic-bezier(.2,.8,.2,1.2);
+            border-top: 5px solid var(--success);
+        }
+        .popup-overlay.show .popup-box { transform: scale(1); }
+        .popup-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 34px;
+            color: #fff;
+            box-shadow: 0 8px 20px -4px rgba(22,163,74,.5);
+        }
+        .popup-box h3 {
+            margin: 0 0 8px;
+            color: var(--primary);
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .popup-box p {
+            margin: 0 0 18px;
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .popup-box .popup-btn {
+            background: var(--success);
+            color: #fff;
+            padding: 11px 24px;
+            width: 100%;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        .popup-box .popup-btn:hover { background: #15803d; }
+
+        .popup-box.error { border-top-color: var(--danger); }
+        .popup-box.error .popup-icon {
+            background: linear-gradient(135deg, #f87171, #dc2626);
+            box-shadow: 0 8px 20px -4px rgba(220,38,38,.5);
+        }
+        .popup-box.error .popup-btn { background: var(--danger); }
+        .popup-box.error .popup-btn:hover { background: #b91c1c; }
+
+        .popup-box.warning { border-top-color: var(--warning); }
+        .popup-box.warning .popup-icon {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 8px 20px -4px rgba(245,158,11,.5);
+        }
+        .popup-box.warning .popup-btn { background: var(--warning); }
+        .popup-box.warning .popup-btn:hover { background: #d97706; }
+
+        /* Stage PDF (off-screen) */
+        #pdf-stage {
+            position: fixed;
+            left: 0; top: 0;
+            width: 794px;
+            background: #fff;
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #pdf-stage .page {
+            width: 794px;
+            background: #fff;
+            padding: 40px 45px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            color: #000;
+        }
+/* Judul di PDF: dua baris, rata tengah, bold */
+#pdf-stage .judul {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1.45;
+    margin-bottom: 22px;
+}
+#pdf-stage .judul .baris1 {
+    display: block;
+}
+#pdf-stage .judul .baris2 {
+    display: block;
+}
+
+/* Baris identitas: Penerobos di baris 1, Bulan/Tahun di baris 2 */
+#pdf-stage .identitas {
+    font-size: 12.5px;
+    line-height: 1.85;
+    margin-bottom: 20px;
+}
+#pdf-stage .identitas .baris-penerobos {
+    margin-bottom: 2px;
+}
+#pdf-stage .identitas .baris-bulan {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+#pdf-stage .identitas .label {
+    display: inline-block;
+}
+#pdf-stage .identitas .dots {
+    letter-spacing: 1px;
+}
+        #pdf-stage table.blok {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+            page-break-inside: avoid;
+        }
+        #pdf-stage table.blok > tbody > tr > td {
+            border: 1px solid #000;
+            vertical-align: top;
+            padding: 12px 14px;
+        }
+        #pdf-stage table.blok > tbody > tr > td.kiri {
+            width: 55%;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+        #pdf-stage table.blok > tbody > tr > td.kanan {
+            width: 45%;
+            padding: 10px;
+        }
+        #pdf-stage table.detail {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        #pdf-stage table.detail td { vertical-align: top; padding: 2px 0; }
+        #pdf-stage .nama-blok { font-weight: bold; margin-bottom: 8px; }
+        #pdf-stage table.foto-wrap { width: 100%; border-collapse: collapse; }
+        #pdf-stage table.foto-wrap > tbody > tr > td {
+            width: 50%;
+            vertical-align: top;
+            padding: 6px;
+            text-align: center;
+        }
+        #pdf-stage .foto-label {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        #pdf-stage .foto-box {
+            border: 1.5px solid #000;
+            width: 100%;
+            height: 230px;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #pdf-stage .foto-box img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+        #pdf-stage .foto-kosong { color: #aaa; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="ui-container">
+    <div class="header">
+        <h2>REALISASI BANTUAN PUSAT<br>DAERAH GARUT KOTA TAHUN 2026</h2>
+    </div>
+
+    <form id="realisasiForm" autocomplete="off">
+        <input type="hidden" id="idKelompok">
+
+        <div class="section-box">
+            <div class="section-title">Identitas Pelaksana</div>
+            <div class="form-group">
+                <label for="namaKelompok">Pilih Nama Kelompok:</label>
+                <div class="select-row">
+                    <select id="namaKelompok" onchange="isiDataOtomatis()" required disabled>
+                        <option value="">⏳ Sedang memuat data...</option>
+                    </select>
+                    <button type="button" class="btn-reload" id="btnReload" onclick="muatData(true)">Muat Ulang</button>
+                </div>
+                <small id="loadStatus" style="color:var(--text-muted); margin-top:6px; display:block;">Menghubungkan ke server...</small>
+                <div id="retryBox" style="display:none; margin-top:8px;">
+                    <button type="button" onclick="muatData(true)" style="background:var(--primary); color:#fff; padding:8px 14px; font-size:13px; border-radius:6px;">🔄 Coba Lagi</button>
+                </div>
+            </div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="namaPenerobos">Nama Penerobos:</label>
+                    <input type="text" id="namaPenerobos" placeholder="Terisi otomatis..." disabled>
+                </div>
+                <div class="form-group">
+                    <label for="bulan">Bulan:</label>
+                    <select id="bulan">
+                        <option value="">-- Pilih --</option>
+                        <option>Januari</option><option>Februari</option><option>Maret</option>
+                        <option>April</option><option>Mei</option><option>Juni</option>
+                        <option>Juli</option><option>Agustus</option><option>September</option>
+                        <option>Oktober</option><option>November</option><option>Desember</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tahun">Tahun:</label>
+                    <input type="text" id="tahun" value="2026" inputmode="numeric">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Detail Bantuan & Penggunaan</div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Jumlah Bantuan Pusat (Rp):</label>
+                    <input type="text" id="jumlahBantuanPusat" placeholder="0" inputmode="numeric" oninput="applyFormatRupiah(this)">
+                </div>
+                <div class="form-group">
+                    <label>RAB (Rp):</label>
+                    <input type="text" id="rab" placeholder="0" inputmode="numeric" oninput="applyFormatRupiah(this)">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Jumlah Sodaqoh Jamaah (Rp):</label>
+                    <input type="text" id="jumlahSodaqohJamaah" placeholder="0" inputmode="numeric" oninput="applyFormatRupiah(this)">
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Sodaqoh Lainnya (Rp):</label>
+                    <input type="text" id="jumlahSodaqohLainnya" placeholder="0" inputmode="numeric" oninput="applyFormatRupiah(this)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Kegunaan / Realisasi:</label>
+                <textarea id="kegunaan" rows="3" placeholder="Uraikan rincian kegunaan..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Keterangan Tambahan:</label>
+                <input type="text" id="keterangan" placeholder="Kosongkan jika tidak ada">
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">Dokumentasi Foto Kegiatan</div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:0; margin-bottom:12px;">
+                Upload foto baru, atau biarkan jika foto lama yang sudah tampil tidak ingin diganti.
+            </p>
+            <div class="photo-grid">
+                <div class="photo-card" id="card1" onclick="triggerUpload('file1')">
+                    <button type="button" class="remove-photo-btn" onclick="removePhoto(event, 1)" title="Hapus Foto">×</button>
+                    <img id="preview1" class="photo-preview" crossorigin="anonymous" alt="">
+                    <div id="placeholder1" class="photo-placeholder">
+                        <span>📷 Foto 1</span>
+                        <small>Klik untuk Upload</small>
+                    </div>
+                    <input type="file" id="file1" accept="image/*" onchange="previewImage(event, 1)">
+                </div>
+                <div class="photo-card" id="card2" onclick="triggerUpload('file2')">
+                    <button type="button" class="remove-photo-btn" onclick="removePhoto(event, 2)" title="Hapus Foto">×</button>
+                    <img id="preview2" class="photo-preview" crossorigin="anonymous" alt="">
+                    <div id="placeholder2" class="photo-placeholder">
+                        <span>📷 Foto 2</span>
+                        <small>Klik untuk Upload</small>
+                    </div>
+                    <input type="file" id="file2" accept="image/*" onchange="previewImage(event, 2)">
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn-sheet" onclick="syncToSheet()" id="btnSubmit" disabled>Simpan Laporan</button>
+            <button type="button" class="btn-pdf" onclick="downloadSinglePDF()" id="btnPdf1">Download Laporan Ini</button>
+            <button type="button" class="btn-pdf-all" onclick="downloadAllPDF()" id="btnPdfAll"> Download Semua Data</button>
+        </div>
+    </form>
+</div>
+
+<!-- POPUP NOTIFIKASI -->
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this) closePopup()">
+    <div class="popup-box" id="popupBox">
+        <div class="popup-icon" id="popupIcon">✓</div>
+        <h3 id="popupTitle">Berhasil!</h3>
+        <p id="popupMessage">Data berhasil disimpan.</p>
+        <button type="button" class="popup-btn" onclick="closePopup()">OK, Alhamdulillah</button>
+    </div>
+</div>
+
+<!-- Stage khusus untuk render PDF -->
+<div id="pdf-stage"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    // ==========================================
+    // KONFIGURASI
+    // ==========================================
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTbtZANPkponsnNssxVI7RgARMUft4rTCqwI6gS4Y74cSGJR-bA0eKev_eKoIdLVs/exec";
+    const CACHE_KEY = 'laporanCache_v6';
+    const CACHE_TIME_KEY = 'laporanCacheTime_v6';
+    const CACHE_TTL = 5 * 60 * 1000; // 5 menit
+    const FETCH_TIMEOUT = 25000;     // 25 detik
+    const MAX_RETRY = 3;
+
+    let databaseLaporan = [];
+    let foto1Base64 = "";
+    let foto2Base64 = "";
+
+    // ==========================================
+    // POPUP NOTIFIKASI
+    // ==========================================
+    function showPopup(message, type = 'success', title) {
+        const overlay = document.getElementById('popupOverlay');
+        const box = document.getElementById('popupBox');
+        const icon = document.getElementById('popupIcon');
+        const ttl = document.getElementById('popupTitle');
+        const msg = document.getElementById('popupMessage');
+
+        box.classList.remove('error', 'warning');
+        if (type === 'error') {
+            box.classList.add('error');
+            icon.textContent = '✕';
+            ttl.textContent = title || 'Gagal!';
+        } else if (type === 'warning') {
+            box.classList.add('warning');
+            icon.textContent = '!';
+            ttl.textContent = title || 'Perhatian';
+        } else {
+            icon.textContent = '✓';
+            ttl.textContent = title || 'Berhasil!';
+        }
+        msg.textContent = message;
+        overlay.classList.add('show');
+    }
+    function closePopup() {
+        document.getElementById('popupOverlay').classList.remove('show');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+    // ==========================================
+    // MUAT DATA (CACHE + RETRY OTOMATIS)
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => muatData(false));
+
+    function setLoadStatus(text, color) {
+        const status = document.getElementById('loadStatus');
+        status.style.color = color || 'var(--text-muted)';
+        status.textContent = text;
+    }
+    function showRetryBtn(show) {
+        document.getElementById('retryBox').style.display = show ? 'block' : 'none';
+    }
+
+    async function muatData(forceReload = false, retryCount = 0) {
+        const select = document.getElementById('namaKelompok');
+        const btnReload = document.getElementById('btnReload');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        // --- Cek cache (hanya pada percobaan pertama) ---
+        if (!forceReload && retryCount === 0) {
+            try {
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                const cacheTime = parseInt(sessionStorage.getItem(CACHE_TIME_KEY) || '0');
+                if (cached && (Date.now() - cacheTime) < CACHE_TTL) {
+                    databaseLaporan = JSON.parse(cached);
+                    populateDropdown(databaseLaporan);
+                    setLoadStatus('✅ Data dimuat dari cache (' + databaseLaporan.length + ' kelompok).', '#059669');
+                    select.disabled = false;
+                    btnSubmit.disabled = false;
+                    btnReload.disabled = false;
+                    showRetryBtn(false);
+                    return;
+                }
+            } catch (e) { /* lanjut fetch */ }
+        }
+
+        // --- Set UI loading ---
+        select.disabled = true;
+        btnSubmit.disabled = true;
+        btnReload.disabled = true;
+        showRetryBtn(false);
+        const attemptInfo = retryCount > 0 ? ` (percobaan ${retryCount + 1}/${MAX_RETRY})` : '';
+        setLoadStatus('⏳ Menghubungkan ke server...' + attemptInfo, 'var(--text-muted)');
+        select.innerHTML = '<option value="">⏳ Sedang memuat data...</option>';
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+        try {
+            const res = await fetch(WEB_APP_URL + '?t=' + Date.now(), {
+                signal: controller.signal,
+                cache: 'no-store',
+                redirect: 'follow'
+            });
+            clearTimeout(timer);
+
+            // Deteksi redirect ke login Google
+            if (res.redirected && res.url.includes('accounts.google.com')) {
+                throw new Error('Web App belum di-deploy dengan akses "Anyone". Buka Deploy → Manage deployments → Who has access → Anyone → Deploy versi baru.');
+            }
+
+            const text = await res.text();
+            if (text.trim().startsWith('<')) {
+                throw new Error('Server mengembalikan HTML (bukan JSON). Pastikan Web App di-deploy dengan akses "Anyone".');
+            }
+
+            let data;
+            try { data = JSON.parse(text); }
+            catch (e) { throw new Error('Respons server bukan JSON valid. Pastikan URL diakhiri /exec.'); }
+
+            if (data && !Array.isArray(data) && data.error) {
+                throw new Error('Server error: ' + data.error);
+            }
+            if (!Array.isArray(data)) throw new Error('Struktur data tidak sesuai.');
+
+            databaseLaporan = data;
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+            } catch (e) { /* storage penuh */ }
+
+            populateDropdown(data);
+            setLoadStatus('✅ Data berhasil dimuat (' + data.length + ' kelompok).', '#059669');
+            select.disabled = false;
+            btnSubmit.disabled = false;
+        } catch (err) {
+            clearTimeout(timer);
+
+            // --- RETRY OTOMATIS ---
+            if (retryCount < MAX_RETRY - 1) {
+                setLoadStatus(`⚠️ Gagal, mencoba ulang (${retryCount + 2}/${MAX_RETRY})...`, 'var(--warning)');
+                await new Promise(r => setTimeout(r, 1500));
+                return muatData(true, retryCount + 1);
+            }
+
+            // --- GAGAL TOTAL ---
+            let pesan;
+            if (err.name === 'AbortError') {
+                pesan = `Koneksi timeout (${FETCH_TIMEOUT / 1000} detik). Periksa koneksi internet, lalu coba lagi.`;
+            } else if (err.message && err.message.includes('Failed to fetch')) {
+                pesan = 'Tidak dapat terhubung ke server. Cek koneksi internet atau matikan VPN/adblock.';
+            } else {
+                pesan = err.message || 'Terjadi kesalahan tidak diketahui.';
+            }
+
+            select.innerHTML = '<option value="">❌ Gagal memuat data</option>';
+            setLoadStatus('⚠️ ' + pesan, 'var(--danger)');
+            showRetryBtn(true);
+        } finally {
+            btnReload.disabled = false;
+        }
+    }
+
+    function populateDropdown(data) {
+        const select = document.getElementById('namaKelompok');
+        select.innerHTML = '<option value="">-- Pilih Nama Kelompok (' + data.length + ' kelompok) --</option>';
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.namaKelompok;
+            opt.textContent = item.namaKelompok;
+            select.appendChild(opt);
+        });
+    }
+
+    // ==========================================
+    // FOTO DRIVE
+    // ==========================================
+    function extractDriveId(url) {
+        if (!url) return null;
+        const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
+    }
+
+    function setFotoLama(id, driveUrl) {
+        const fileId = extractDriveId(driveUrl);
+        if (!fileId) return;
+        const urls = [
+            'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200',
+            'https://lh3.googleusercontent.com/d/' + fileId + '=w1200',
+            'https://drive.google.com/uc?export=view&id=' + fileId
+        ];
+        const img = document.getElementById('preview' + id);
+        const ph = document.getElementById('placeholder' + id);
+        const btnX = document.querySelector('#card' + id + ' .remove-photo-btn');
+        let idx = 0;
+        img.style.display = 'none';
+        ph.style.display = 'flex';
+        ph.innerHTML = '<span>⏳ Memuat foto...</span>';
+        img.onerror = function () {
+            idx++;
+            if (idx < urls.length) { img.src = urls[idx]; }
+            else {
+                ph.innerHTML = '<span>📷 Foto ' + id + '</span><small>Foto lama gagal dimuat</small>';
+                btnX.style.display = 'none';
+            }
+        };
+        img.onload = function () { img.style.display = 'block'; ph.style.display = 'none'; btnX.style.display = 'flex'; };
+        img.src = urls[0];
+    }
+
+    function resetPlaceholder(id) {
+        document.getElementById('placeholder' + id).innerHTML = '<span>📷 Foto ' + id + '</span><small>Klik untuk Upload</small>';
+    }
+
+    // ==========================================
+    // AUTO-FILL
+    // ==========================================
+    function isiDataOtomatis() {
+        const selectedKelompok = document.getElementById('namaKelompok').value;
+        const found = databaseLaporan.find(item => item.namaKelompok === selectedKelompok);
+
+        removePhoto(null, 1);
+        removePhoto(null, 2);
+
+        if (found) {
+            document.getElementById('idKelompok').value = found.id;
+            document.getElementById('namaPenerobos').value = found.namaPenerobos || '';
+            document.getElementById('bulan').value = found.bulan || '';
+            document.getElementById('tahun').value = found.tahun || "2026";
+            document.getElementById('kegunaan').value = found.kegunaan || '';
+            document.getElementById('keterangan').value = found.keterangan || '';
+            document.getElementById('jumlahBantuanPusat').value = formatUang(found.jumlahBantuanPusat);
+            document.getElementById('rab').value = formatUang(found.rab);
+            document.getElementById('jumlahSodaqohJamaah').value = formatUang(found.jumlahSodaqohJamaah);
+            document.getElementById('jumlahSodaqohLainnya').value = formatUang(found.jumlahSodaqohLainnya);
+            setFotoLama(1, found.foto1);
+            setFotoLama(2, found.foto2);
+        } else {
+            document.getElementById('idKelompok').value = '';
+            document.getElementById('namaPenerobos').value = '';
+            document.getElementById('bulan').value = '';
+            document.getElementById('tahun').value = '2026';
+            document.getElementById('kegunaan').value = '';
+            document.getElementById('keterangan').value = '';
+            ['jumlahBantuanPusat', 'rab', 'jumlahSodaqohJamaah', 'jumlahSodaqohLainnya'].forEach(x => document.getElementById(x).value = '');
+        }
+    }
+
+    // ==========================================
+    // FORMAT RUPIAH
+    // ==========================================
+    function formatUang(angka) {
+        if (!angka) return "";
+        const cleanAngka = angka.toString().replace(/[^0-9]/g, '');
+        if (!cleanAngka) return "";
+        const sisa = cleanAngka.length % 3;
+        let rupiah = cleanAngka.substr(0, sisa);
+        const ribuan = cleanAngka.substr(sisa).match(/\d{3}/gi);
+        if (ribuan) rupiah += (sisa ? '.' : '') + ribuan.join('.');
+        return 'Rp. ' + rupiah;
+    }
+    function applyFormatRupiah(input) { input.value = formatUang(input.value); }
+
+    // ==========================================
+    // FOTO UPLOAD LOKAL
+    // ==========================================
+    function triggerUpload(fileId) { document.getElementById(fileId).click(); }
+
+    function previewImage(event, id) {
+        event.stopPropagation();
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (id === 1) foto1Base64 = e.target.result;
+                if (id === 2) foto2Base64 = e.target.result;
+                const img = document.getElementById('preview' + id);
+                img.onload = function () {
+                    img.style.display = 'block';
+                    document.getElementById('placeholder' + id).style.display = 'none';
+                    document.querySelector('#card' + id + ' .remove-photo-btn').style.display = 'flex';
+                };
+                img.onerror = function () {
+                    showPopup('File gambar tidak dapat dibaca.', 'error', 'Gagal!');
+                    removePhoto(null, id);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removePhoto(event, id) {
+        if (event) event.stopPropagation();
+        if (id === 1) foto1Base64 = "";
+        if (id === 2) foto2Base64 = "";
+        document.getElementById('file' + id).value = '';
+        const img = document.getElementById('preview' + id);
+        img.onload = null; img.onerror = null; img.src = '';
+        img.style.display = 'none';
+        document.getElementById('placeholder' + id).style.display = 'flex';
+        document.querySelector('#card' + id + ' .remove-photo-btn').style.display = 'none';
+        resetPlaceholder(id);
+    }
+
+    // ==========================================
+    // SIMPAN KE SHEET
+    // ==========================================
+    async function syncToSheet() {
+        if (!document.getElementById('namaKelompok').value) {
+            showPopup('Pilih Nama Kelompok terlebih dahulu!', 'warning', 'Perhatian');
+            return;
+        }
+        const btn = document.getElementById('btnSubmit');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Sedang Menyimpan...";
+        btn.disabled = true;
+
+        const payload = {
+            id: document.getElementById('idKelompok').value,
+            bulan: document.getElementById('bulan').value,
+            tahun: document.getElementById('tahun').value,
+            namaPenerobos: document.getElementById('namaPenerobos').value,
+            namaKelompok: document.getElementById('namaKelompok').value,
+            jumlahBantuanPusat: document.getElementById('jumlahBantuanPusat').value,
+            kegunaan: document.getElementById('kegunaan').value,
+            rab: document.getElementById('rab').value,
+            jumlahSodaqohJamaah: document.getElementById('jumlahSodaqohJamaah').value,
+            jumlahSodaqohLainnya: document.getElementById('jumlahSodaqohLainnya').value,
+            keterangan: document.getElementById('keterangan').value,
+            foto1: foto1Base64,
+            foto2: foto2Base64
+        };
+
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 60000); // 60s untuk upload foto
+            const res = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+            clearTimeout(timer);
+
+            const text = await res.text();
+            let r;
+            try { r = JSON.parse(text); }
+            catch (e) { throw new Error('Respons server tidak valid.'); }
+            if (r.status === 'error') throw new Error(r.message);
+
+            showPopup(
+                'Data berhasil disimpan, Alhamdulilahi Jaza Kumullah Khoiro',
+                'success',
+                'Alhamdulillah!'
+            );
+
+            sessionStorage.removeItem(CACHE_KEY);
+            sessionStorage.removeItem(CACHE_TIME_KEY);
+
+            await muatData(true);
+            document.getElementById('namaKelompok').value = payload.namaKelompok;
+            isiDataOtomatis();
+        } catch (err) {
+            const msg = err.name === 'AbortError'
+                ? 'Timeout saat menyimpan. Foto mungkin terlalu besar atau koneksi lambat.'
+                : err.message;
+            showPopup('Gagal menyimpan: ' + msg, 'error', 'Gagal!');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = document.getElementById('namaKelompok').disabled;
+        }
+    }
+
+    // ==========================================
+    // MUAT FOTO → DATA URL (ANTI-CORS + LANDSCAPE RAPI)
+    // ==========================================
+    function loadFotoDataUrl(url) {
+        return new Promise(resolve => {
+            if (!url) return resolve(null);
+            const id = extractDriveId(url);
+            if (!id) {
+                return resolve(url.startsWith('data:') ? url : null);
+            }
+            const urls = [
+                'https://drive.google.com/thumbnail?id=' + id + '&sz=w800',
+                'https://lh3.googleusercontent.com/d/' + id + '=w800',
+                'https://drive.google.com/uc?export=view&id=' + id
+            ];
+            let idx = 0;
+            const tryNext = () => {
+                if (idx >= urls.length) return resolve(null);
+                const tmp = new Image();
+                tmp.crossOrigin = 'anonymous';
+                const to = setTimeout(() => { idx++; tryNext(); }, 8000);
+                tmp.onload = () => {
+                    clearTimeout(to);
+                    try {
+                        const w = tmp.naturalWidth, h = tmp.naturalHeight;
+                        if (!w || !h) { idx++; return tryNext(); }
+
+                        // Kotak PDF 3:4 portrait → foto landscape di-contain
+                        // sehingga muncul utuh dengan background putih di atas/bawah
+                        const BOX_W = 600, BOX_H = 800;
+                        const c = document.createElement('canvas');
+                        c.width = BOX_W;
+                        c.height = BOX_H;
+                        const ctx = c.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, BOX_W, BOX_H);
+
+                        const scale = Math.min(BOX_W / w, BOX_H / h);
+                        const drawW = Math.round(w * scale);
+                        const drawH = Math.round(h * scale);
+                        const dx = Math.round((BOX_W - drawW) / 2);
+                        const dy = Math.round((BOX_H - drawH) / 2);
+
+                        ctx.drawImage(tmp, 0, 0, w, h, dx, dy, drawW, drawH);
+                        resolve(c.toDataURL('image/jpeg', 0.85));
+                    } catch (e) { idx++; tryNext(); }
+                };
+                tmp.onerror = () => { clearTimeout(to); idx++; tryNext(); };
+                tmp.src = urls[idx];
+            };
+            tryNext();
+        });
+    }
+
+    // ==========================================
+    // FORMAT RUPIAH PDF
+    // ==========================================
+    function rp(v) {
+        const f = formatUang(v);
+        return f ? f + ',-' : 'Rp. ....................,-';
+    }
+
+    // ==========================================
+    // BUILD HTML UNTUK SATU HALAMAN (PDF)
+    // ==========================================
+// ==========================================
+// BUILD HTML UNTUK SATU HALAMAN (PDF)
+// ==========================================
+function buildPageHTML(headerItem, blokList) {
+    const blokHTMLStr = blokList.map(b => `
+        <table class="blok">
+            <tr>
+                <td class="kiri">
+                    <div class="nama-blok">${b.nomor}. ${b.item.namaKelompok || '................................................'}</div>
+                    <table class="detail">
+                        <tr>
+                            <td style="width:45%;">Bantuan dari pusat</td>
+                            <td style="width:4%;">:</td>
+                            <td><b>${rp(b.item.jumlahBantuanPusat)}</b></td>
+                        </tr>
+                        <tr>
+                            <td>Realisasi Kegunaan</td>
+                            <td>:</td>
+                            <td>${b.item.kegunaan || '...............'}</td>
+                        </tr>
+                        <tr><td colspan="3" style="height:8px;"></td></tr>
+                        <tr>
+                            <td>RAB</td>
+                            <td>:</td>
+                            <td>${rp(b.item.rab)}</td>
+                        </tr>
+                        <tr>
+                            <td>Shodakoh dari Jamaah</td>
+                            <td>:</td>
+                            <td>${rp(b.item.jumlahSodaqohJamaah)}</td>
+                        </tr>
+                        <tr>
+                            <td>Shodakoh Lainnya</td>
+                            <td>:</td>
+                            <td>${rp(b.item.jumlahSodaqohLainnya)}</td>
+                        </tr>
+                        ${b.item.keterangan ? `
+                        <tr><td colspan="3" style="height:8px;"></td></tr>
+                        <tr>
+                            <td>Keterangan</td>
+                            <td>:</td>
+                            <td>${b.item.keterangan}</td>
+                        </tr>` : ''}
+                    </table>
+                </td>
+                <td class="kanan">
+                    <table class="foto-wrap">
+                        <tr>
+                            <td>
+                                <div class="foto-label">Foto 1</div>
+                                <div class="foto-box">
+                                    ${b.f1 ? `<img src="${b.f1}">` : `<span class="foto-kosong">(kosong)</span>`}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="foto-label">Foto 2</div>
+                                <div class="foto-box">
+                                    ${b.f2 ? `<img src="${b.f2}">` : `<span class="foto-kosong">(kosong)</span>`}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    `).join('');
+
+    const tahun = headerItem.tahun || '2026';
+    const namaPenerobos = headerItem.namaPenerobos || '…………………………………………..';
+    const bulan = headerItem.bulan || '………………….';
+
+    return `
+        <div class="page">
+            <div class="judul">
+                <span class="baris1">REALISASI BANTUAN PUSAT</span>
+                <span class="baris2">DAERAH GARUT KOTA TAHUN ${tahun}.</span>
+            </div>
+            <div class="identitas">
+                <div class="baris-penerobos">
+                    <span class="label">Penerobos: </span><b>${namaPenerobos}</b>
+                </div>
+                <div class="baris-bulan">
+                    <span><span class="label">Bulan </span>: <b>${bulan}</b></span>
+                    <span><span class="label">Tahun </span>: <b>${tahun}</b></span>
+                </div>
+            </div>
+            ${blokHTMLStr}
+        </div>
+    `;
+}
+
+    // ==========================================
+    // RENDER PAGE → CANVAS
+    // ==========================================
+    async function renderPageToCanvas(pageHTML) {
+        const stage = document.getElementById('pdf-stage');
+        stage.innerHTML = pageHTML;
+
+        const imgs = stage.querySelectorAll('img');
+        await Promise.all(Array.from(imgs).map(img => {
+            if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+                setTimeout(resolve, 4000);
+            });
+        }));
+
+        await new Promise(r => setTimeout(r, 150));
+
+        const pageEl = stage.querySelector('.page');
+        const canvas = await html2canvas(pageEl, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: pageEl.scrollWidth,
+            height: pageEl.scrollHeight,
+            windowWidth: pageEl.scrollWidth,
+            windowHeight: pageEl.scrollHeight
+        });
+
+        stage.innerHTML = '';
+        return canvas;
+    }
+
+    // ==========================================
+    // PDF: LAPORAN INDIVIDU
+    // ==========================================
+    async function downloadSinglePDF() {
+        const kel = document.getElementById('namaKelompok').value;
+        if (!kel) {
+            showPopup('Pilih Kelompok terlebih dahulu!', 'warning', 'Perhatian');
+            return;
+        }
+
+        const btn = document.getElementById('btnPdf1');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "⏳ Menyiapkan PDF..."; btn.disabled = true;
+
+        try {
+            const p1 = document.getElementById('preview1');
+            const p2 = document.getElementById('preview2');
+            btn.innerHTML = "⏳ Memuat foto...";
+            const f1 = (p1.src && p1.style.display !== 'none') ? await loadFotoDataUrl(p1.src) : null;
+            const f2 = (p2.src && p2.style.display !== 'none') ? await loadFotoDataUrl(p2.src) : null;
+
+            const item = {
+                namaKelompok: kel,
+                namaPenerobos: document.getElementById('namaPenerobos').value,
+                bulan: document.getElementById('bulan').value,
+                tahun: document.getElementById('tahun').value,
+                jumlahBantuanPusat: document.getElementById('jumlahBantuanPusat').value,
+                rab: document.getElementById('rab').value,
+                jumlahSodaqohJamaah: document.getElementById('jumlahSodaqohJamaah').value,
+                jumlahSodaqohLainnya: document.getElementById('jumlahSodaqohLainnya').value,
+                kegunaan: document.getElementById('kegunaan').value,
+                keterangan: document.getElementById('keterangan').value
+            };
+
+            btn.innerHTML = "⏳ Merender halaman...";
+            const pageHTML = buildPageHTML(item, [{ nomor: 1, item, f1, f2 }]);
+            const canvas = await renderPageToCanvas(pageHTML);
+
+            btn.innerHTML = "⏳ Menyusun PDF...";
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            const imgRatio = canvas.width / canvas.height;
+            let drawW = pageW;
+            let drawH = drawW / imgRatio;
+            if (drawH > pageH) {
+                drawH = pageH;
+                drawW = drawH * imgRatio;
+            }
+            const offsetX = (pageW - drawW) / 2;
+
+            pdf.addImage(imgData, 'JPEG', offsetX, 0, drawW, drawH);
+            pdf.save(`Laporan_Realisasi_${kel}.pdf`);
+        } catch (err) {
+            showPopup('Gagal membuat PDF: ' + err.message, 'error', 'Gagal!');
+            console.error(err);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // ==========================================
+    // PDF: SEMUA DATA
+    // ==========================================
+    async function downloadAllPDF() {
+        if (databaseLaporan.length === 0) {
+            showPopup('Data masih kosong / belum dimuat!', 'warning', 'Perhatian');
+            return;
+        }
+
+        const btn = document.getElementById('btnPdfAll');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+
+        try {
+            const perPenerobos = {};
+            databaseLaporan.forEach(it => {
+                const key = (it.namaPenerobos || '-').toString().trim() || '-';
+                if (!perPenerobos[key]) perPenerobos[key] = [];
+                perPenerobos[key].push(it);
+            });
+
+            const semua = [];
+            Object.keys(perPenerobos).forEach(p => perPenerobos[p].forEach(it => semua.push(it)));
+            for (let i = 0; i < semua.length; i++) {
+                btn.innerHTML = `⏳ Memuat foto (${i + 1}/${semua.length})...`;
+                semua[i]._f1 = await loadFotoDataUrl(semua[i].foto1 || null);
+                semua[i]._f2 = await loadFotoDataUrl(semua[i].foto2 || null);
+            }
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            const keys = Object.keys(perPenerobos);
+            for (let i = 0; i < keys.length; i++) {
+                const p = keys[i];
+                const list = perPenerobos[p];
+                btn.innerHTML = `⏳ Render halaman (${i + 1}/${keys.length})...`;
+
+                const blokList = list.map((it, idx) => ({
+                    nomor: idx + 1,
+                    item: it,
+                    f1: it._f1,
+                    f2: it._f2
+                }));
+
+                const pageHTML = buildPageHTML(list[0], blokList);
+                const canvas = await renderPageToCanvas(pageHTML);
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                const imgRatio = canvas.width / canvas.height;
+                let drawW = pageW;
+                let drawH = drawW / imgRatio;
+                if (drawH > pageH) {
+                    drawH = pageH;
+                    drawW = drawH * imgRatio;
+                }
+                const offsetX = (pageW - drawW) / 2;
+
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', offsetX, 0, drawW, drawH);
+            }
+
+            btn.innerHTML = "⏳ Menyimpan PDF...";
+            pdf.save(`Realisasi_Bantuan_Pusat_Garut_Kota_2026.pdf`);
+        } catch (err) {
+            showPopup('Gagal membuat PDF: ' + err.message, 'error', 'Gagal!');
+            console.error(err);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
