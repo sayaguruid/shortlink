@@ -265,23 +265,18 @@
             font-size: 14px;
             border-radius: 8px;
         }
-        .popup-box .popup-btn:hover { background: #15803d; }
-
         .popup-box.error { border-top-color: var(--danger); }
         .popup-box.error .popup-icon {
             background: linear-gradient(135deg, #f87171, #dc2626);
             box-shadow: 0 8px 20px -4px rgba(220,38,38,.5);
         }
         .popup-box.error .popup-btn { background: var(--danger); }
-        .popup-box.error .popup-btn:hover { background: #b91c1c; }
-
         .popup-box.warning { border-top-color: var(--warning); }
         .popup-box.warning .popup-icon {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             box-shadow: 0 8px 20px -4px rgba(245,158,11,.5);
         }
         .popup-box.warning .popup-btn { background: var(--warning); }
-        .popup-box.warning .popup-btn:hover { background: #d97706; }
 
         /* Stage PDF (off-screen) */
         #pdf-stage {
@@ -301,41 +296,26 @@
             font-family: Arial, sans-serif;
             color: #000;
         }
-/* Judul di PDF: dua baris, rata tengah, bold */
-#pdf-stage .judul {
-    text-align: center;
-    font-size: 15px;
-    font-weight: bold;
-    line-height: 1.45;
-    margin-bottom: 22px;
-}
-#pdf-stage .judul .baris1 {
-    display: block;
-}
-#pdf-stage .judul .baris2 {
-    display: block;
-}
-
-/* Baris identitas: Penerobos di baris 1, Bulan/Tahun di baris 2 */
-#pdf-stage .identitas {
-    font-size: 12.5px;
-    line-height: 1.85;
-    margin-bottom: 20px;
-}
-#pdf-stage .identitas .baris-penerobos {
-    margin-bottom: 2px;
-}
-#pdf-stage .identitas .baris-bulan {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-}
-#pdf-stage .identitas .label {
-    display: inline-block;
-}
-#pdf-stage .identitas .dots {
-    letter-spacing: 1px;
-}
+        #pdf-stage .judul {
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.45;
+            margin-bottom: 22px;
+        }
+        #pdf-stage .judul .baris1 { display: block; }
+        #pdf-stage .judul .baris2 { display: block; }
+        #pdf-stage .identitas {
+            font-size: 12.5px;
+            line-height: 1.85;
+            margin-bottom: 20px;
+        }
+        #pdf-stage .identitas .baris-penerobos { margin-bottom: 2px; }
+        #pdf-stage .identitas .baris-bulan {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
         #pdf-stage table.blok {
             width: 100%;
             border-collapse: collapse;
@@ -394,6 +374,13 @@
             display: block;
         }
         #pdf-stage .foto-kosong { color: #aaa; font-size: 11px; }
+        #pdf-stage .page-lanjutan {
+            text-align: center;
+            font-size: 12px;
+            font-style: italic;
+            margin-bottom: 14px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -505,7 +492,7 @@
         <div class="actions">
             <button type="button" class="btn-sheet" onclick="syncToSheet()" id="btnSubmit" disabled>Simpan Laporan</button>
             <button type="button" class="btn-pdf" onclick="downloadSinglePDF()" id="btnPdf1">Download Laporan Ini</button>
-            <button type="button" class="btn-pdf-all" onclick="downloadAllPDF()" id="btnPdfAll"> Download Semua Data</button>
+            <button type="button" class="btn-pdf-all" onclick="downloadAllPDF()" id="btnPdfAll">Download Semua Data</button>
         </div>
     </form>
 </div>
@@ -520,28 +507,27 @@
     </div>
 </div>
 
-<!-- Stage khusus untuk render PDF -->
 <div id="pdf-stage"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-    // ==========================================
-    // KONFIGURASI
-    // ==========================================
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTbtZANPkponsnNssxVI7RgARMUft4rTCqwI6gS4Y74cSGJR-bA0eKev_eKoIdLVs/exec";
-    const CACHE_KEY = 'laporanCache_v6';
-    const CACHE_TIME_KEY = 'laporanCacheTime_v6';
-    const CACHE_TTL = 5 * 60 * 1000; // 5 menit
-    const FETCH_TIMEOUT = 25000;     // 25 detik
+    const CACHE_KEY = 'laporanCache_v7';
+    const CACHE_TIME_KEY = 'laporanCacheTime_v7';
+    const CACHE_TTL = 5 * 60 * 1000;
+    const FETCH_TIMEOUT = 25000;
     const MAX_RETRY = 3;
+
+    // Batas blok per halaman PDF (biar tidak overflow A4)
+    const BLOK_PER_HALAMAN = 3;
 
     let databaseLaporan = [];
     let foto1Base64 = "";
     let foto2Base64 = "";
 
     // ==========================================
-    // POPUP NOTIFIKASI
+    // POPUP
     // ==========================================
     function showPopup(message, type = 'success', title) {
         const overlay = document.getElementById('popupOverlay');
@@ -552,27 +538,20 @@
 
         box.classList.remove('error', 'warning');
         if (type === 'error') {
-            box.classList.add('error');
-            icon.textContent = '✕';
-            ttl.textContent = title || 'Gagal!';
+            box.classList.add('error'); icon.textContent = '✕'; ttl.textContent = title || 'Gagal!';
         } else if (type === 'warning') {
-            box.classList.add('warning');
-            icon.textContent = '!';
-            ttl.textContent = title || 'Perhatian';
+            box.classList.add('warning'); icon.textContent = '!'; ttl.textContent = title || 'Perhatian';
         } else {
-            icon.textContent = '✓';
-            ttl.textContent = title || 'Berhasil!';
+            icon.textContent = '✓'; ttl.textContent = title || 'Berhasil!';
         }
         msg.textContent = message;
         overlay.classList.add('show');
     }
-    function closePopup() {
-        document.getElementById('popupOverlay').classList.remove('show');
-    }
+    function closePopup() { document.getElementById('popupOverlay').classList.remove('show'); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 
     // ==========================================
-    // MUAT DATA (CACHE + RETRY OTOMATIS)
+    // MUAT DATA
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => muatData(false));
 
@@ -590,7 +569,6 @@
         const btnReload = document.getElementById('btnReload');
         const btnSubmit = document.getElementById('btnSubmit');
 
-        // --- Cek cache (hanya pada percobaan pertama) ---
         if (!forceReload && retryCount === 0) {
             try {
                 const cached = sessionStorage.getItem(CACHE_KEY);
@@ -599,22 +577,17 @@
                     databaseLaporan = JSON.parse(cached);
                     populateDropdown(databaseLaporan);
                     setLoadStatus('✅ Data dimuat dari cache (' + databaseLaporan.length + ' kelompok).', '#059669');
-                    select.disabled = false;
-                    btnSubmit.disabled = false;
-                    btnReload.disabled = false;
+                    select.disabled = false; btnSubmit.disabled = false; btnReload.disabled = false;
                     showRetryBtn(false);
                     return;
                 }
-            } catch (e) { /* lanjut fetch */ }
+            } catch (e) {}
         }
 
-        // --- Set UI loading ---
-        select.disabled = true;
-        btnSubmit.disabled = true;
-        btnReload.disabled = true;
+        select.disabled = true; btnSubmit.disabled = true; btnReload.disabled = true;
         showRetryBtn(false);
         const attemptInfo = retryCount > 0 ? ` (percobaan ${retryCount + 1}/${MAX_RETRY})` : '';
-        setLoadStatus('⏳ Menghubungkan ke server...' + attemptInfo, 'var(--text-muted)');
+        setLoadStatus('⏳ Menghubungkan ke server...' + attemptInfo);
         select.innerHTML = '<option value="">⏳ Sedang memuat data...</option>';
 
         const controller = new AbortController();
@@ -622,61 +595,42 @@
 
         try {
             const res = await fetch(WEB_APP_URL + '?t=' + Date.now(), {
-                signal: controller.signal,
-                cache: 'no-store',
-                redirect: 'follow'
+                signal: controller.signal, cache: 'no-store', redirect: 'follow'
             });
             clearTimeout(timer);
 
-            // Deteksi redirect ke login Google
             if (res.redirected && res.url.includes('accounts.google.com')) {
-                throw new Error('Web App belum di-deploy dengan akses "Anyone". Buka Deploy → Manage deployments → Who has access → Anyone → Deploy versi baru.');
+                throw new Error('Web App belum di-deploy dengan akses "Anyone".');
             }
-
             const text = await res.text();
             if (text.trim().startsWith('<')) {
-                throw new Error('Server mengembalikan HTML (bukan JSON). Pastikan Web App di-deploy dengan akses "Anyone".');
+                throw new Error('Server mengembalikan HTML. Pastikan deploy dengan akses "Anyone".');
             }
-
             let data;
             try { data = JSON.parse(text); }
-            catch (e) { throw new Error('Respons server bukan JSON valid. Pastikan URL diakhiri /exec.'); }
-
-            if (data && !Array.isArray(data) && data.error) {
-                throw new Error('Server error: ' + data.error);
-            }
+            catch (e) { throw new Error('Respons bukan JSON valid.'); }
+            if (data && !Array.isArray(data) && data.error) throw new Error('Server: ' + data.error);
             if (!Array.isArray(data)) throw new Error('Struktur data tidak sesuai.');
 
             databaseLaporan = data;
             try {
                 sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
                 sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-            } catch (e) { /* storage penuh */ }
+            } catch (e) {}
 
             populateDropdown(data);
             setLoadStatus('✅ Data berhasil dimuat (' + data.length + ' kelompok).', '#059669');
-            select.disabled = false;
-            btnSubmit.disabled = false;
+            select.disabled = false; btnSubmit.disabled = false;
         } catch (err) {
             clearTimeout(timer);
-
-            // --- RETRY OTOMATIS ---
             if (retryCount < MAX_RETRY - 1) {
                 setLoadStatus(`⚠️ Gagal, mencoba ulang (${retryCount + 2}/${MAX_RETRY})...`, 'var(--warning)');
                 await new Promise(r => setTimeout(r, 1500));
                 return muatData(true, retryCount + 1);
             }
-
-            // --- GAGAL TOTAL ---
-            let pesan;
-            if (err.name === 'AbortError') {
-                pesan = `Koneksi timeout (${FETCH_TIMEOUT / 1000} detik). Periksa koneksi internet, lalu coba lagi.`;
-            } else if (err.message && err.message.includes('Failed to fetch')) {
-                pesan = 'Tidak dapat terhubung ke server. Cek koneksi internet atau matikan VPN/adblock.';
-            } else {
-                pesan = err.message || 'Terjadi kesalahan tidak diketahui.';
-            }
-
+            let pesan = err.name === 'AbortError'
+                ? `Koneksi timeout (${FETCH_TIMEOUT / 1000}s). Periksa koneksi.`
+                : (err.message || 'Terjadi kesalahan.');
             select.innerHTML = '<option value="">❌ Gagal memuat data</option>';
             setLoadStatus('⚠️ ' + pesan, 'var(--danger)');
             showRetryBtn(true);
@@ -685,13 +639,18 @@
         }
     }
 
+    // ==========================================
+    // POPULATE DROPDOWN — PAKAI ID|NAMA SEBAGAI VALUE
+    // ==========================================
     function populateDropdown(data) {
         const select = document.getElementById('namaKelompok');
         select.innerHTML = '<option value="">-- Pilih Nama Kelompok (' + data.length + ' kelompok) --</option>';
         data.forEach(item => {
             const opt = document.createElement('option');
-            opt.value = item.namaKelompok;
-            opt.textContent = item.namaKelompok;
+            // value = "ID|namaKelompok" → unik meski nama sama
+            opt.value = item.id + '|' + item.namaKelompok;
+            // tampilkan: nama kelompok + (ID) kecil di belakang agar user bisa bedakan
+            opt.textContent = item.namaKelompok + '  [' + item.id + ']';
             select.appendChild(opt);
         });
     }
@@ -737,11 +696,19 @@
     }
 
     // ==========================================
-    // AUTO-FILL
+    // AUTO-FILL — CARI BERDASARKAN ID|NAMA
     // ==========================================
     function isiDataOtomatis() {
-        const selectedKelompok = document.getElementById('namaKelompok').value;
-        const found = databaseLaporan.find(item => item.namaKelompok === selectedKelompok);
+        const selectedValue = document.getElementById('namaKelompok').value;
+        if (!selectedValue) return;
+
+        const parts = selectedValue.split('|');
+        const id = parts[0];
+        const nama = parts.slice(1).join('|');
+
+        const found = databaseLaporan.find(item =>
+            String(item.id) === String(id) && item.namaKelompok === nama
+        );
 
         removePhoto(null, 1);
         removePhoto(null, 2);
@@ -786,7 +753,7 @@
     function applyFormatRupiah(input) { input.value = formatUang(input.value); }
 
     // ==========================================
-    // FOTO UPLOAD LOKAL
+    // FOTO UPLOAD
     // ==========================================
     function triggerUpload(fileId) { document.getElementById(fileId).click(); }
 
@@ -828,13 +795,17 @@
     }
 
     // ==========================================
-    // SIMPAN KE SHEET
+    // SIMPAN
     // ==========================================
     async function syncToSheet() {
-        if (!document.getElementById('namaKelompok').value) {
+        const sel = document.getElementById('namaKelompok').value;
+        if (!sel) {
             showPopup('Pilih Nama Kelompok terlebih dahulu!', 'warning', 'Perhatian');
             return;
         }
+        const parts = sel.split('|');
+        const namaKelompok = parts.slice(1).join('|');
+
         const btn = document.getElementById('btnSubmit');
         const originalText = btn.innerHTML;
         btn.innerHTML = "⏳ Sedang Menyimpan...";
@@ -845,7 +816,7 @@
             bulan: document.getElementById('bulan').value,
             tahun: document.getElementById('tahun').value,
             namaPenerobos: document.getElementById('namaPenerobos').value,
-            namaKelompok: document.getElementById('namaKelompok').value,
+            namaKelompok: namaKelompok,
             jumlahBantuanPusat: document.getElementById('jumlahBantuanPusat').value,
             kegunaan: document.getElementById('kegunaan').value,
             rab: document.getElementById('rab').value,
@@ -858,11 +829,9 @@
 
         try {
             const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 60000); // 60s untuk upload foto
+            const timer = setTimeout(() => controller.abort(), 60000);
             const res = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                signal: controller.signal
+                method: 'POST', body: JSON.stringify(payload), signal: controller.signal
             });
             clearTimeout(timer);
 
@@ -872,21 +841,17 @@
             catch (e) { throw new Error('Respons server tidak valid.'); }
             if (r.status === 'error') throw new Error(r.message);
 
-            showPopup(
-                'Data berhasil disimpan, Alhamdulilahi Jaza Kumullah Khoiro',
-                'success',
-                'Alhamdulillah!'
-            );
+            showPopup('Data berhasil disimpan, Alhamdulilahi Jaza Kumullah Khoiro', 'success', 'Alhamdulillah!');
 
             sessionStorage.removeItem(CACHE_KEY);
             sessionStorage.removeItem(CACHE_TIME_KEY);
 
             await muatData(true);
-            document.getElementById('namaKelompok').value = payload.namaKelompok;
+            document.getElementById('namaKelompok').value = sel;
             isiDataOtomatis();
         } catch (err) {
             const msg = err.name === 'AbortError'
-                ? 'Timeout saat menyimpan. Foto mungkin terlalu besar atau koneksi lambat.'
+                ? 'Timeout saat menyimpan. Cek koneksi atau perkecil ukuran foto.'
                 : err.message;
             showPopup('Gagal menyimpan: ' + msg, 'error', 'Gagal!');
         } finally {
@@ -896,15 +861,13 @@
     }
 
     // ==========================================
-    // MUAT FOTO → DATA URL (ANTI-CORS + LANDSCAPE RAPI)
+    // MUAT FOTO → DATA URL
     // ==========================================
     function loadFotoDataUrl(url) {
         return new Promise(resolve => {
             if (!url) return resolve(null);
             const id = extractDriveId(url);
-            if (!id) {
-                return resolve(url.startsWith('data:') ? url : null);
-            }
+            if (!id) return resolve(url.startsWith('data:') ? url : null);
             const urls = [
                 'https://drive.google.com/thumbnail?id=' + id + '&sz=w800',
                 'https://lh3.googleusercontent.com/d/' + id + '=w800',
@@ -921,23 +884,17 @@
                     try {
                         const w = tmp.naturalWidth, h = tmp.naturalHeight;
                         if (!w || !h) { idx++; return tryNext(); }
-
-                        // Kotak PDF 3:4 portrait → foto landscape di-contain
-                        // sehingga muncul utuh dengan background putih di atas/bawah
                         const BOX_W = 600, BOX_H = 800;
                         const c = document.createElement('canvas');
-                        c.width = BOX_W;
-                        c.height = BOX_H;
+                        c.width = BOX_W; c.height = BOX_H;
                         const ctx = c.getContext('2d');
                         ctx.fillStyle = '#ffffff';
                         ctx.fillRect(0, 0, BOX_W, BOX_H);
-
                         const scale = Math.min(BOX_W / w, BOX_H / h);
                         const drawW = Math.round(w * scale);
                         const drawH = Math.round(h * scale);
                         const dx = Math.round((BOX_W - drawW) / 2);
                         const dy = Math.round((BOX_H - drawH) / 2);
-
                         ctx.drawImage(tmp, 0, 0, w, h, dx, dy, drawW, drawH);
                         resolve(c.toDataURL('image/jpeg', 0.85));
                     } catch (e) { idx++; tryNext(); }
@@ -949,22 +906,16 @@
         });
     }
 
-    // ==========================================
-    // FORMAT RUPIAH PDF
-    // ==========================================
     function rp(v) {
         const f = formatUang(v);
         return f ? f + ',-' : 'Rp. ....................,-';
     }
 
     // ==========================================
-    // BUILD HTML UNTUK SATU HALAMAN (PDF)
+    // BUILD 1 BLOK HTML (dipakai di halaman)
     // ==========================================
-// ==========================================
-// BUILD HTML UNTUK SATU HALAMAN (PDF)
-// ==========================================
-function buildPageHTML(headerItem, blokList) {
-    const blokHTMLStr = blokList.map(b => `
+    function buildBlokHTML(b) {
+        return `
         <table class="blok">
             <tr>
                 <td class="kiri">
@@ -1024,15 +975,22 @@ function buildPageHTML(headerItem, blokList) {
                     </table>
                 </td>
             </tr>
-        </table>
-    `).join('');
+        </table>`;
+    }
 
-    const tahun = headerItem.tahun || '2026';
-    const namaPenerobos = headerItem.namaPenerobos || '…………………………………………..';
-    const bulan = headerItem.bulan || '………………….';
+    // ==========================================
+    // BUILD HALAMAN (dengan header & footer halaman)
+    // ==========================================
+    function buildHalamanHTML(headerItem, blokList, isLanjutan = false, nomorHalaman = 1) {
+        const blokHTMLStr = blokList.map(b => buildBlokHTML(b)).join('');
+        const tahun = headerItem.tahun || '2026';
+        const namaPenerobos = headerItem.namaPenerobos || '…………………………………………..';
+        const bulan = headerItem.bulan || '………………….';
 
-    return `
-        <div class="page">
+        // Halaman lanjutan: header lebih ringkas
+        const headerHTML = isLanjutan
+            ? `<div class="page-lanjutan">(Lanjutan) ${namaPenerobos} — Bulan: ${bulan} — Tahun: ${tahun}</div>`
+            : `
             <div class="judul">
                 <span class="baris1">REALISASI BANTUAN PUSAT</span>
                 <span class="baris2">DAERAH GARUT KOTA TAHUN ${tahun}.</span>
@@ -1045,19 +1003,33 @@ function buildPageHTML(headerItem, blokList) {
                     <span><span class="label">Bulan </span>: <b>${bulan}</b></span>
                     <span><span class="label">Tahun </span>: <b>${tahun}</b></span>
                 </div>
-            </div>
-            ${blokHTMLStr}
-        </div>
-    `;
-}
+            </div>`;
+
+        return `
+            <div class="page">
+                ${headerHTML}
+                ${blokHTMLStr}
+            </div>`;
+    }
 
     // ==========================================
-    // RENDER PAGE → CANVAS
+    // PECAH BLOK JADI BEBERAPA HALAMAN
+    // ==========================================
+    function pecahKeHalaman(headerItem, semuaBlok) {
+        const halaman = [];
+        for (let i = 0; i < semuaBlok.length; i += BLOK_PER_HALAMAN) {
+            halaman.push(semuaBlok.slice(i, i + BLOK_PER_HALAMAN));
+        }
+        if (halaman.length === 0) halaman.push([]);
+        return halaman;
+    }
+
+    // ==========================================
+    // RENDER 1 HALAMAN → CANVAS
     // ==========================================
     async function renderPageToCanvas(pageHTML) {
         const stage = document.getElementById('pdf-stage');
         stage.innerHTML = pageHTML;
-
         const imgs = stage.querySelectorAll('img');
         await Promise.all(Array.from(imgs).map(img => {
             if (img.complete && img.naturalWidth > 0) return Promise.resolve();
@@ -1067,35 +1039,48 @@ function buildPageHTML(headerItem, blokList) {
                 setTimeout(resolve, 4000);
             });
         }));
-
         await new Promise(r => setTimeout(r, 150));
 
         const pageEl = stage.querySelector('.page');
         const canvas = await html2canvas(pageEl, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: pageEl.scrollWidth,
-            height: pageEl.scrollHeight,
-            windowWidth: pageEl.scrollWidth,
-            windowHeight: pageEl.scrollHeight
+            scale: 2, useCORS: true, allowTaint: false,
+            backgroundColor: '#ffffff', logging: false,
+            width: pageEl.scrollWidth, height: pageEl.scrollHeight,
+            windowWidth: pageEl.scrollWidth, windowHeight: pageEl.scrollHeight
         });
-
         stage.innerHTML = '';
         return canvas;
+    }
+
+    // ==========================================
+    // TAMBAH CANVAS KE PDF A4 (MENGHORMATI RASIO)
+    // ==========================================
+    function addCanvasToPDF(pdf, canvas, isFirstPage) {
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgRatio = canvas.width / canvas.height;
+        let drawW = pageW;
+        let drawH = drawW / imgRatio;
+        if (drawH > pageH) {
+            drawH = pageH;
+            drawW = drawH * imgRatio;
+        }
+        const offsetX = (pageW - drawW) / 2;
+        if (!isFirstPage) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', offsetX, 0, drawW, drawH);
     }
 
     // ==========================================
     // PDF: LAPORAN INDIVIDU
     // ==========================================
     async function downloadSinglePDF() {
-        const kel = document.getElementById('namaKelompok').value;
-        if (!kel) {
+        const sel = document.getElementById('namaKelompok').value;
+        if (!sel) {
             showPopup('Pilih Kelompok terlebih dahulu!', 'warning', 'Perhatian');
             return;
         }
+        const namaKelompok = sel.split('|').slice(1).join('|');
 
         const btn = document.getElementById('btnPdf1');
         const originalText = btn.innerHTML;
@@ -1109,7 +1094,7 @@ function buildPageHTML(headerItem, blokList) {
             const f2 = (p2.src && p2.style.display !== 'none') ? await loadFotoDataUrl(p2.src) : null;
 
             const item = {
-                namaKelompok: kel,
+                namaKelompok: namaKelompok,
                 namaPenerobos: document.getElementById('namaPenerobos').value,
                 bulan: document.getElementById('bulan').value,
                 tahun: document.getElementById('tahun').value,
@@ -1121,29 +1106,22 @@ function buildPageHTML(headerItem, blokList) {
                 keterangan: document.getElementById('keterangan').value
             };
 
-            btn.innerHTML = "⏳ Merender halaman...";
-            const pageHTML = buildPageHTML(item, [{ nomor: 1, item, f1, f2 }]);
-            const canvas = await renderPageToCanvas(pageHTML);
+            const blok = [{ nomor: 1, item: item, f1: f1, f2: f2 }];
+            const halamanList = pecahKeHalaman(item, blok);
 
-            btn.innerHTML = "⏳ Menyusun PDF...";
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
-
-            const imgRatio = canvas.width / canvas.height;
-            let drawW = pageW;
-            let drawH = drawW / imgRatio;
-            if (drawH > pageH) {
-                drawH = pageH;
-                drawW = drawH * imgRatio;
+            for (let i = 0; i < halamanList.length; i++) {
+                btn.innerHTML = `⏳ Render halaman ${i + 1}/${halamanList.length}...`;
+                const isLanjutan = i > 0;
+                const html = buildHalamanHTML(item, halamanList[i], isLanjutan, i + 1);
+                const canvas = await renderPageToCanvas(html);
+                addCanvasToPDF(pdf, canvas, i === 0);
             }
-            const offsetX = (pageW - drawW) / 2;
 
-            pdf.addImage(imgData, 'JPEG', offsetX, 0, drawW, drawH);
-            pdf.save(`Laporan_Realisasi_${kel}.pdf`);
+            btn.innerHTML = "⏳ Menyimpan PDF...";
+            pdf.save(`Laporan_Realisasi_${namaKelompok}.pdf`);
         } catch (err) {
             showPopup('Gagal membuat PDF: ' + err.message, 'error', 'Gagal!');
             console.error(err);
@@ -1154,7 +1132,7 @@ function buildPageHTML(headerItem, blokList) {
     }
 
     // ==========================================
-    // PDF: SEMUA DATA
+    // PDF: SEMUA DATA (per Penerobos, multi-halaman)
     // ==========================================
     async function downloadAllPDF() {
         if (databaseLaporan.length === 0) {
@@ -1167,6 +1145,7 @@ function buildPageHTML(headerItem, blokList) {
         btn.disabled = true;
 
         try {
+            // Kelompokkan per Penerobos
             const perPenerobos = {};
             databaseLaporan.forEach(it => {
                 const key = (it.namaPenerobos || '-').toString().trim() || '-';
@@ -1174,6 +1153,7 @@ function buildPageHTML(headerItem, blokList) {
                 perPenerobos[key].push(it);
             });
 
+            // Muat semua foto
             const semua = [];
             Object.keys(perPenerobos).forEach(p => perPenerobos[p].forEach(it => semua.push(it)));
             for (let i = 0; i < semua.length; i++) {
@@ -1184,37 +1164,26 @@ function buildPageHTML(headerItem, blokList) {
 
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
 
             const keys = Object.keys(perPenerobos);
-            for (let i = 0; i < keys.length; i++) {
-                const p = keys[i];
+            let firstPage = true;
+
+            for (let pi = 0; pi < keys.length; pi++) {
+                const p = keys[pi];
                 const list = perPenerobos[p];
-                btn.innerHTML = `⏳ Render halaman (${i + 1}/${keys.length})...`;
-
                 const blokList = list.map((it, idx) => ({
-                    nomor: idx + 1,
-                    item: it,
-                    f1: it._f1,
-                    f2: it._f2
+                    nomor: idx + 1, item: it, f1: it._f1, f2: it._f2
                 }));
+                const halamanList = pecahKeHalaman(list[0], blokList);
 
-                const pageHTML = buildPageHTML(list[0], blokList);
-                const canvas = await renderPageToCanvas(pageHTML);
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-                const imgRatio = canvas.width / canvas.height;
-                let drawW = pageW;
-                let drawH = drawW / imgRatio;
-                if (drawH > pageH) {
-                    drawH = pageH;
-                    drawW = drawH * imgRatio;
+                for (let hi = 0; hi < halamanList.length; hi++) {
+                    btn.innerHTML = `⏳ Render (${pi + 1}/${keys.length} - hal ${hi + 1}/${halamanList.length})...`;
+                    const isLanjutan = hi > 0;
+                    const html = buildHalamanHTML(list[0], halamanList[hi], isLanjutan, hi + 1);
+                    const canvas = await renderPageToCanvas(html);
+                    addCanvasToPDF(pdf, canvas, firstPage);
+                    firstPage = false;
                 }
-                const offsetX = (pageW - drawW) / 2;
-
-                if (i > 0) pdf.addPage();
-                pdf.addImage(imgData, 'JPEG', offsetX, 0, drawW, drawH);
             }
 
             btn.innerHTML = "⏳ Menyimpan PDF...";
