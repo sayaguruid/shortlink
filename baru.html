@@ -178,7 +178,7 @@
 <div id="toast"><i id="tIc" class="fas fa-check-circle"></i><span id="tMs"></span></div>
 
 <script>
-const SU = 'https://script.google.com/macros/s/AKfycbwIlmdrleq2LYxeMlYbSrldekEmPxmqY_y6grecfeAzoRg4K6n0r7nhfJ8zC-0rqZ5f/exec';
+const SU = 'https://script.google.com/macros/s/AKfycbzWP8ZwT3N-FbhrSMbGu-vAmqHUBpQbCudVfqL9KbMOyA41buQktxqSQF8CI5YjqPBK/exec';
 const LOGO_URL = 'https://i.imgur.com/zKX5JtG.jpeg';
 let LOGO_B64 = '';
 
@@ -490,17 +490,49 @@ async function pD(){
 }
 
 /* ============ KELOLA KELAS ============ */
+// ============ GANTI pKelolaKelas() ============
 async function pKelolaKelas(){
-  const rk=await api('getKelasList');
-  const kl=rk.success?rk.data:[];
-  let h=`<div><div class="flex justify-between items-center mb-4"><div><h1 class="font-h font-800 text-xl">Kelola Kelas</h1><p class="text-xs mt-0.5" style="color:var(--tx3)">Tambah kelas baru yang otomatis terhubung ke pengguna, mapel, dan tugas</p></div><button class="bt bt1" onclick="mAKelas()"><i class="fas fa-plus"></i> Tambah Kelas</button></div>`;
-  if(!kl.length){h+=empty('fa-door-open','Belum ada kelas')}else{
-    h+=`<div class="grid grid-cols-2 md:grid-cols-3 gap-3">`;
-    kl.forEach(k=>{h+=`<div class="cd flex justify-between items-center"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--gl)"><i class="fas fa-door-open text-sm" style="color:var(--g1)"></i></div><span class="font-600 text-sm">${k}</span></div><button class="ibtn del" onclick="cfDel('Hapus kelas ${esc(k)}?',async()=>{const r=await api('deleteKelas',{kelas:'${esc(k)}'});if(r.success){invCache(['getKelasList']);toast('Kelas dihapus');nav('kelola-kelas')}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div>`});
-    h+=`</div>`;
+  const rk = await api('getKelasList');
+  const kl = rk.success ? rk.data : [];
+  let h = `<div>
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h1 class="font-h font-800 text-xl">Kelola Kelas</h1>
+        <p class="text-xs mt-0.5" style="color:var(--tx3)">Tambah kelas baru yang otomatis terhubung ke pengguna, mapel, dan tugas</p>
+      </div>
+      <button class="bt bt1" onclick="mAKelas()"><i class="fas fa-plus"></i> Tambah Kelas</button>
+    </div>`;
+  
+  if(!kl.length){
+    h += empty('fa-door-open','Belum ada kelas');
+  } else {
+    h += `<div class="grid grid-cols-2 md:grid-cols-3 gap-3">`;
+    kl.forEach(k => {
+      h += `<div class="cd flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--gl)">
+            <i class="fas fa-door-open text-sm" style="color:var(--g1)"></i>
+          </div>
+          <span class="font-600 text-sm">${k}</span>
+        </div>
+        <button class="ibtn del" onclick="cfDel('Hapus kelas ${esc(k)}? Semua data terkait (mapel, tugas, absensi, jurnal) akan ikut terhapus!',async()=>{
+          const r = await api('deleteKelas',{kelas:'${esc(k)}'});
+          if(r.success){
+            invCache(['getKelasList','getMapel','getTugas','getJurnal','getRiwayatAbsen']);
+            toast(r.message);
+            nav('kelola-kelas');
+          } else {
+            toast(r.message,'error');
+          }
+        })"><i class="fas fa-trash"></i></button>
+      </div>`;
+    });
+    h += `</div>`;
   }
-  return h+'</div>';
+  return h + '</div>';
 }
+
+
 function mAKelas(){
   opM('Tambah Kelas Baru',`<div class="space-y-3">
     <div class="warn-box"><i class="fas fa-info-circle text-yellow-600 mt-0.5"></i><p>Kelas baru otomatis terhubung ke pengguna, mapel, tugas, dan absensi.</p></div>
@@ -684,7 +716,7 @@ async function ldTargetKarakterTable(){
   const penilai=document.getElementById('tkFPenilai')?.value||'';
   const kelas=document.getElementById('tkFKelas')?.value||'';
   const semester=document.getElementById('tkFSemester')?.value||A.sess.semester;
-  const r=await api('getTargetKarakter',{semester});
+  const r=await api('getTargetKarakter',{semester, kelas});
   let data=r.success?(r.dataAll||[...r.dataGuru,...r.dataOrtu]).map(normJ):[];
   if(penilai)data=data.filter(d=>d.targetuntuk===penilai);
   if(kelas)data=data.filter(d=>d.kelas===kelas||d.kelas==='Semua'||!d.kelas);
@@ -768,20 +800,29 @@ async function pKS(){
   </div>
   <div class="cd overflow-x-auto"><div id="ksTb"></div><div id="ksPager"></div></div></div>`;
 }
+
 function renderKsTable(){
   let data = [...PGR.ks.data];
   if(A.u.Role==='Guru') data = data.filter(u => u.Role==='Siswa' || u.Role==='Orang Tua');
-  PGR.ks.data = data;
-  const { items, total } = pagerInfo('ks');
+  
+  // Jangan overwrite PGR.ks.data
+  const per = PGR.ks.per;
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / per));
+  if(PGR.ks.page > totalPages) PGR.ks.page = totalPages;
+  const start = (PGR.ks.page - 1) * per;
+  const items = data.slice(start, start + per);
+  
   const tb = document.getElementById('ksTb'), pg = document.getElementById('ksPager');
   if(!total){ tb.innerHTML = empty('fa-users','Tidak ada pengguna'); pg.innerHTML = ''; return; }
+  
   let h = `<table class="tb w-full"><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Kelas</th><th>Aksi</th></tr></thead><tbody>`;
   items.forEach(s=>{
-    h += `<tr><td class="font-600 text-sm">${s.Nama}</td><td class="text-xs text-gray-500">${s.Email}</td><td><span class="bd-tag bg2">${s.Role}</span></td><td><span class="bd-tag bg4">${s.Kelas||'-'}</span></td><td><div class="flex gap-1"><button class="ibtn" onclick="mES('${s.ID}','${esc(s.Nama)}','${esc(s.Email)}','${esc(s.Role)}','${esc(s.Kelas)}','${esc(s.EmailAnak||'')}','${esc(s.NISN||'')}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus ${esc(s.Nama)}?',async()=>{const r=await api('deleteSiswa',{id:'${s.ID}'});if(r.success){invCache(['getSiswaByKelas']);toast(r.message);nav('kelola-siswa')}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></td></tr>`;
+    h += `<tr><td class="font-600 text-sm">${s.Nama}</td><td class="text-xs text-gray-500">${s.Email}</td><td><span class="bd-tag bg2">${s.Role}</span></td><td><span class="bd-tag bg4">${s.Kelas||'-'}</span></td><td><div class="flex gap-1"><button class="ibtn" onclick="mES('${s.ID}','${esc(s.Nama)}','${esc(s.Email)}','${esc(s.Role)}','${esc(s.Kelas)}','${esc(s.EmailAnak||'')}','${esc(s.NISN||'')}','${esc(s.NamaOrtu||'')}')"><i class="fas fa-pen"></i></button><button class="ibtn del" onclick="cfDel('Hapus ${esc(s.Nama)}?',async()=>{const r=await api('deleteSiswa',{id:'${s.ID}'});if(r.success){invCache(['getSiswaByKelas']);toast(r.message);nav('kelola-siswa')}else toast(r.message,'error')})"><i class="fas fa-trash"></i></button></div></td></tr>`;
   });
   h += '</tbody></table>';
   tb.innerHTML = h;
-  pg.innerHTML = pagerHtml('ks','gpKs');
+  pg.innerHTML = makePager(PGR.ks.page, totalPages, total, per, 'gpKs');
 }
 function gpKs(p){ gotoPager('ks', p, renderKsTable); }
 
@@ -791,6 +832,7 @@ async function fKSCh(){
   PGR.ks.page = 1;
   renderKsTable();
 }
+
 function mAS(){
   api('getKelasList').then(r=>{
     const kl=r.success?r.data:[];
@@ -805,6 +847,10 @@ function mAS(){
         <div class="warn-box mb-2"><i class="fas fa-info-circle text-yellow-600"></i><p class="text-xs">Untuk akun Orang Tua: pilih kelas anak, lalu pilih nama anak.</p></div>
         <label class="fl">Kelas Anak</label><select id="sOrtuKelas" class="fi mb-2" onchange="ldOrtuAnakList()"><option value="">-- Pilih Kelas Anak --</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select>
         <label class="fl">Nama Anak</label><select id="sEA" class="fi"><option value="">-- Pilih Anak --</option></select>
+      </div>
+      <div id="sNamaOrtuWrap" style="display:block">
+        <label class="fl">Nama Orang Tua/Wali</label>
+        <input id="sNamaOrtu" class="fi" placeholder="Nama orang tua/wali siswa">
       </div>
       <div><label class="fl">Kelas</label><select id="sK" class="fi"><option value="">-- Pilih Kelas --</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
     </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAS()"><i class="fas fa-save"></i> Simpan</button>`);
@@ -821,16 +867,19 @@ async function ldOrtuAnakList(){
   const siswa=r.success?r.data.filter(u=>u.Role==='Siswa'):[];
   document.getElementById('sEA').innerHTML=`<option value="">-- Pilih Anak --</option>`+siswa.map(s=>`<option value="${s.Email}|${s.Nama}|${s.Kelas}">${s.Nama}</option>`).join('');
 }
+
 async function smAS(){
   const n=document.getElementById('sN').value.trim(),e=document.getElementById('sE').value.trim(),p=document.getElementById('sP').value,ro=document.getElementById('sR').value,nisn=document.getElementById('sNISN')?.value||'';
+  const namaOrtu = document.getElementById('sNamaOrtu')?.value.trim() || '';
   let k=document.getElementById('sK')?.value||'';
   let ea='',na='',ka='';
   if(ro==='Orang Tua'){const anakVal=document.getElementById('sEA')?.value||'';if(anakVal){const pts=anakVal.split('|');ea=pts[0];na=pts[1];ka=pts[2];k=ka}}
   if(!n||!e||!p){toast('Nama, email, password wajib','warning');return}
-  const res=await api('addSiswa',{nama:n,email:e,password:p,role:ro,kelas:k,emailAnak:ea,namaAnak:na,nisn});
+  const res=await api('addSiswa',{nama:n,email:e,password:p,role:ro,kelas:k,emailAnak:ea,namaAnak:na,kelasAnak:ka,nisn,namaOrtu});
   if(res.success){clM();invCache(['getSiswaByKelas','getKelasList']);toast(res.message);nav('kelola-siswa')}else toast(res.message,'error');
 }
-function mES(id,nama,email,role,kelas,emailAnak,nisn){
+
+function mES(id,nama,email,role,kelas,emailAnak,nisn,namaOrtu){
   api('getKelasList').then(r=>{
     const kl=r.success?r.data:[];
     const roleOpts=A.u.Role==='Guru'?`<option value="Siswa"${role==='Siswa'?' selected':''}>Siswa</option><option value="Orang Tua"${role==='Orang Tua'?' selected':''}>Orang Tua</option>`:`<option value="Siswa"${role==='Siswa'?' selected':''}>Siswa</option><option value="Guru"${role==='Guru'?' selected':''}>Guru</option><option value="Orang Tua"${role==='Orang Tua'?' selected':''}>Orang Tua</option><option value="Kepala Sekolah"${role==='Kepala Sekolah'?' selected':''}>Kepala Sekolah</option><option value="Bendahara"${role==='Bendahara'?' selected':''}>Bendahara</option><option value="Yayasan"${role==='Yayasan'?' selected':''}>Yayasan</option><option value="Admin"${role==='Admin'?' selected':''}>Admin</option>`;
@@ -841,13 +890,20 @@ function mES(id,nama,email,role,kelas,emailAnak,nisn){
       <div><label class="fl">Role</label><select id="sR" class="fi">${roleOpts}</select></div>
       <div id="sEAWrap" style="display:${role==='Orang Tua'?'block':'none'}"><label class="fl">Email Anak</label><input id="sEA" class="fi" value="${emailAnak}"></div>
       <div id="sNWrap" style="display:${role==='Siswa'?'block':'none'}"><label class="fl">NISN</label><input id="sNISN" class="fi" value="${nisn}"></div>
+      <div id="sNamaOrtuWrap" style="display:block">
+        <label class="fl">Nama Orang Tua/Wali</label>
+        <input id="sNamaOrtu" class="fi" value="${namaOrtu||''}" placeholder="Nama orang tua/wali siswa">
+      </div>
       <div><label class="fl">Kelas</label><select id="sK" class="fi"><option value="">-- Pilih --</option>${kl.map(k=>`<option value="${k}"${k===kelas?' selected':''}>${k}</option>`).join('')}</select></div>
     </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smES('${id}')"><i class="fas fa-save"></i> Simpan</button>`);
   });
 }
+
+
 async function smES(id){
   const n=document.getElementById('sN').value.trim(),p=document.getElementById('sP').value,ro=document.getElementById('sR').value,ea=document.getElementById('sEA')?.value||'',nisn=document.getElementById('sNISN')?.value||'',k=document.getElementById('sK').value;
-  const res=await api('updateSiswa',{id,nama:n,password:p,role:ro,kelas:k,emailAnak:ea,nisn});
+  const namaOrtu = document.getElementById('sNamaOrtu')?.value.trim() || '';
+  const res=await api('updateSiswa',{id,nama:n,password:p,role:ro,kelas:k,emailAnak:ea,nisn,namaOrtu});
   if(res.success){clM();invCache(['getSiswaByKelas','getKelasList']);toast(res.message);nav('kelola-siswa')}else toast(res.message,'error');
 }
 
@@ -1372,12 +1428,91 @@ async function smEJG(id){
   if(r.success){ clM(); invCache(['getJurnal']); toast('Jurnal berhasil diperbarui'); nav('jurnal'); }
   else{ toast(r.message||'Gagal memperbarui jurnal','error'); }
 }
-function dlJgPdf(){
-  const d=A._jgData;if(!d.length){toast('Tidak ada data','warning');return}
-  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');doc.setFontSize(13);doc.text('JURNAL GURU',105,20,{align:'center'});
-  const td=d.map((j,i)=>[i+1,j.NamaMapel||j.namamapel,fmtDS(j.Tanggal||j.tanggal),j.Kelas||j.kelas,j.MateriYangDiajarkan||j.materiyangdiajarkan,j.StatusGuru||j.statusguru||'Hadir']);
-  doc.autoTable({startY:28,head:[['No','Mapel','Tanggal','Kelas','Materi','Status']],body:td,theme:'grid',styles:{fontSize:8}});
-  previewPdf(doc,'Jurnal.pdf');
+
+// ============ GANTI dlJgPdf() ============
+async function dlJgPdf(){
+  const d = A._jgData;
+  if(!d.length){ toast('Tidak ada data','warning'); return; }
+  
+  // Ambil data mapel untuk mapping nama
+  const rm = await api('getMapel');
+  const mapelMap = {};
+  if(rm.success){
+    rm.data.forEach(m => {
+      mapelMap[m.IDMapel || m.idmapel || m.id] = m.NamaMapel || m.namamapel;
+    });
+  }
+  
+  // Ambil data absensi untuk rekap kehadiran
+  const ra = await api('getRiwayatAbsen', {});
+  const absensiData = ra.success ? ra.data.map(normJ) : [];
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('l','mm','a4'); // Landscape untuk kolom lebih banyak
+  const pw = 297, ml = 15, mr = 15;
+  let y = 15;
+  
+  // Header
+  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,15,15) }catch(e){}
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('JURNAL GURU', pw/2, y+5, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`, pw/2, y+11, {align:'center'});
+  y += 20;
+  
+  // Table dengan nama mapel dan rekap kehadiran
+  const tableData = d.map((j, i) => {
+    const rawMapel = String(j.IDMapel || j.idmapel || '-');
+    const mIds = rawMapel.split(',').map(x => x.trim());
+    const mapelNames = mIds.map(id => mapelMap[id] || id).join(', ');
+    
+    // Hitung rekap kehadiran untuk kelas dan tanggal yang sama
+    const tgl = String(j.Tanggal || j.tanggal || '').split('T')[0];
+    const kelas = j.Kelas || j.kelas || '';
+    const absensiHariItu = absensiData.filter(a => 
+      String(a.tanggal).startsWith(tgl) && String(a.kelas) === String(kelas)
+    );
+    
+    let hadir = 0, sakit = 0, izin = 0, alpha = 0;
+    absensiHariItu.forEach(a => {
+      if(a.status === 'Hadir') hadir++;
+      else if(a.status === 'Sakit') sakit++;
+      else if(a.status === 'Izin') izin++;
+      else alpha++;
+    });
+    
+    return [
+      i + 1,
+      mapelNames,
+      fmtDS(j.Tanggal || j.tanggal),
+      kelas,
+      j.MateriYangDiajarkan || j.materiyangdiajarkan || '-',
+      j.StatusGuru || j.statusguru || 'Hadir',
+      `H:${hadir} S:${sakit} I:${izin} A:${alpha}`
+    ];
+  });
+  
+  doc.autoTable({
+    startY: y,
+    head: [['No', 'Mata Pelajaran', 'Tanggal', 'Kelas', 'Materi', 'Status', 'Kehadiran Siswa']],
+    body: tableData,
+    theme: 'grid',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 70 },
+      5: { cellWidth: 20 },
+      6: { cellWidth: 50 }
+    }
+  });
+  
+  previewPdf(doc, 'Jurnal_Guru.pdf');
 }
 
 /* ============ KEUANGAN (PAGINATED) ============ */
@@ -1544,18 +1679,36 @@ function renderPrestasi(){
 }
 function gpPrestasi(p){ gotoPager('prestasi', p, renderPrestasi); }
 
-function mAPrestasi(){
-  const reqFilter=A.u.Role==='Guru'?{kelas:A.u.Kelas}:{kelas:'__ALL__'};
-  api('getSiswaByKelas',reqFilter).then(r=>{
-    const sw=r.success?r.data.filter(u=>u.Role==='Siswa'):[];
-    opM('Tambah Prestasi',`<div class="space-y-3">
-      <div><label class="fl">Tanggal</label><input type="date" id="pTanggal" class="fi" value="${todayISO()}"></div>
-      <div><label class="fl">Siswa</label><select id="pSiswa" class="fi">${so(sw.map(s=>({v:s.Email+'|'+s.Nama+'|'+s.Kelas,l:s.Nama+' ('+s.Kelas+')'})))}</select></div>
-      <div><label class="fl">Nama Prestasi / Lomba</label><input id="pNama" class="fi" placeholder="Olimpiade Matematika Nasional"></div>
-      <div class="grid grid-cols-2 gap-3"><div><label class="fl">Juara Ke-</label><input id="pJuara" class="fi" placeholder="1"></div><div><label class="fl">Tahun</label><input type="number" id="pTahun" class="fi" value="${new Date().getFullYear()}"></div></div>
-      <div><label class="fl">Upload Foto</label><input type="file" id="pFoto" class="fi" accept="image/*" onchange="prvBukti(this,'pFotoPrv')"><img id="pFotoPrv" class="img-preview" style="display:none"></div>
-    </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAPrestasi()">Simpan</button>`);
-  });
+// ============ GANTI mAPrestasi() ============
+async function mAPrestasi(){
+  // Ambil semua siswa tanpa filter kelas untuk memastikan data muncul
+  const r = await api('getSiswaByKelas', { kelas: '__ALL__' });
+  const sw = r.success ? r.data.filter(u => u.Role === 'Siswa') : [];
+  
+  // Jika guru, filter berdasarkan kelas yang diajar
+  let filteredSiswa = sw;
+  if(A.u.Role === 'Guru' && A.u.Kelas){
+    // Guru bisa melihat siswa dari kelas yang dia ampu
+    // Karena guru mungkin mengajar beberapa kelas, kita tampilkan semua dulu
+    // atau bisa difilter berdasarkan mapel yang diajar
+  }
+  
+  opM('Tambah Prestasi', `<div class="space-y-3">
+    <div><label class="fl">Tanggal</label><input type="date" id="pTanggal" class="fi" value="${todayISO()}"></div>
+    <div>
+      <label class="fl">Siswa</label>
+      <select id="pSiswa" class="fi">
+        <option value="">-- Pilih Siswa --</option>
+        ${filteredSiswa.map(s => `<option value="${s.Email}|${s.Nama}|${s.Kelas}">${s.Nama} (${s.Kelas})</option>`).join('')}
+      </select>
+    </div>
+    <div><label class="fl">Nama Prestasi / Lomba</label><input id="pNama" class="fi" placeholder="Olimpiade Matematika Nasional"></div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="fl">Juara Ke-</label><input id="pJuara" class="fi" placeholder="1"></div>
+      <div><label class="fl">Tahun</label><input type="number" id="pTahun" class="fi" value="${new Date().getFullYear()}"></div>
+    </div>
+    <div><label class="fl">Upload Foto</label><input type="file" id="pFoto" class="fi" accept="image/*" onchange="prvBukti(this,'pFotoPrv')"><img id="pFotoPrv" class="img-preview" style="display:none"></div>
+  </div>`, `<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAPrestasi()">Simpan</button>`);
 }
 async function smAPrestasi(){
   const t=document.getElementById('pTanggal').value,sw=document.getElementById('pSiswa').value,nm=document.getElementById('pNama').value,j=document.getElementById('pJuara').value,th=document.getElementById('pTahun').value;
@@ -1571,51 +1724,153 @@ function dlPrestasiPdf(){
 }
 
 /* ============ KARAKTER (GURU & ORTU) ============ */
+
+let _karGuruState = { data: [], page: 1, per: 10, filterBidang: '' };
+
+// ============ GANTI pKarGuru() ============
 async function pKarGuru(){
-  const rk=await api('getKelasList');
-  const isGuru=A.u.Role==='Guru';
-  return`<div><h1 class="font-h font-800 text-xl mb-4">Penilaian Karakter</h1>
-  <div class="info-box mb-4"><i class="fas fa-info-circle" style="color:var(--g1);margin-top:2px"></i><div><p class="font-600 text-sm">Panduan Skor Karakter</p><div class="grid grid-cols-2 gap-1 mt-1 text-xs"><span><b>1</b> — Perlu Bimbingan</span><span><b>2</b> — Mulai Berkembang</span><span><b>3</b> — Berkembang Sesuai Harapan</span><span><b>4</b> — Sangat Berkembang</span></div></div></div>
-  <div class="cd mb-3"><div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <div><label class="fl">Kelas</label><select id="kgK" class="fi" onchange="ldKgSiswa()"><option value="">-- Pilih --</option>${(rk.success?rk.data:[]).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
-    <div><label class="fl">Siswa</label><select id="kgS" class="fi" onchange="ldKgForm()"><option value="">-- Pilih Kelas Dulu --</option></select></div>
-    <div><label class="fl">Penilai</label>${isGuru?`<input type="hidden" id="kgType" value="Guru"><div class="fi" style="background:#f8fafc;color:var(--tx3)">Guru</div>`:`<select id="kgType" class="fi" onchange="ldKgForm()"><option value="Guru">Guru</option><option value="Ortu">Orang Tua</option></select>`}</div>
-  </div></div>
-  <div id="kgC"></div></div>`;
+  const rk = await api('getKelasList');
+  const isGuru = A.u.Role === 'Guru';
+  return `<div>
+    <h1 class="font-h font-800 text-xl mb-4">Penilaian Karakter</h1>
+    <div class="info-box mb-4">
+      <i class="fas fa-info-circle" style="color:var(--g1);margin-top:2px"></i>
+      <div>
+        <p class="font-600 text-sm">Panduan Skor Karakter</p>
+        <div class="grid grid-cols-2 gap-1 mt-1 text-xs">
+          <span><b>1</b> — Perlu Bimbingan</span>
+          <span><b>2</b> — Mulai Berkembang</span>
+          <span><b>3</b> — Berkembang Sesuai Harapan</span>
+          <span><b>4</b> — Sangat Berkembang</span>
+        </div>
+      </div>
+    </div>
+    <div class="cd mb-3">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="fl">Kelas</label>
+          <select id="kgK" class="fi" onchange="ldKgSiswa()">
+            <option value="">-- Pilih --</option>
+            ${(rk.success?rk.data:[]).map(k=>`<option value="${k}">${k}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="fl">Siswa</label>
+          <select id="kgS" class="fi" onchange="ldKgForm()">
+            <option value="">-- Pilih Kelas Dulu --</option>
+          </select>
+        </div>
+        <div>
+          <label class="fl">Penilai</label>
+          ${isGuru?`<input type="hidden" id="kgType" value="Guru"><div class="fi" style="background:#f8fafc;color:var(--tx3)">Guru</div>`:`<select id="kgType" class="fi" onchange="ldKgForm()"><option value="Guru">Guru</option><option value="Ortu">Orang Tua</option></select>`}
+        </div>
+        <div>
+          <label class="fl">Filter Bidang</label>
+          <select id="kgFBidang" class="fi" onchange="ldKgForm()">
+            <option value="">Semua Bidang</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="kgC"></div>
+  </div>`;
 }
-async function ldKgSiswa(){const r=await api('getSiswaByKelas',{kelas:document.getElementById('kgK').value});document.getElementById('kgS').innerHTML='<option value="">-- Pilih Siswa --</option>'+(r.success?r.data.filter(u=>u.Role==='Siswa').map(u=>`<option value="${u.Email}">${u.Nama}</option>`).join(''):'');document.getElementById('kgC').innerHTML=''}
+async function ldKgSiswa(){
+  const r=await api('getSiswaByKelas',{kelas:document.getElementById('kgK').value});
+  document.getElementById('kgS').innerHTML='<option value="">-- Pilih Siswa --</option>'+(r.success?r.data.filter(u=>u.Role==='Siswa').map(u=>`<option value="${u.Email}">${u.Nama}</option>`).join(''):'');
+  document.getElementById('kgC').innerHTML='';
+  const fb = document.getElementById('kgFBidang');
+  if(fb) fb.innerHTML = '<option value="">Semua Bidang</option>';
+}
+
 async function ldKgForm(){
-  const email=document.getElementById('kgS').value,type=document.getElementById('kgType').value,c=document.getElementById('kgC');if(!email)return;c.innerHTML=skC();
-  let bulanHtml='';if(type==='Ortu'){bulanHtml=`<div class="mb-3"><label class="fl">Bulan Penilaian</label><select id="kgB" class="fi" onchange="ldKgFormVals()">${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map(b=>`<option value="${b}">${b}</option>`).join('')}</select></div>`}
-  c.innerHTML=bulanHtml+`<div id="kgFormArea"></div>`;ldKgFormVals();
-}
-async function ldKgFormVals(){
-  const email=document.getElementById('kgS').value,type=document.getElementById('kgType').value,kelas=document.getElementById('kgK').value;
-  const bulan=type==='Ortu'?document.getElementById('kgB')?.value:'';
-  const area=document.getElementById('kgFormArea');area.innerHTML=sk(10);
-  const[rt,rn]=await Promise.all([api('getTargetKarakter',{semester:A.sess.semester,kelas,bulan}),api('getNilaiKarakter',{emailSiswa:email,semua:true,semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran,bulan})]);
-  const targets=type==='Guru'?(rt.success?rt.dataGuru.map(normJ):[]):(rt.success?rt.dataOrtu.map(normJ):[]);
-  const nilais=rn.success?rn.data.map(normJ):[];
-  let h=`<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Penilaian Karakter — ${type==='Guru'?'Oleh Guru':'Oleh Orang Tua'}</h3>`;
-  if(!targets.length){h+=`<div class="warn-box"><i class="fas fa-info-circle text-yellow-600"></i><p>Belum ada target karakter untuk ${type==='Guru'?'Guru':'Orang Tua'}. Tambahkan di menu Target Karakter.</p></div>`}
-  else{
-    h+=`<div class="space-y-4">`;
-    const byBidang={};targets.forEach(t=>{const b=t.bidang||'Umum';if(!byBidang[b])byBidang[b]=[];byBidang[b].push(t)});
-    for(const[bidang,items]of Object.entries(byBidang)){
-      h+=`<div><p class="text-xs font-700 text-blue-700 mb-2 uppercase tracking-wide">${bidang}</p>`;
-      items.forEach(t=>{
-        const idT=t.id||t.idkarakter;const v=nilais.find(n=>String(n.idtarget)===String(idT)&&String(n.penilai).toLowerCase()===type.toLowerCase())?.nilai;
-        h+=`<div class="p-3 border rounded-lg mb-2"><p class="text-sm mb-2">${t.target}</p><div class="flex gap-2 flex-wrap">`;
-        [1,2,3,4].forEach(n=>{h+=`<label class="text-center cursor-pointer"><div class="kar-score${v==n?' sel':''}" onclick="selKar(this,'kar_${idT}',${n})">${n}</div><input type="radio" name="kar_${idT}" value="${n}" ${v==n?'checked':''} style="display:none"><div class="kar-desc">${['PB','MB','BSH','SB'][n-1]}</div></label>`});
-        h+=`</div></div>`;
-      });
-      h+=`</div>`;
-    }
-    h+=`</div>`;
+  const email = document.getElementById('kgS').value;
+  const type = document.getElementById('kgType').value;
+  const c = document.getElementById('kgC');
+  if(!email) return;
+  c.innerHTML = skC();
+  
+  let bulanHtml = '';
+  if(type === 'Ortu'){
+    bulanHtml = `<div class="mb-3">
+      <label class="fl">Bulan Penilaian</label>
+      <select id="kgB" class="fi" onchange="ldKgFormVals()">
+        ${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map(b=>`<option value="${b}">${b}</option>`).join('')}
+      </select>
+    </div>`;
   }
-  h+=`<button class="bt bt1 mt-3 w-full justify-center" onclick="svKg()"><i class="fas fa-save"></i> Simpan Penilaian</button></div>`;
-  area.innerHTML=h;
+  c.innerHTML = bulanHtml + `<div id="kgFormArea"></div>`;
+  ldKgFormVals();
 }
+
+async function ldKgFormVals(){
+  const email = document.getElementById('kgS').value;
+  const type = document.getElementById('kgType').value;
+  const kelas = document.getElementById('kgK').value;
+  const bulan = type === 'Ortu' ? document.getElementById('kgB')?.value : '';
+  const filterBidang = document.getElementById('kgFBidang')?.value || '';
+  
+  const area = document.getElementById('kgFormArea');
+  area.innerHTML = sk(10);
+  
+  const [rt, rn] = await Promise.all([
+    api('getTargetKarakter', {semester: A.sess.semester, kelas, bulan}),
+    api('getNilaiKarakter', {emailSiswa: email, semua: true, semester: A.sess.semester, tahunPelajaran: A.sess.tahunPelajaran, bulan})
+  ]);
+  
+  let targets = type === 'Guru' ? (rt.success ? rt.dataGuru.map(normJ) : []) : (rt.success ? rt.dataOrtu.map(normJ) : []);
+  const nilais = rn.success ? rn.data.map(normJ) : [];
+  
+  // Update filter bidang options
+  const allBidang = [...new Set(targets.map(t => t.bidang || 'Umum').filter(Boolean))];
+  const fbSelect = document.getElementById('kgFBidang');
+  if(fbSelect && fbSelect.options.length <= 1){
+    fbSelect.innerHTML = '<option value="">Semua Bidang</option>' + allBidang.map(b => `<option value="${b}">${b}</option>`).join('');
+  }
+  
+  // Apply filter bidang
+  if(filterBidang){
+    targets = targets.filter(t => (t.bidang || 'Umum') === filterBidang);
+  }
+  
+  let h = `<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Penilaian Karakter — ${type === 'Guru' ? 'Oleh Guru' : 'Oleh Orang Tua'}</h3>`;
+  
+  if(!targets.length){
+    h += `<div class="warn-box"><i class="fas fa-info-circle text-yellow-600"></i><p>Belum ada target karakter untuk ${type === 'Guru' ? 'Guru' : 'Orang Tua'}.</p></div>`;
+  } else {
+    h += `<div class="space-y-4">`;
+    const byBidang = {};
+    targets.forEach(t => {
+      const b = t.bidang || 'Umum';
+      if(!byBidang[b]) byBidang[b] = [];
+      byBidang[b].push(t);
+    });
+    
+    for(const [bidang, items] of Object.entries(byBidang)){
+      h += `<div><p class="text-xs font-700 text-blue-700 mb-2 uppercase tracking-wide">${bidang}</p>`;
+      items.forEach(t => {
+        const idT = t.id || t.idkarakter;
+        const v = nilais.find(n => String(n.idtarget) === String(idT) && String(n.penilai).toLowerCase() === type.toLowerCase())?.nilai;
+        h += `<div class="p-3 border rounded-lg mb-2">
+          <p class="text-sm mb-2">${t.target}</p>
+          <div class="flex gap-2 flex-wrap">`;
+        [1,2,3,4].forEach(n => {
+          h += `<label class="text-center cursor-pointer">
+            <div class="kar-score${v==n?' sel':''}" onclick="selKar(this,'kar_${idT}',${n})">${n}</div>
+            <input type="radio" name="kar_${idT}" value="${n}" ${v==n?'checked':''} style="display:none">
+            <div class="kar-desc">${['PB','MB','BSH','SB'][n-1]}</div>
+          </label>`;
+        });
+        h += `</div></div>`;
+      });
+      h += `</div>`;
+    }
+    h += `</div>`;
+  }
+  h += `<button class="bt bt1 mt-3 w-full justify-center" onclick="svKg()"><i class="fas fa-save"></i> Simpan Penilaian</button></div>`;
+  area.innerHTML = h;
+}
+
 function selKar(el, name, val){
   const wrap = el.closest('.flex') || el.parentElement?.parentElement;
   if(wrap) wrap.querySelectorAll('.kar-score').forEach(e => e.classList.remove('sel'));
@@ -1662,7 +1917,7 @@ async function pKarOrtu(){
 async function ldKoForm(){
   const b=document.getElementById('koB')?.value,c=document.getElementById('koC');if(!c)return;c.innerHTML=skC();
   const[rt,rn]=await Promise.all([api('getTargetKarakter',{semester:A.sess.semester,kelas:A.u.KelasAnak,bulan:b}),api('getNilaiKarakter',{emailSiswa:A.u.EmailAnak,semua:true,semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran,bulan:b})]);
-  const tO=rt.success?(rt.dataOrtu||[]).map(normJ).filter(t=>!t.bulan||t.bulan.trim()===''||t.bulan.toLowerCase()===(b||'').toLowerCase()):[];
+const tO = rt.success ? (rt.dataOrtu || []).map(normJ) : [];
   const nilais=rn.success?rn.data.map(normJ):[];
   let h=`<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Penilaian Karakter — Bulan ${b}</h3>`;
   if(!tO.length){h+=`<div class="warn-box"><i class="fas fa-info-circle text-yellow-600"></i><p>Belum ada target karakter untuk bulan ${b}.</p></div>`}
@@ -2111,87 +2366,305 @@ function gpTkRapor(p){
   gotoPager('tkRapor', p, ()=>renderTkRapor(k));
 }
 
-async function getProfilDefault(){
-  const r=await api('getProfilSekolah');if(r.success&&r.data.length>0)return normJ(r.data[0]);
-  return{namasekolah:'PKBM Baitul Hikmah',alamat:'Jl. Pendidikan',kepalasekolah:'Kepala Sekolah',walikelas:'Wali Kelas'};
-}
-async function cetakRaporAkademik(email,nama,kelas,nisn){
-  const[rT,rC,rM,profil]=await Promise.all([api('getTranskrip',{email,kelas}),api('getCapaian',{semester:A.sess.semester}),api('getMapel'),getProfilDefault()]);
-  const transkrip=rT.success?rT.data:[];
-  const capaianAll=rC.success?rC.data.map(normJ):[];
-  const mapelList=rM.success?rM.data.map(normJ):[];
-  const mapelIdToName={};mapelList.forEach(m=>mapelIdToName[m.idmapel||m.IDMapel]=(m.namamapel||m.NamaMapel||''));
-  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');
-  const pw=210,ml=15,mr=15;let y=12;
-  if(LOGO_B64)try{doc.addImage(LOGO_B64,'JPEG',ml,y,18,18)}catch(e){}
-  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text('PKBM BAITUL HIKMAH',pw/2,y+5,{align:'center'});
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text(profil.alamat||'',pw/2,y+11,{align:'center'});
-  doc.setLineWidth(0.5);doc.line(ml,y+16,pw-mr,y+16);y+=22;
-  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('LAPORAN HASIL BELAJAR (RAPOR AKADEMIK)',pw/2,y,{align:'center'});
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`,pw/2,y+6,{align:'center'});y+=14;
+
+// ============ GANTI cetakRaporAkademik() ============
+async function cetakRaporAkademik(email, nama, kelas, nisn){
+  const [rT, rC, rM, profil, rSiswa] = await Promise.all([
+    api('getTranskrip', {email, kelas}),
+    api('getCapaian', {semester: A.sess.semester}),
+    api('getMapel'),
+    getProfilDefault(),
+    api('getSiswaByKelas', {kelas: '__ALL__'})
+  ]);
+  
+  const transkrip = rT.success ? rT.data : [];
+  const capaianAll = rC.success ? rC.data.map(normJ) : [];
+  const mapelList = rM.success ? rM.data.map(normJ) : [];
+  const mapelIdToName = {};
+  mapelList.forEach(m => mapelIdToName[m.idmapel || m.IDMapel] = (m.namamapel || m.NamaMapel || ''));
+  
+  // Cari data siswa untuk mendapatkan nama orang tua
+  const siswaData = rSiswa.success ? rSiswa.data.find(s => String(s.Email).toLowerCase() === String(email).toLowerCase()) : null;
+  const namaOrtu = siswaData?.NamaOrtu || siswaData?.namaortu || '-';
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  const pw = 210, ml = 15, mr = 15;
+  let y = 12;
+  
+  // Header
+  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,18,18) }catch(e){}
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.text('PKBM BAITUL HIKMAH', pw/2, y+5, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(profil.alamat || '', pw/2, y+11, {align:'center'});
+  doc.setLineWidth(0.5);
+  doc.line(ml, y+16, pw-mr, y+16);
+  y += 22;
+  
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.text('LAPORAN HASIL BELAJAR (RAPOR AKADEMIK)', pw/2, y, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`, pw/2, y+6, {align:'center'});
+  y += 14;
+  
+  // Info Siswa
   doc.setFontSize(9);
-  const col2=pw/2+5;
-  doc.text('Nama Siswa',ml,y);doc.text(': '+nama,ml+28,y);
-  doc.text('Kelas',col2,y);doc.text(': '+kelas,col2+20,y);y+=5;
-  doc.text('NISN',ml,y);doc.text(': '+(nisn||'-'),ml+28,y);
-  doc.text('Semester',col2,y);doc.text(': '+A.sess.semester,col2+20,y);y+=5;
-  doc.text('Sekolah',ml,y);doc.text(': PKBM Baitul Hikmah',ml+28,y);
-  doc.text('Tahun Ajaran',col2,y);doc.text(': '+A.sess.tahunPelajaran,col2+20,y);y+=8;
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('A. NILAI DAN KETERCAPAIAN KOMPETENSI',ml,y);y+=4;
-  let tb=[];let no=1;
-  transkrip.forEach(t=>{
-    if(String(t.namaMapel).toLowerCase().includes('project'))return;
-    const targetMapelId=mapelList.find(m=>(m.namamapel||m.NamaMapel||'').toLowerCase().trim()===String(t.namaMapel).toLowerCase().trim())?.idmapel||null;
-    let cap=capaianAll.find(c=>(String(c.idmapel)===String(targetMapelId)||String(c.matapelajaran||'').toLowerCase().trim()===String(t.namaMapel).toLowerCase().trim())&&(String(c.semester)===String(A.sess.semester)||String(c.semester)==='Semua'));
-    const capText=cap?(cap.deskripsicapaian||cap.deskripsiCapaian||'Siswa menunjukkan kemajuan yang baik dalam mata pelajaran ini.'):'Siswa menunjukkan kemajuan yang baik dalam mata pelajaran ini.';
-    tb.push([no++,t.namaMapel,t.nilaiAkhir,capText]);
+  const col2 = pw/2 + 5;
+  doc.text('Nama Siswa', ml, y); doc.text(': ' + nama, ml+28, y);
+  doc.text('Kelas', col2, y); doc.text(': ' + kelas, col2+20, y);
+  y += 5;
+  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+28, y);
+  doc.text('Semester', col2, y); doc.text(': ' + A.sess.semester, col2+20, y);
+  y += 5;
+  doc.text('Nama Orang Tua/Wali', ml, y); doc.text(': ' + (namaOrtu || '-'), ml+45, y);
+  doc.text('Tahun Ajaran', col2, y); doc.text(': ' + A.sess.tahunPelajaran, col2+20, y);
+  y += 8;
+  
+  // Tabel Nilai dengan Capaian yang lebih rapi
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('A. NILAI DAN KETERCAPAIAN KOMPETENSI', ml, y);
+  y += 4;
+  
+  let tb = [];
+  let no = 1;
+  transkrip.forEach(t => {
+    if(String(t.namaMapel).toLowerCase().includes('project')) return;
+    
+    const targetMapelId = mapelList.find(m => 
+      (m.namamapel || m.NamaMapel || '').toLowerCase().trim() === String(t.namaMapel).toLowerCase().trim()
+    )?.idmapel || null;
+    
+    let cap = capaianAll.find(c => 
+      (String(c.idmapel) === String(targetMapelId) || 
+       String(c.matapelajaran || '').toLowerCase().trim() === String(t.namaMapel).toLowerCase().trim()) && 
+      (String(c.semester) === String(A.sess.semester) || String(c.semester) === 'Semua')
+    );
+    
+    const capText = cap ? (cap.deskripsicapaian || cap.deskripsiCapaian || 'Siswa menunjukkan kemajuan yang baik.') : 'Siswa menunjukkan kemajuan yang baik dalam mata pelajaran ini.';
+    
+    tb.push([no++, t.namaMapel, t.nilaiAkhir, capText]);
   });
-  doc.autoTable({startY:y,head:[['No','Mata Pelajaran','Nilai','Deskripsi Capaian Kompetensi']],body:tb,theme:'grid',styles:{fontSize:8,font:'helvetica'},headStyles:{fillColor:[29,78,216],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:8},1:{cellWidth:32},2:{cellWidth:14},3:{cellWidth:116}},alternateRowStyles:{fillColor:[240,247,255]}});
-  y=doc.lastAutoTable.finalY+12;
-  if(y>245){doc.addPage();y=20}
-  doc.setFontSize(9);doc.setFont('helvetica','normal');
-  doc.text('Orang Tua/Wali Murid,',ml+5,y);doc.text('Wali Kelas,',pw-mr-55,y);
-  y+=22;doc.text('______________________',ml+5,y);doc.text(profil.walikelas||'______________________',pw-mr-55,y);
-  y+=12;if(y>270){doc.addPage();y=20}
-  doc.text('Mengetahui,',pw/2,y,{align:'center'});
-  doc.text('Kepala Sekolah PKBM Baitul Hikmah',pw/2,y+5,{align:'center'});
-  doc.text(profil.kepalasekolah||'______________________',pw/2,y+22,{align:'center'});
-  previewPdf(doc,'Rapor_Akademik_'+nama.replace(/\s+/g,'_')+'.pdf');
-}
-async function cetakRaporKarakter(email,nama,nisn,kelas){
-  const[rt,rn,profil]=await Promise.all([api('getTargetKarakter',{semester:A.sess.semester,kelas}),api('getNilaiKarakter',{emailSiswa:email,semua:true,semester:A.sess.semester,tahunPelajaran:A.sess.tahunPelajaran}),getProfilDefault()]);
-  const tG=rt.success?(rt.dataGuru||[]).map(normJ):[];const tO=rt.success?(rt.dataOrtu||[]).map(normJ):[];
-  const nilais=rn.success?rn.data.map(normJ):[];
-  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');
-  const pw=210,ml=15,mr=15;let y=12;
-  if(LOGO_B64)try{doc.addImage(LOGO_B64,'JPEG',ml,y,18,18)}catch(e){}
-  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text('ATOMIC SCHOOL',pw/2,y+5,{align:'center'});
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text(profil.alamat||'',pw/2,y+11,{align:'center'});
-  doc.setLineWidth(0.5);doc.line(ml,y+16,pw-mr,y+16);y+=22;
-  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('LAPORAN PENILAIAN KARAKTER SISWA',pw/2,y,{align:'center'});
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`,pw/2,y+6,{align:'center'});y+=14;
+  
+  // Hitung lebar kolom yang lebih proporsional
+  const colWidths = {
+    0: 8,   // No
+    1: 35,  // Mata Pelajaran
+    2: 12,  // Nilai
+    3: 125  // Deskripsi Capaian (dikurangi agar tidak keluar)
+  };
+  
+  doc.autoTable({
+    startY: y,
+    head: [['No', 'Mata Pelajaran', 'Nilai', 'Deskripsi Capaian Kompetensi']],
+    body: tb,
+    theme: 'grid',
+    styles: { 
+      fontSize: 8, 
+      font: 'helvetica',
+      cellPadding: 2,
+      overflow: 'linebreak'
+    },
+    headStyles: { 
+      fillColor: [29,78,216], 
+      textColor: 255, 
+      fontStyle: 'bold' 
+    },
+    columnStyles: {
+      0: { cellWidth: colWidths[0], halign: 'center' },
+      1: { cellWidth: colWidths[1] },
+      2: { cellWidth: colWidths[2], halign: 'center', fontStyle: 'bold' },
+      3: { cellWidth: colWidths[3] }
+    },
+    alternateRowStyles: { fillColor: [240,247,255] },
+    margin: { left: ml, right: mr }
+  });
+  
+  y = doc.lastAutoTable.finalY + 12;
+  if(y > 245){ doc.addPage(); y = 20; }
+  
+  // Tanda tangan dengan wali kelas yang sesuai
   doc.setFontSize(9);
-  doc.text('Nama Siswa',ml,y);doc.text(': '+nama,ml+28,y);doc.text('Kelas',pw/2+5,y);doc.text(': '+kelas,pw/2+25,y);y+=5;
-  doc.text('NISN',ml,y);doc.text(': '+(nisn||'-'),ml+28,y);doc.text('Semester',pw/2+5,y);doc.text(': '+A.sess.semester,pw/2+25,y);y+=8;
-  const lblMap={1:'Perlu Bimbingan',2:'Mulai Berkembang',3:'Berkembang Sesuai Harapan',4:'Sangat Berkembang'};
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('A. PENILAIAN KARAKTER OLEH GURU (Skala 1–4)',ml,y);y+=4;
-  let tbG=[];tG.forEach((t,i)=>{const idT=t.id||t.idkarakter;const nObj=nilais.find(n=>String(n.idtarget)===String(idT)&&String(n.penilai).toLowerCase()==='guru');const v=nObj?nObj.nilai:'-';tbG.push([i+1,t.bidang||'-',t.target||'-',v,lblMap[v]||'-'])});
-  doc.autoTable({startY:y,head:[['No','Bidang','Target/Indikator','Nilai','Keterangan']],body:tbG,theme:'grid',styles:{fontSize:8},headStyles:{fillColor:[29,78,216],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:8},1:{cellWidth:24},2:{cellWidth:80},3:{cellWidth:12},4:{cellWidth:46}}});
-  y=doc.lastAutoTable.finalY+8;
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('B. PENILAIAN KARAKTER OLEH ORANG TUA (Skala 1–4)',ml,y);y+=4;
-  let tbO=[];tO.forEach((t,i)=>{const idT=t.id||t.idkarakter;const nObj=nilais.find(n=>String(n.idtarget)===String(idT)&&String(n.penilai).toLowerCase().includes('ortu'));const v=nObj?nObj.nilai:'-';tbO.push([i+1,t.bidang||'-',t.target||'-',v,lblMap[v]||'-'])});
-  doc.autoTable({startY:y,head:[['No','Bidang','Target/Indikator','Nilai','Keterangan']],body:tbO,theme:'grid',styles:{fontSize:8},headStyles:{fillColor:[245,158,11],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:8},1:{cellWidth:24},2:{cellWidth:80},3:{cellWidth:12},4:{cellWidth:46}}});
-  y=doc.lastAutoTable.finalY+12;if(y>245){doc.addPage();y=20}
-  doc.setFontSize(9);doc.setFont('helvetica','normal');
-  doc.text('Orang Tua/Wali Murid,',ml+5,y);doc.text('Wali Kelas,',pw-mr-55,y);
-  y+=22;doc.text('______________________',ml+5,y);doc.text(profil.walikelas||'______________________',pw-mr-55,y);
-  y+=12;if(y>270){doc.addPage();y=20}
-  doc.text('Mengetahui,',pw/2,y,{align:'center'});
-  doc.text('Kepala Sekolah Atomic School',pw/2,y+5,{align:'center'});
-  doc.text(profil.kepalasekolah||'______________________',pw/2,y+22,{align:'center'});
-  previewPdf(doc,'Rapor_Karakter_'+nama.replace(/\s+/g,'_')+'.pdf');
+  doc.setFont('helvetica','normal');
+  
+  // Cari wali kelas yang sesuai dengan kelas siswa
+  const waliKelas = profil.walikelas || '';
+  
+  doc.text('Orang Tua/Wali Murid,', ml+5, y);
+  doc.text('Wali Kelas,', pw-mr-55, y);
+  y += 22;
+  doc.text('______________________', ml+5, y);
+  doc.text(waliKelas || '______________________', pw-mr-55, y);
+  y += 12;
+  if(y > 270){ doc.addPage(); y = 20; }
+  doc.text('Mengetahui,', pw/2, y, {align:'center'});
+  doc.text('Kepala Sekolah PKBM Baitul Hikmah', pw/2, y+5, {align:'center'});
+  doc.text(profil.kepalasekolah || '______________________', pw/2, y+22, {align:'center'});
+  
+  previewPdf(doc, 'Rapor_Akademik_' + nama.replace(/\s+/g,'_') + '.pdf');
 }
 
+// ============ TAMBAHKAN FUNGSI BARU ============
+
+
+// ============ GANTI getProfilDefault() ============
+async function getProfilDefault(){
+  const r = await api('getProfilSekolah');
+  if(r.success && r.data.length > 0) {
+    const profil = normJ(r.data[0]);
+    // Pastikan ada field KelasWali
+    return {
+      namasekolah: profil.namasekolah || 'PKBM Baitul Hikmah',
+      alamat: profil.alamat || 'Kp. Cinunuk Tengah Desa Wanaraja Kec. Wanaraja Kab. Garut',
+      kepalasekolah: profil.kepalasekolah || 'Randi Nova Jaya, S.Pd',
+      walikelas: profil.walikelas || 'Nurita Agustin',
+      kelaswali: profil.kelaswali || '',
+      walikelasperkelas: profil.walikelasperkelas || ''
+    };
+  }
+  return {
+    namasekolah: 'PKBM Baitul Hikmah',
+    alamat: 'Kp. Cinunuk Tengah Desa Wanaraja Kec. Wanaraja Kab. Garut',
+    kepalasekolah: 'Randi Nova Jaya, S.Pd',
+    walikelas: 'Nurita Agustin',
+    kelaswali: '',
+    walikelasperkelas: ''
+  };
+}
+
+
+// ============ GANTI cetakRaporKarakter() ============
+async function cetakRaporKarakter(email, nama, nisn, kelas){
+  const [rt, rn, profil] = await Promise.all([
+    api('getTargetKarakter', {semester: A.sess.semester, kelas}),
+    api('getNilaiKarakter', {emailSiswa: email, semua: true, semester: A.sess.semester, tahunPelajaran: A.sess.tahunPelajaran}),
+    getProfilDefault()
+  ]);
+  
+  const tG = rt.success ? (rt.dataGuru || []).map(normJ) : [];
+  const tO = rt.success ? (rt.dataOrtu || []).map(normJ) : [];
+  const nilais = rn.success ? rn.data.map(normJ) : [];
+  
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  const pw = 210, ml = 15, mr = 15;
+  let y = 12;
+  
+  // Header
+  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,18,18) }catch(e){}
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.text('ATOMIC SCHOOL', pw/2, y+5, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(profil.alamat || '', pw/2, y+11, {align:'center'});
+  doc.setLineWidth(0.5);
+  doc.line(ml, y+16, pw-mr, y+16);
+  y += 22;
+  
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.text('LAPORAN PENILAIAN KARAKTER SISWA', pw/2, y, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`, pw/2, y+6, {align:'center'});
+  y += 14;
+  
+  doc.setFontSize(9);
+  doc.text('Nama Siswa', ml, y); doc.text(': ' + nama, ml+28, y);
+  doc.text('Kelas', pw/2+5, y); doc.text(': ' + kelas, pw/2+25, y);
+  y += 5;
+  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+28, y);
+  doc.text('Semester', pw/2+5, y); doc.text(': ' + A.sess.semester, pw/2+25, y);
+  y += 8;
+  
+  const lblMap = {1:'Perlu Bimbingan', 2:'Mulai Berkembang', 3:'Berkembang Sesuai Harapan', 4:'Sangat Berkembang'};
+  
+  // Penilaian Guru
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('A. PENILAIAN KARAKTER OLEH GURU (Skala 1–4)', ml, y);
+  y += 4;
+  
+  let tbG = [];
+  tG.forEach((t, i) => {
+    const idT = t.id || t.idkarakter;
+    const nObj = nilais.find(n => String(n.idtarget) === String(idT) && String(n.penilai).toLowerCase() === 'guru');
+    const v = nObj ? nObj.nilai : '-';
+    tbG.push([i+1, t.bidang || '-', t.target || '-', v, lblMap[v] || '-']);
+  });
+  
+  doc.autoTable({
+    startY: y,
+    head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
+    body: tbG.length ? tbG : [['-','-','Belum ada penilaian guru','-','-']],
+    theme: 'grid',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 8, halign: 'center' },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 75 },
+      3: { cellWidth: 12, halign: 'center' },
+      4: { cellWidth: 45 }
+    }
+  });
+  
+  y = doc.lastAutoTable.finalY + 8;
+  
+  // Penilaian Orang Tua
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('B. PENILAIAN KARAKTER OLEH ORANG TUA (Skala 1–4)', ml, y);
+  y += 4;
+  
+  let tbO = [];
+  tO.forEach((t, i) => {
+    const idT = t.id || t.idkarakter;
+    const nObj = nilais.find(n => String(n.idtarget) === String(idT) && String(n.penilai).toLowerCase().includes('ortu'));
+    const v = nObj ? nObj.nilai : '-';
+    tbO.push([i+1, t.bidang || '-', t.target || '-', v, lblMap[v] || '-']);
+  });
+  
+  doc.autoTable({
+    startY: y,
+    head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
+    body: tbO.length ? tbO : [['-','-','Belum ada penilaian orang tua','-','-']],
+    theme: 'grid',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [245,158,11], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 8, halign: 'center' },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 75 },
+      3: { cellWidth: 12, halign: 'center' },
+      4: { cellWidth: 45 }
+    }
+  });
+  
+  y = doc.lastAutoTable.finalY + 14;
+  if(y > 245){ doc.addPage(); y = 20; }
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Orang Tua/Wali Murid,', ml+5, y);
+  doc.text('Wali Kelas,', pw-mr-55, y);
+  y += 22;
+  doc.text('______________________', ml+5, y);
+  doc.text(profil.walikelas || '______________________', pw-mr-55, y);
+  y += 12;
+  if(y > 270){ doc.addPage(); y = 20; }
+  doc.text('Mengetahui,', pw/2, y, {align:'center'});
+  doc.text('Kepala Sekolah Atomic School', pw/2, y+5, {align:'center'});
+  doc.text(profil.kepalasekolah || '______________________', pw/2, y+22, {align:'center'});
+  
+  previewPdf(doc, 'Rapor_Karakter_' + nama.replace(/\s+/g,'_') + '.pdf');
+}
 /* ============ RAPOR PRESTASI (BARU) ============ */
 async function cetakRaporPrestasi(email, nama, kelas, nisn){
   const [rP, profil] = await Promise.all([api('getPrestasi'), getProfilDefault()]);
