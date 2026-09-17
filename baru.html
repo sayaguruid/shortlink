@@ -246,7 +246,36 @@ function drP(u){if(!u)return '';if(u.includes('drive.google.com')){let m=u.match
 function imgUrl(u){if(!u)return '';let m=u.match(/file\/d\/([a-zA-Z0-9_-]+)/)||u.match(/[?&]id=([a-zA-Z0-9_-]+)/);if(m)return`https://lh3.googleusercontent.com/d/${m[1]}`;return u}
 function getYtEmbedUrl(url){if(!url)return'';let regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;let match=url.match(regExp);if(match&&match[2].length===11)return'https://www.youtube.com/embed/'+match[2];return url}
 function so(a,s='',p='-- Pilih --'){return`<option value="">${p}</option>`+a.map(o=>{const v=typeof o==='string'?o:o.v,l=typeof o==='string'?o:o.l;return`<option value="${v}"${v==s?' selected':''}>${l}</option>`}).join('')}
-function fRp(v){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(v)||0)}
+function fRp(v){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(v)||0)}4
+/* Format angka dengan pemisah ribuan saat input */
+function fmtInputNumber(el){
+  // Simpan posisi kursor
+  const val = el.value;
+  const selStart = el.selectionStart;
+  const digitBefore = val.substring(0, selStart).replace(/\D/g,'').length;
+  
+  // Format ulang
+  let digits = val.replace(/\D/g,'');
+  let formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  el.value = formatted;
+  
+  // Kembalikan posisi kursor
+  let newPos = 0, digitCount = 0;
+  for(let i = 0; i < formatted.length; i++){
+    if(digitCount >= digitBefore) break;
+    if(/\d/.test(formatted[i])) digitCount++;
+    newPos = i + 1;
+  }
+  if(digitCount < digitBefore) newPos = formatted.length;
+  
+  try { el.setSelectionRange(newPos, newPos); } catch(e){}
+}
+
+/* Ambil nilai integer dari input berformat */
+function getNumberValue(el){
+  return Number((el.value||'').replace(/\D/g,'')) || 0;
+}
+
 function invCache(actions){for(const k in _c){for(const a of actions){if(k.includes('"'+a+'"')){delete _c[k];break}}}}
 
 /* ============ PAGINATION HELPERS ============ */
@@ -1334,18 +1363,75 @@ async function dlAbsPdf(){
 }
 
 /* ============ JURNAL GURU / PANTAU (PAGINATED) ============ */
+
 async function pJG(){
   const isMonitor=['Kepala Sekolah','Yayasan','Admin','Bendahara'].includes(A.u.Role);
   const isBendahara=A.u.Role==='Bendahara';
-  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);A.d.mapel=rm.success?rm.data.map(normJ):[];const kl=rk.success?rk.data:[];
+  const isKepsek=A.u.Role==='Kepala Sekolah';
+  const isYayasan=A.u.Role==='Yayasan';
+  const isAdmin=A.u.Role==='Admin';
+  const isGuru=A.u.Role==='Guru';
+  
+  const[rm,rk]=await Promise.all([api('getMapel'),api('getKelasList')]);
+  A.d.mapel=rm.success?rm.data.map(normJ):[];
+  const kl=rk.success?rk.data:[];
   invCache(['getJurnal']);
   const req=isMonitor?{}:{emailGuru:A.u.Email};
   const rj=await api('getJurnal',req);A._jgData=rj.success?rj.data:[];
   initPager('jg', A._jgData, 10);
+  
   let titleText='Jurnal Guru';
   if(isBendahara) titleText='Rekap Kehadiran Guru';
   else if(isMonitor) titleText='Jurnal & Kehadiran Guru';
+  
   setTimeout(()=>ldJGFilter(), 30);
+  
+  // ============ KONFIGURASI FILTER PER ROLE ============
+  // Bendahara: Tanggal Range + Kelas
+  // Kepsek & Yayasan: Mapel + Kelas + Tanggal Range
+  // Admin: Mapel + Kelas + Tanggal Spesifik + Tanggal Range (lengkap)
+  // Guru: Mapel + Kelas + Tanggal Spesifik
+  
+  const showMapel = !isBendahara; // Bendahara tidak perlu filter mapel
+  const showKelas = isBendahara || isKepsek || isYayasan || isAdmin || isGuru;
+  const showDateRange = isBendahara || isKepsek || isYayasan || isAdmin;
+  const showDateSpesifik = isAdmin || isGuru;
+  const showStatCards = isMonitor && !isBendahara;
+  const showResetBtn = isBendahara || isKepsek || isYayasan || isAdmin;
+  
+  let filterHtml = '';
+  
+  // Baris pertama: Tanggal Range (jika ada)
+  if(showDateRange){
+    filterHtml += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 pb-3" style="border-bottom:1px solid var(--bd)">
+      <div><label class="fl">Dari Tanggal</label><input type="date" id="jgDari" class="fi" onchange="ldJGFilter()"></div>
+      <div><label class="fl">Sampai Tanggal</label><input type="date" id="jgSampai" class="fi" onchange="ldJGFilter()"></div>
+    </div>`;
+  }
+  
+  // Baris kedua: Mapel, Kelas, Tanggal Spesifik
+  const cols = [];
+  if(showMapel){
+    cols.push(`<div><label class="fl">Mapel</label><select class="fi" id="jgFM" onchange="ldJGFilter()"><option value="">Semua</option>${A.d.mapel.map(m=>`<option value="${m.IDMapel||m.idmapel}">${m.NamaMapel||m.namamapel}</option>`).join('')}</select></div>`);
+  }
+  if(showKelas){
+    cols.push(`<div><label class="fl">Kelas</label><select class="fi" id="jgFK" onchange="ldJGFilter()"><option value="">Semua</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>`);
+  }
+  if(showDateSpesifik){
+    cols.push(`<div><label class="fl">Tanggal Spesifik</label><input type="date" id="jgDate" class="fi" onchange="ldJGFilter()"></div>`);
+  }
+  
+  // Grid: 1-3 kolom sesuai jumlah
+  const gridClass = cols.length === 1 ? 'grid-cols-1' : (cols.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3');
+  if(cols.length > 0){
+    filterHtml += `<div class="grid ${gridClass} gap-3">${cols.join('')}</div>`;
+  }
+  
+  // Tombol Reset
+  if(showResetBtn){
+    filterHtml += `<button class="bt bt2 mt-3 bts" onclick="resetJgFilter()"><i class="fas fa-rotate-left"></i> Reset Filter</button>`;
+  }
+  
   return`<div><div class="flex justify-between items-center mb-4">
     <div><h1 class="font-h font-800 text-xl">${titleText}</h1></div>
     <div class="flex gap-2">
@@ -1353,22 +1439,35 @@ async function pJG(){
       ${!isMonitor?`<button class="bt bt1" onclick="mAJG()"><i class="fas fa-plus"></i> Tambah Jurnal</button>`:''}
     </div>
   </div>
-  ${isMonitor&&!isBendahara?`<div class="grid grid-cols-3 gap-3 mb-4" id="jgStatCards">${buildJgStats(A._jgData)}</div>`:''}
-  <div class="cd mb-3"><div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <div><label class="fl">Mapel</label><select class="fi" id="jgFM" onchange="ldJGFilter()"><option value="">Semua</option>${A.d.mapel.map(m=>`<option value="${m.IDMapel||m.idmapel}">${m.NamaMapel||m.namamapel}</option>`).join('')}</select></div>
-    <div><label class="fl">Kelas</label><select class="fi" id="jgFK" onchange="ldJGFilter()"><option value="">Semua</option>${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}</select></div>
-    <div><label class="fl">Tanggal</label><input type="date" id="jgDate" class="fi" onchange="ldJGFilter()"></div>
-  </div></div>
+  ${showStatCards?`<div class="grid grid-cols-3 gap-3 mb-4" id="jgStatCards">${buildJgStats(A._jgData)}</div>`:''}
+  <div class="cd mb-3">
+    ${filterHtml}
+  </div>
   <div id="jgC"></div></div>`;
 }
+
 function buildJgStats(data){
   const H=data.filter(j=>(j.StatusGuru||j.statusguru||'Hadir')==='Hadir').length;
   const S=data.filter(j=>(j.StatusGuru||j.statusguru||'')==='Sakit').length;
   const I=data.filter(j=>(j.StatusGuru||j.statusguru||'')==='Izin').length;
   return st('fa-check-circle','Hadir',H,'#059669')+st('fa-briefcase-medical','Sakit',S,'var(--y1)')+st('fa-door-open','Izin',I,'var(--g4)');
 }
+
 function rJGBendaharaRekap(data){
-  if(!data.length)return empty('fa-chalkboard-user','Belum ada data kehadiran guru');
+  // Info periode (selalu tampil untuk bendahara)
+  const dari = document.getElementById('jgDari')?.value || '';
+  const sampai = document.getElementById('jgSampai')?.value || '';
+  const kelas = document.getElementById('jgFK')?.value || '';
+  let periodInfo = '';
+  if(dari || sampai || kelas){
+    let parts = [];
+    if(dari || sampai) parts.push(`Periode: ${dari?fmtDS(dari):'Awal'} s/d ${sampai?fmtDS(sampai):'Sekarang'}`);
+    if(kelas) parts.push(`Kelas: ${kelas}`);
+    periodInfo = `<div class="info-box mb-3"><i class="fas fa-calendar"></i><p>${parts.join(' · ')}</p></div>`;
+  }
+  
+  if(!data.length) return periodInfo + empty('fa-chalkboard-user','Belum ada data kehadiran guru');
+  
   const rekap={};
   data.forEach(j=>{
     const g=j.NamaGuru||j.namaguru||j.EmailGuru||j.emailguru||'Guru';
@@ -1379,17 +1478,34 @@ function rJGBendaharaRekap(data){
     else if(s==='Izin')rekap[g].Izin++;
     rekap[g].Total++;
   });
-  let h=`<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Rekapitulasi Kehadiran Guru</h3><div class="overflow-x-auto"><table class="tb"><thead><tr><th>Nama Guru</th><th>Hadir</th><th>Sakit</th><th>Izin</th><th>Total Mengajar</th></tr></thead><tbody>`;
+  
+  let h = periodInfo + `<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Rekapitulasi Kehadiran Guru</h3><div class="overflow-x-auto"><table class="tb"><thead><tr><th>Nama Guru</th><th>Hadir</th><th>Sakit</th><th>Izin</th><th>Total Mengajar</th></tr></thead><tbody>`;
   Object.values(rekap).forEach(r=>{
     h+=`<tr><td class="font-600">${r.nama}</td><td><span class="bd-tag bgg">${r.Hadir}</span></td><td><span class="bd-tag bgy">${r.Sakit}</span></td><td><span class="bd-tag bg2">${r.Izin}</span></td><td class="font-600">${r.Total}</td></tr>`;
   });
   return h+'</tbody></table></div></div>';
 }
 function rJGList(data,isMonitor){
-  if(!data.length)return empty('fa-book','Belum ada jurnal');
+  // Info periode untuk monitor
+  let periodInfo = '';
+  if(isMonitor){
+    const dari = document.getElementById('jgDari')?.value || '';
+    const sampai = document.getElementById('jgSampai')?.value || '';
+    const kelas = document.getElementById('jgFK')?.value || '';
+    const mapel = document.getElementById('jgFM')?.value || '';
+    if(dari || sampai || kelas || mapel){
+      let parts = [];
+      if(dari || sampai) parts.push(`Periode: ${dari?fmtDS(dari):'Awal'} s/d ${sampai?fmtDS(sampai):'Sekarang'}`);
+      if(kelas) parts.push(`Kelas: ${kelas}`);
+      periodInfo = `<div class="info-box mb-3"><i class="fas fa-calendar"></i><p>${parts.join(' · ')}</p></div>`;
+    }
+  }
+  
+  if(!data.length) return periodInfo + empty('fa-book','Belum ada jurnal');
   let mm={};(A.d.mapel||[]).forEach(m=>mm[m.IDMapel||m.idmapel||m.id]=m.NamaMapel||m.namamapel);
   const { items, total } = pagerInfo('jg');
-  let h=`<div class="flex justify-end mb-2">${makePerPageSelect('pg_jg', PGR.jg.per, `setPagerPer('jg', this.value); ldJGFilter()`)}</div>`;
+  let h = periodInfo;
+  h += `<div class="flex justify-end mb-2">${makePerPageSelect('pg_jg', PGR.jg.per, `setPagerPer('jg', this.value); ldJGFilter()`)}</div>`;
   h += `<div class="space-y-2">`;
   items.forEach(j=>{
     const jid=j.IDJurnal||j.ID||j.id||'';
@@ -1426,16 +1542,48 @@ function gpJG(p){
     document.getElementById('jgC').innerHTML = rJGList(PGR.jg.data, ['Kepala Sekolah','Yayasan','Admin'].includes(A.u.Role));
   });
 }
+
 function ldJGFilter(){
-  const fm=document.getElementById('jgFM')?.value||'',fk=document.getElementById('jgFK')?.value||'',fd=document.getElementById('jgDate')?.value||'';
+  // Ambil semua filter yang mungkin ada (optional chaining untuk element yang tidak ada)
+  const fm = document.getElementById('jgFM')?.value || '';
+  const fk = document.getElementById('jgFK')?.value || '';
+  const fd = document.getElementById('jgDate')?.value || '';
+  const fdari = document.getElementById('jgDari')?.value || '';
+  const fsampai = document.getElementById('jgSampai')?.value || '';
+  
   let f=[...A._jgData];
-  if(fm)f=f.filter(j=>String(j.IDMapel||j.idmapel).includes(fm));
-  if(fk)f=f.filter(j=>(j.Kelas||j.kelas)===fk);
-  if(fd)f=f.filter(j=>String(j.Tanggal||j.tanggal||'').startsWith(fd));
-  const isBendahara=A.u.Role==='Bendahara';
-  if(isBendahara){ document.getElementById('jgC').innerHTML=rJGBendaharaRekap(f); }
-  else { PGR.jg.data = f; PGR.jg.page = 1; document.getElementById('jgC').innerHTML=rJGList(f,['Kepala Sekolah','Yayasan','Admin'].includes(A.u.Role)); }
+  if(fm) f = f.filter(j => String(j.IDMapel||j.idmapel).includes(fm));
+  if(fk) f = f.filter(j => String(j.Kelas||j.kelas) === String(fk));
+  if(fd) f = f.filter(j => String(j.Tanggal||j.tanggal||'').startsWith(fd));
+  
+  // Filter range tanggal (untuk bendahara, kepsek, yayasan, admin)
+  if(fdari) f = f.filter(j => String(j.Tanggal||j.tanggal||'').split('T')[0] >= fdari);
+  if(fsampai) f = f.filter(j => String(j.Tanggal||j.tanggal||'').split('T')[0] <= fsampai);
+  
+  const isBendahara = A.u.Role === 'Bendahara';
+  const isMonitor = ['Kepala Sekolah','Yayasan','Admin'].includes(A.u.Role);
+  
+  // Update stat cards untuk monitor non-bendahara
+  if(isMonitor && !isBendahara){
+    const sc = document.getElementById('jgStatCards');
+    if(sc) sc.innerHTML = buildJgStats(f);
+  }
+  
+  if(isBendahara){ 
+    document.getElementById('jgC').innerHTML = rJGBendaharaRekap(f); 
+  } else { 
+    PGR.jg.data = f; 
+    PGR.jg.page = 1; 
+    document.getElementById('jgC').innerHTML = rJGList(f, isMonitor); 
+  }
 }
+
+function resetJgFilter(){
+  const ids = ['jgFM','jgFK','jgDate','jgDari','jgSampai'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ldJGFilter();
+}
+
 function mAJG(){
   api('getKelasList').then(r=>{
     const kl=r.success?r.data:[];
@@ -1486,6 +1634,15 @@ async function smEJG(id){
 
 // ============ GANTI dlJgPdf() ============
 async function dlJgPdf(){
+    // Info periode (jika ada filter tanggal)
+const dari = document.getElementById('jgDari')?.value||'';
+const sampai = document.getElementById('jgSampai')?.value||'';
+if(dari || sampai){
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`Periode: ${dari?fmtDS(dari):'Awal'} s/d ${sampai?fmtDS(sampai):'Sekarang'}`, pw/2, y, {align:'center'});
+  y += 6;
+}
   const d = A._jgData;
   if(!d.length){ toast('Tidak ada data','warning'); return; }
   
@@ -1600,43 +1757,57 @@ function ldKeuangan(){
 }
 function gpKeu(p){ gotoPager('keu', p, ldKeuangan); }
 
-function mAKeuangan(jenis){
-  opM(`Tambah ${jenis}`,`<div class="space-y-3">
-    <div><label class="fl">Tanggal</label><input type="date" id="kTanggal" class="fi" value="${todayISO()}"></div>
-    <div><label class="fl">Keterangan</label><input id="kKet" class="fi" placeholder="Deskripsi transaksi..."></div>
-    <div><label class="fl">Nominal (Rp)</label><input id="kNom" class="fi nominal-input" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')"></div>
-    <div><label class="fl">Bukti Transaksi</label><input type="file" id="kBukti" class="fi" accept="image/*,.pdf" onchange="prvBukti(this,'prvBuktiImg')"><img id="prvBuktiImg" class="img-preview" style="display:none"></div>
-  </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAKeuangan('${jenis}')">Simpan</button>`);
-}
-function prvBukti(inp,previewId){const prev=document.getElementById(previewId);if(inp.files&&inp.files[0]){const reader=new FileReader();reader.onload=e=>{prev.src=e.target.result;prev.style.display='block'};reader.readAsDataURL(inp.files[0])}}
 
-async function smAKeuangan(jenis){
-  const t=document.getElementById('kTanggal').value;
-  const k=document.getElementById('kKet').value;
-  // Selalu ambil dari value, strip semua non-digit
-  const rawNomVal = document.getElementById('kNom').value.replace(/\D/g,'');
-  const n = Number(rawNomVal || 0);
-  if(!t||!k||!n||n<=0){toast('Lengkapi form dengan nominal yang valid','warning');return}
-  const file=document.getElementById('kBukti').files[0];let b64='',fn='';if(file){b64=await toBase64(file);fn=file.name}
-  const r=await api('addKeuangan',{tanggal:t,jenis,keterangan:k,nominal:n,penginput:A.u.Nama,fileData:b64?{base64:b64,filename:fn}:null});
-  if(r.success){clM();invCache(['getKeuangan']);toast(r.message);nav('keuangan')}else toast(r.message,'error');
-}
 function mEKeuangan(id,tanggal,keterangan,jenis,nominal){
   opM(`Edit Keuangan`,`<div class="space-y-3">
     <div><label class="fl">Tanggal</label><input type="date" id="ekTanggal" class="fi" value="${tanggal}"></div>
     <div><label class="fl">Keterangan</label><input id="ekKet" class="fi" value="${keterangan}"></div>
     <div><label class="fl">Jenis</label><select id="ekJenis" class="fi"><option value="Pemasukan"${jenis==='Pemasukan'?' selected':''}>Pemasukan</option><option value="Pengeluaran"${jenis==='Pengeluaran'?' selected':''}>Pengeluaran</option></select></div>
-    <div><label class="fl">Nominal</label><input id="ekNom" class="fi nominal-input" value="${Number(nominal||0).toLocaleString('id-ID')}" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')"></div>
+    <div>
+      <label class="fl">Nominal (Rp)</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-600 text-slate-500 pointer-events-none">Rp</span>
+        <input id="ekNom" type="text" inputmode="numeric" class="fi nominal-input" value="${Number(nominal||0).toLocaleString('id-ID')}" oninput="fmtInputNumber(this);document.getElementById('ekNomPreview').textContent=fRp(getNumberValue(this))" style="padding-left:38px">
+      </div>
+      <p id="ekNomPreview" class="text-[11px] mt-1" style="color:var(--tx3)">${fRp(nominal||0)}</p>
+    </div>
     <div><label class="fl">Bukti Baru</label><input type="file" id="ekBukti" class="fi" accept="image/*,.pdf" onchange="prvBukti(this,'ekBuktiPrv')"><img id="ekBuktiPrv" class="img-preview" style="display:none"></div>
   </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smEKeuangan('${id}')">Simpan</button>`);
 }
+function prvBukti(inp,previewId){const prev=document.getElementById(previewId);if(inp.files&&inp.files[0]){const reader=new FileReader();reader.onload=e=>{prev.src=e.target.result;prev.style.display='block'};reader.readAsDataURL(inp.files[0])}}
+
+
+async function smAKeuangan(jenis){
+  const t=document.getElementById('kTanggal').value;
+  const k=document.getElementById('kKet').value;
+  const n = getNumberValue(document.getElementById('kNom'));
+  if(!t||!k||!n||n<=0){toast('Lengkapi form dengan nominal yang valid','warning');return}
+  const file=document.getElementById('kBukti').files[0];let b64='',fn='';if(file){b64=await toBase64(file);fn=file.name}
+  const r=await api('addKeuangan',{tanggal:t,jenis,keterangan:k,nominal:n,penginput:A.u.Nama,fileData:b64?{base64:b64,filename:fn}:null});
+  if(r.success){clM();invCache(['getKeuangan']);toast(r.message);nav('keuangan')}else toast(r.message,'error');
+}
+function mAKeuangan(jenis){
+  opM(`Tambah ${jenis}`,`<div class="space-y-3">
+    <div><label class="fl">Tanggal</label><input type="date" id="kTanggal" class="fi" value="${todayISO()}"></div>
+    <div><label class="fl">Keterangan</label><input id="kKet" class="fi" placeholder="Deskripsi transaksi..."></div>
+    <div>
+      <label class="fl">Nominal (Rp)</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-600 text-slate-500 pointer-events-none">Rp</span>
+        <input id="kNom" type="text" inputmode="numeric" class="fi nominal-input" placeholder="0" oninput="fmtInputNumber(this);document.getElementById('kNomPreview').textContent=fRp(getNumberValue(this))" style="padding-left:38px">
+      </div>
+      <p id="kNomPreview" class="text-[11px] mt-1" style="color:var(--tx3)">Rp 0</p>
+    </div>
+    <div><label class="fl">Bukti Transaksi</label><input type="file" id="kBukti" class="fi" accept="image/*,.pdf" onchange="prvBukti(this,'prvBuktiImg')"><img id="prvBuktiImg" class="img-preview" style="display:none"></div>
+  </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smAKeuangan('${jenis}')">Simpan</button>`);
+}
+
 
 async function smEKeuangan(id){
   const t=document.getElementById('ekTanggal').value;
   const k=document.getElementById('ekKet').value;
   const j=document.getElementById('ekJenis').value;
-  const rawNomVal = document.getElementById('ekNom').value.replace(/\D/g,'');
-  const n = Number(rawNomVal || 0);
+  const n = getNumberValue(document.getElementById('ekNom'));
   if(!t||!k||!n||n<=0){toast('Lengkapi form dengan nominal yang valid','warning');return}
   const file=document.getElementById('ekBukti').files[0];let b64='',fn='';if(file){b64=await toBase64(file);fn=file.name}
   const r=await api('updateKeuangan',{id,tanggal:t,jenis:j,keterangan:k,nominal:n,fileData:b64?{base64:b64,filename:fn}:null});
@@ -1684,25 +1855,65 @@ function ldSPP(){
 function gpSPP(p){ gotoPager('spp', p, ldSPP); }
 
 function mASPP(){
-  api('getSiswaByKelas',{kelas:'__ALL__'}).then(r=>{
-    const sw=r.success?r.data.filter(u=>u.Role==='Siswa'):[];
+  api('getKelasList').then(rk=>{
+    const kl = rk.success ? rk.data : [];
     opM('Catat Pembayaran SPP',`<div class="space-y-3">
       <div><label class="fl">Tanggal</label><input type="date" id="sTanggal" class="fi" value="${todayISO()}"></div>
-      <div><label class="fl">Siswa</label><select id="sSiswa" class="fi">${so(sw.map(s=>({v:s.Email+'|'+s.Nama+'|'+s.Kelas,l:s.Nama+' ('+s.Kelas+')'})))}</select></div>
+      <div>
+        <label class="fl">Pilih Kelas</label>
+        <select id="sKelasSPP" class="fi" onchange="ldSiswaSPP()">
+          <option value="">-- Pilih Kelas --</option>
+          ${kl.map(k=>`<option value="${k}">${k}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label class="fl">Siswa</label>
+        <select id="sSiswa" class="fi"><option value="">-- Pilih Kelas Dulu --</option></select>
+      </div>
       <div><label class="fl">Bulan</label><select id="sBulan" class="fi">${so(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map(b=>({v:b,l:b})))}</select></div>
-      <div><label class="fl">Nominal (Rp)</label><input id="sNom" class="fi nominal-input" placeholder="0" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')"></div>
+      <div>
+        <label class="fl">Nominal (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-600 text-slate-500 pointer-events-none">Rp</span>
+          <input id="sNom" type="text" inputmode="numeric" class="fi nominal-input" placeholder="0" oninput="fmtInputNumber(this);document.getElementById('sNomPreview').textContent=fRp(getNumberValue(this))" style="padding-left:38px">
+        </div>
+        <p id="sNomPreview" class="text-[11px] mt-1" style="color:var(--tx3)">Rp 0</p>
+      </div>
       <div><label class="fl">Bukti Pembayaran</label><input type="file" id="sBukti" class="fi" accept="image/*,.pdf" onchange="prvBukti(this,'sBuktiPrv')"><img id="sBuktiPrv" class="img-preview" style="display:none"></div>
     </div>`,`<button class="bt bt2" onclick="clM()">Batal</button><button class="bt bt1" onclick="smASPP()">Simpan</button>`);
   });
 }
 
+// Fungsi baru untuk load siswa setelah pilih kelas
+async function ldSiswaSPP(){
+  const kls = document.getElementById('sKelasSPP')?.value;
+  const selSiswa = document.getElementById('sSiswa');
+  if(!kls){
+    selSiswa.innerHTML = '<option value="">-- Pilih Kelas Dulu --</option>';
+    return;
+  }
+  selSiswa.innerHTML = '<option value="">Memuat siswa...</option>';
+  const r = await api('getSiswaByKelas', {kelas: kls});
+  const sw = r.success ? r.data.filter(u => u.Role === 'Siswa') : [];
+  if(!sw.length){
+    selSiswa.innerHTML = '<option value="">-- Tidak ada siswa di kelas ini --</option>';
+    return;
+  }
+  selSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>' + 
+    sw.map(s => `<option value="${s.Email}|${s.Nama}|${s.Kelas}">${s.Nama}</option>`).join('');
+}
+
 async function smASPP(){
   const t=document.getElementById('sTanggal').value;
+  const kls=document.getElementById('sKelasSPP').value;
   const sw=document.getElementById('sSiswa').value;
   const b=document.getElementById('sBulan').value;
-  const rawNomVal = document.getElementById('sNom').value.replace(/\D/g,'');
-  const n = Number(rawNomVal || 0);
-  if(!t||!sw||!b||!n||n<=0){toast('Lengkapi form dengan nominal yang valid','warning');return}
+  const n = getNumberValue(document.getElementById('sNom'));
+  if(!t){toast('Tanggal wajib diisi','warning');return}
+  if(!kls){toast('Pilih kelas terlebih dahulu','warning');return}
+  if(!sw){toast('Pilih siswa terlebih dahulu','warning');return}
+  if(!b){toast('Pilih bulan','warning');return}
+  if(!n||n<=0){toast('Isi nominal yang valid','warning');return}
   const[em,nm,kl]=sw.split('|');
   const file=document.getElementById('sBukti').files[0];let b64='',fn='';if(file){b64=await toBase64(file);fn=file.name}
   const r=await api('addSPP',{tanggal:t,namaSiswa:nm,emailSiswa:em,kelas:kl,bulan:b,nominal:n,penginput:A.u.Nama,fileData:b64?{base64:b64,filename:fn}:null});
@@ -2232,18 +2443,26 @@ async function pNi(){
   const isOrtu = A.u.Role === 'Orang Tua';
   const eml = isOrtu ? A.u.EmailAnak : A.u.Email;
   const kls = isOrtu ? A.u.KelasAnak : A.u.Kelas;
-  const [rn, rj, rt, rkTarget, rkNilai] = await Promise.all([
+  const [rn, rj, rt, rkTarget, rkNilai, rm] = await Promise.all([
     api('getNilaiKuis', {email: eml}),
     api('getJawabanTugas', {email: eml}),
     api('getTugas', {kelas: kls}),
     api('getTargetKarakter', {semester:A.sess.semester, kelas:kls}),
-    api('getNilaiKarakter', {emailSiswa:eml, semua:true, semester:A.sess.semester, tahunPelajaran:A.sess.tahunPelajaran})
+    api('getNilaiKarakter', {emailSiswa:eml, semua:true, semester:A.sess.semester, tahunPelajaran:A.sess.tahunPelajaran}),
+    api('getMapel')
   ]);
   const tasks = rt.success ? rt.data : [];
   const taskMap = {}; tasks.forEach(t => taskMap[t.IDTugas||t.idtugas] = t.Judul);
   const jw = (rj.success ? rj.data : []).map(normJ);
+  
+  // Map IDMapel → NamaMapel
+  const mapelMap = {};
+  if(rm.success) rm.data.forEach(m => { 
+    mapelMap[m.IDMapel || m.idmapel] = m.NamaMapel || m.namamapel; 
+  });
+  
   _nilaiState = {
-    jw, taskMap,
+    jw, taskMap, mapelMap,
     rn: rn.success ? rn.data : [],
     tGuru: rkTarget.success ? (rkTarget.dataGuru||[]).map(normJ) : [],
     tOrtu: rkTarget.success ? (rkTarget.dataOrtu||[]).map(normJ) : [],
@@ -2263,7 +2482,7 @@ async function pNi(){
   </div>`;
 }
 function renderNilaiAnak(){
-  const { jw, taskMap, rn, tGuru, tOrtu, nilais } = _nilaiState;
+  const { jw, taskMap, rn, tGuru, tOrtu, nilais, mapelMap } = _nilaiState;
   const lblMap = {1:'Perlu Bimbingan',2:'Mulai Berkembang',3:'Berkembang Sesuai Harapan',4:'Sangat Berkembang'};
   const { items: pageJw, total } = pagerInfo('nilaiAnak');
 
@@ -2282,19 +2501,26 @@ function renderNilaiAnak(){
   }
   h += `</div>`;
 
-h += `<div class="cd mb-4"><h3 class="font-h font-700 text-sm mb-3">Nilai Kuis / Latihan</h3>`;
-if(!rn.length){ h += empty('fa-chart-column','Belum ada nilai kuis'); }
-else {
-  h += `<table class="tb"><thead><tr><th>Bab</th><th>Skor</th><th>Tanggal</th></tr></thead><tbody>`;
-  rn.forEach(n=>{ 
-    const bab = n.bab || n.Bab || '-';
-    const skor = n.skor || n.Skor || '-';
-    const tanggal = n.tanggal || n.Tanggal || '';
-    h += `<tr><td>${bab}</td><td><span class="bd-tag bgg font-700">${skor}</span></td><td class="text-xs text-gray-500">${tanggal?fmtDS(tanggal):'-'}</td></tr>`; 
-  });
-  h += `</tbody></table>`;
-}
-h += `</div>`;
+  h += `<div class="cd mb-4"><h3 class="font-h font-700 text-sm mb-3">Nilai Kuis / Latihan</h3>`;
+  if(!rn.length){ h += empty('fa-chart-column','Belum ada nilai kuis'); }
+  else {
+    h += `<div class="overflow-x-auto"><table class="tb"><thead><tr><th>Nama Mapel</th><th>Bab</th><th>Skor</th><th>Tanggal</th></tr></thead><tbody>`;
+    rn.forEach(n=>{ 
+      const idMapel = n.idmapel || n.IDMapel || '';
+      const namaMapel = (mapelMap && mapelMap[idMapel]) || idMapel || '-';
+      const bab = n.bab || n.Bab || '-';
+      const skor = n.skor || n.Skor || '-';
+      const tanggal = n.tanggal || n.Tanggal || '';
+      h += `<tr>
+        <td class="font-600 text-sm">${namaMapel}</td>
+        <td>${bab}</td>
+        <td><span class="bd-tag bgg font-700">${skor}</span></td>
+        <td class="text-xs text-gray-500">${tanggal?fmtDS(tanggal):'-'}</td>
+      </tr>`; 
+    });
+    h += `</tbody></table></div>`;
+  }
+  h += `</div>`;
 
   h += `<div class="cd"><h3 class="font-h font-700 text-sm mb-3">Penilaian Karakter</h3><div class="space-y-4">`;
   h += `<div><p class="text-xs font-700 text-blue-700 mb-2 uppercase">Penilaian oleh Guru</p>`;
@@ -2456,15 +2682,12 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
   const capaianAll = rC.success ? rC.data.map(normJ) : [];
   const mapelList = rM.success ? rM.data.map(normJ) : [];
   
-  // Cari data siswa untuk nama orang tua
   const siswaData = rSiswa.success ? rSiswa.data.find(s => String(s.Email).toLowerCase() === String(email).toLowerCase()) : null;
   const namaOrtu = siswaData?.NamaOrtu || siswaData?.namaortu || '-';
   
-  // Prestasi siswa
   const prestasiAll = rPrestasi.success ? rPrestasi.data.map(normJ) : [];
   const prestasiSiswa = prestasiAll.filter(p => String(p.emailsiswa||'').toLowerCase() === String(email).toLowerCase());
   
-  // Absensi siswa (hitung Sakit, Izin, Alpha)
   const absenAll = rAbsen.success ? rAbsen.data.map(normJ) : [];
   const absenSiswa = absenAll.filter(a => String(a.emailsiswa||'').toLowerCase() === String(email).toLowerCase());
   let cntSakit = 0, cntIzin = 0, cntAlpha = 0;
@@ -2481,39 +2704,40 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
   let y = 15;
   
   // ============ HEADER ============
-  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,20,20) }catch(e){}
+  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,18,18) }catch(e){}
   doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
+  doc.setFontSize(12); // HANYA JUDUL YANG LEBIH BESAR
   doc.text('LAPORAN HASIL BELAJAR', pw/2, y+8, {align:'center'});
   doc.setFontSize(10);
   doc.setFont('helvetica','normal');
   doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`, pw/2, y+14, {align:'center'});
   doc.setLineWidth(0.5);
-  doc.line(ml, y+22, pw-mr, y+22);
-  y += 28;
+  doc.line(ml, y+20, pw-mr, y+20);
+  y += 26;
   
-  // ============ INFO SISWA ============
+  // ============ INFO SISWA (font 10pt semua) ============
   doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
   const col2 = pw/2 + 5;
-  const lineH = 6;
+  const lineH = 5.5;
   
-  doc.text('Nama', ml, y); doc.text(': ' + nama, ml+35, y);
-  doc.text('Kelas', col2, y); doc.text(': ' + kelas, col2+35, y);
+  doc.text('Nama', ml, y); doc.text(': ' + nama, ml+30, y);
+  doc.text('Kelas', col2, y); doc.text(': ' + kelas, col2+30, y);
   y += lineH;
-  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+35, y);
-  doc.text('Semester', col2, y); doc.text(': ' + A.sess.semester, col2+35, y);
+  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+30, y);
+  doc.text('Semester', col2, y); doc.text(': ' + A.sess.semester, col2+30, y);
   y += lineH;
-  doc.text('Sekolah', ml, y); doc.text(': ' + (profil.namasekolah || 'PKBM Baitul Hikmah'), ml+35, y);
-  doc.text('Tahun Pelajaran', col2, y); doc.text(': ' + A.sess.tahunPelajaran, col2+35, y);
+  doc.text('Sekolah', ml, y); doc.text(': ' + (profil.namasekolah || 'PKBM Baitul Hikmah'), ml+30, y);
+  doc.text('Tahun Pelajaran', col2, y); doc.text(': ' + A.sess.tahunPelajaran, col2+30, y);
   y += lineH;
-  doc.text('Alamat', ml, y); doc.text(': ' + (profil.alamat || '-'), ml+35, y);
+  doc.text('Alamat', ml, y); doc.text(': ' + (profil.alamat || '-'), ml+30, y);
   y += 8;
   
   // ============ A. NILAI AKADEMIK ============
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10); // SAMA dengan body
   doc.text('A. Nilai Akademik', ml, y);
-  y += 2;
+  y += 3;
   
   let tbA = [];
   let no = 1;
@@ -2536,24 +2760,42 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
     head: [['No', 'Mata Pelajaran', 'Nilai', 'Deskripsi Capaian Kompetensi']],
     body: tbA.length ? tbA : [['-', 'Belum ada nilai', '-', '-']],
     theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
+    // FONT SERAGAM 10pt SEMUA
+    styles: { 
+      fontSize: 10, 
+      cellPadding: 2.5, 
+      overflow: 'linebreak',
+      font: 'helvetica',
+      textColor: [0, 0, 0],
+      lineColor: [100, 100, 100],
+      lineWidth: 0.1
+    },
+    headStyles: { 
+      fillColor: [29,78,216], 
+      textColor: 255, 
+      fontStyle: 'bold',
+      fontSize: 10,
+      halign: 'center'
+    },
+    bodyStyles: {
+      fontSize: 10
+    },
     columnStyles: {
-      0: { cellWidth: 8, halign: 'center' },
-      1: { cellWidth: 40 },
+      0: { cellWidth: 10, halign: 'center' },
+      1: { cellWidth: 45, halign: 'left' },
       2: { cellWidth: 15, halign: 'center', fontStyle: 'bold' },
-      3: { cellWidth: 117 }
+      3: { cellWidth: 110, halign: 'left' }
     },
     margin: { left: ml, right: mr }
   });
-  y = doc.lastAutoTable.finalY + 10;
+  y = doc.lastAutoTable.finalY + 8;
   
   // ============ B. PRESTASI ============
   if(y > 230){ doc.addPage(); y = 20; }
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.text('B. Prestasi', ml, y);
-  y += 2;
+  y += 3;
   
   let tbB = [];
   if(prestasiSiswa.length){
@@ -2569,24 +2811,38 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
     head: [['No', 'Prestasi', 'Juara', 'Tahun']],
     body: tbB,
     theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
+    styles: { 
+      fontSize: 10, 
+      cellPadding: 2.5,
+      font: 'helvetica',
+      textColor: [0, 0, 0],
+      lineColor: [100, 100, 100],
+      lineWidth: 0.1
+    },
+    headStyles: { 
+      fillColor: [29,78,216], 
+      textColor: 255, 
+      fontStyle: 'bold',
+      fontSize: 10,
+      halign: 'center'
+    },
+    bodyStyles: { fontSize: 10 },
     columnStyles: {
       0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 110 },
-      2: { cellWidth: 30, halign: 'center' },
-      3: { cellWidth: 30, halign: 'center' }
+      1: { cellWidth: 115, halign: 'left' },
+      2: { cellWidth: 27, halign: 'center' },
+      3: { cellWidth: 28, halign: 'center' }
     },
     margin: { left: ml, right: mr }
   });
-  y = doc.lastAutoTable.finalY + 10;
+  y = doc.lastAutoTable.finalY + 8;
   
-  // ============ C. KETIDAKHADIRAN ============
-  if(y > 230){ doc.addPage(); y = 20; }
+  // ============ C. KETIDAKHADIRAN (kolom lebih sempit) ============
+  if(y > 240){ doc.addPage(); y = 20; }
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.text('C. Ketidakhadiran', ml, y);
-  y += 2;
+  y += 3;
   
   doc.autoTable({
     startY: y,
@@ -2597,12 +2853,29 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
       ['Tanpa Keterangan', cntAlpha + ' Hari']
     ],
     theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 2 },
-    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 100 },
-      1: { cellWidth: 80, halign: 'center', fontStyle: 'bold' }
+    styles: { 
+      fontSize: 10, 
+      cellPadding: 2.5,
+      font: 'helvetica',
+      textColor: [0, 0, 0],
+      lineColor: [100, 100, 100],
+      lineWidth: 0.1
     },
+    headStyles: { 
+      fillColor: [29,78,216], 
+      textColor: 255, 
+      fontStyle: 'bold',
+      fontSize: 10,
+      halign: 'center'
+    },
+    bodyStyles: { fontSize: 10 },
+    // KOLOM LEBIH SEMPIT (total 80mm, bukan 180mm)
+    columnStyles: {
+      0: { cellWidth: 55, halign: 'left' },
+      1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
+    },
+    // Table hanya pakai separuh halaman
+    tableWidth: 80,
     margin: { left: ml, right: mr }
   });
   y = doc.lastAutoTable.finalY + 15;
@@ -2616,11 +2889,13 @@ async function cetakRaporAkademik(email, nama, kelas, nisn){
   doc.text('Wali Kelas,', pw-mr-55, y);
   
   y += 6;
+  doc.setFont('helvetica','bold');
   doc.text(namaOrtu || '......................', ml+5, y+18);
   doc.text(profil.walikelas || '......................', pw-mr-55, y+18);
   
   y += 28;
   if(y > 260){ doc.addPage(); y = 20; }
+  doc.setFont('helvetica','normal');
   doc.text('Mengetahui,', pw/2, y, {align:'center'});
   doc.text('Kepala Sekolah ' + (profil.namasekolah || ''), pw/2, y+6, {align:'center'});
   y += 24;
@@ -2681,41 +2956,42 @@ async function cetakRaporKarakter(email, nama, nisn, kelas){
   let y = 15;
   
   // ============ HEADER ============
-  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,20,20) }catch(e){}
+  if(LOGO_B64) try{ doc.addImage(LOGO_B64,'JPEG',ml,y,18,18) }catch(e){}
   doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
+  doc.setFontSize(12); // HANYA JUDUL
   doc.text('LAPORAN PENILAIAN KARAKTER SISWA', pw/2, y+8, {align:'center'});
   doc.setFontSize(10);
   doc.setFont('helvetica','normal');
   doc.text(`Semester ${A.sess.semester} — Tahun Pelajaran ${A.sess.tahunPelajaran}`, pw/2, y+14, {align:'center'});
   doc.setLineWidth(0.5);
-  doc.line(ml, y+22, pw-mr, y+22);
-  y += 28;
+  doc.line(ml, y+20, pw-mr, y+20);
+  y += 26;
   
   // ============ INFO SISWA ============
   doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
   const col2 = pw/2 + 5;
-  const lineH = 6;
+  const lineH = 5.5;
   
-  doc.text('Nama', ml, y); doc.text(': ' + nama, ml+35, y);
-  doc.text('Kelas', col2, y); doc.text(': ' + kelas, col2+35, y);
+  doc.text('Nama', ml, y); doc.text(': ' + nama, ml+30, y);
+  doc.text('Kelas', col2, y); doc.text(': ' + kelas, col2+30, y);
   y += lineH;
-  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+35, y);
-  doc.text('Semester', col2, y); doc.text(': ' + A.sess.semester, col2+35, y);
+  doc.text('NISN', ml, y); doc.text(': ' + (nisn || '-'), ml+30, y);
+  doc.text('Semester', col2, y); doc.text(': ' + A.sess.semester, col2+30, y);
   y += lineH;
-  doc.text('Sekolah', ml, y); doc.text(': ' + (profil.namasekolah || 'PKBM Baitul Hikmah'), ml+35, y);
-  doc.text('Tahun Pelajaran', col2, y); doc.text(': ' + A.sess.tahunPelajaran, col2+35, y);
+  doc.text('Sekolah', ml, y); doc.text(': ' + (profil.namasekolah || 'PKBM Baitul Hikmah'), ml+30, y);
+  doc.text('Tahun Pelajaran', col2, y); doc.text(': ' + A.sess.tahunPelajaran, col2+30, y);
   y += lineH;
-  doc.text('Alamat', ml, y); doc.text(': ' + (profil.alamat || '-'), ml+35, y);
-  y += 10;
+  doc.text('Alamat', ml, y); doc.text(': ' + (profil.alamat || '-'), ml+30, y);
+  y += 8;
   
   const lblMap = {1:'Perlu Bimbingan', 2:'Mulai Berkembang', 3:'Berkembang Sesuai Harapan', 4:'Sangat Berkembang'};
   
   // ============ A. PENILAIAN GURU ============
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.text('A. Penilaian Karakter oleh Guru (Skala 1-4)', ml, y);
-  y += 2;
+  y += 3;
   
   let tbG = [];
   tG.forEach((t, i) => {
@@ -2725,30 +3001,46 @@ async function cetakRaporKarakter(email, nama, nisn, kelas){
     tbG.push([i+1, t.bidang || '-', t.target || '-', v, lblMap[v] || '-']);
   });
   
-  doc.autoTable({
-    startY: y,
-    head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
-    body: tbG.length ? tbG : [['-','-','Belum ada penilaian guru','-','-']],
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-    headStyles: { fillColor: [29,78,216], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 8, halign: 'center' },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 75 },
-      3: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
-      4: { cellWidth: 45 }
-    },
-    margin: { left: ml, right: mr }
-  });
-  y = doc.lastAutoTable.finalY + 10;
+doc.autoTable({
+  startY: y,
+  head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
+  body: tbG.length ? tbG : [['-','-','Belum ada penilaian guru','-','-']],
+  theme: 'grid',
+  styles: { 
+    fontSize: 10, 
+    cellPadding: 2.5, 
+    overflow: 'linebreak',
+    font: 'helvetica',
+    textColor: [0, 0, 0],
+    lineColor: [100, 100, 100],
+    lineWidth: 0.1
+  },
+  headStyles: { 
+    fillColor: [29,78,216], 
+    textColor: 255, 
+    fontStyle: 'bold',
+    fontSize: 10,
+    halign: 'center',
+    valign: 'middle'
+  },
+  bodyStyles: { fontSize: 10 },
+  columnStyles: {
+    0: { cellWidth: 10, halign: 'center' },
+    1: { cellWidth: 28, halign: 'left' },
+    2: { cellWidth: 72, halign: 'left' },
+    3: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },  // ← Diperbesar dari 12 jadi 20
+    4: { cellWidth: 50, halign: 'left' }
+  },
+  margin: { left: ml, right: mr }
+});
+  y = doc.lastAutoTable.finalY + 8;
   
   // ============ B. PENILAIAN ORANG TUA ============
   if(y > 230){ doc.addPage(); y = 20; }
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.text('B. Penilaian Karakter oleh Orang Tua (Skala 1-4)', ml, y);
-  y += 2;
+  y += 3;
   
   let tbO = [];
   tO.forEach((t, i) => {
@@ -2758,22 +3050,38 @@ async function cetakRaporKarakter(email, nama, nisn, kelas){
     tbO.push([i+1, t.bidang || '-', t.target || '-', v, lblMap[v] || '-']);
   });
   
-  doc.autoTable({
-    startY: y,
-    head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
-    body: tbO.length ? tbO : [['-','-','Belum ada penilaian orang tua','-','-']],
-    theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
-    headStyles: { fillColor: [245,158,11], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      0: { cellWidth: 8, halign: 'center' },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 75 },
-      3: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
-      4: { cellWidth: 45 }
-    },
-    margin: { left: ml, right: mr }
-  });
+ doc.autoTable({
+  startY: y,
+  head: [['No','Bidang','Target/Indikator','Nilai','Keterangan']],
+  body: tbO.length ? tbO : [['-','-','Belum ada penilaian orang tua','-','-']],
+  theme: 'grid',
+  styles: { 
+    fontSize: 10, 
+    cellPadding: 2.5, 
+    overflow: 'linebreak',
+    font: 'helvetica',
+    textColor: [0, 0, 0],
+    lineColor: [100, 100, 100],
+    lineWidth: 0.1
+  },
+  headStyles: { 
+    fillColor: [245,158,11], 
+    textColor: 255, 
+    fontStyle: 'bold',
+    fontSize: 10,
+    halign: 'center',
+    valign: 'middle'
+  },
+  bodyStyles: { fontSize: 10 },
+  columnStyles: {
+    0: { cellWidth: 10, halign: 'center' },
+    1: { cellWidth: 28, halign: 'left' },
+    2: { cellWidth: 72, halign: 'left' },
+    3: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },  // ← Diperbesar dari 12 jadi 20
+    4: { cellWidth: 50, halign: 'left' }
+  },
+  margin: { left: ml, right: mr }
+});
   y = doc.lastAutoTable.finalY + 15;
   
   // ============ TANDA TANGAN ============
@@ -2785,11 +3093,13 @@ async function cetakRaporKarakter(email, nama, nisn, kelas){
   doc.text('Wali Kelas,', pw-mr-55, y);
   
   y += 6;
+  doc.setFont('helvetica','bold');
   doc.text(namaOrtu || '......................', ml+5, y+18);
   doc.text(profil.walikelas || '......................', pw-mr-55, y+18);
   
   y += 28;
   if(y > 260){ doc.addPage(); y = 20; }
+  doc.setFont('helvetica','normal');
   doc.text('Mengetahui,', pw/2, y, {align:'center'});
   doc.text('Kepala Sekolah ' + (profil.namasekolah || ''), pw/2, y+6, {align:'center'});
   y += 24;
