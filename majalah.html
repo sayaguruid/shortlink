@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asisten LINES Garut — Generator Berita & Majalah</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#0a3d2a;--green-light:#12553a;--green-ghost:#e8f5ee;
+  --gold:#b8963e;--gold-light:#d4b563;--gold-ghost:#faf6ed;
+  --bg:#f4f5f7;--card:#fff;--text:#1a1d21;--text2:#5a5f66;--text3:#8c919a;
+  --border:#e2e4e8;--radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.05),0 8px 32px rgba(0,0,0,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+
+.hero{background:linear-gradient(145deg,#072e1f 0%,#0a3d2a 40%,#12553a 100%);padding:28px 24px 24px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(184,150,62,.12) 0%,transparent 70%);pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:720px;margin:0 auto}
+.hero-logo{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid rgba(255,255,255,.12)}
+.hero-logo img{width:36px;height:36px;object-fit:contain}
+.hero h1{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px}
+.hero p{color:rgba(255,255,255,.55);font-size:12.5px;font-weight:500}
+
+.top-nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.top-nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:2px;padding:0 16px}
+.nav-btn{flex:1;padding:14px 16px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:700;color:var(--text3);font-family:inherit;border-bottom:3px solid transparent;transition:all .2s;position:relative}
+.nav-btn:hover{color:var(--text2);background:var(--bg)}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--gold)}
+.nav-btn .badge{display:inline-block;background:var(--gold);color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:10px;margin-left:5px;vertical-align:middle}
+
+.container{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.container.narrow{max-width:720px}
+.tab-panel{display:none}.tab-panel.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px;border:1px solid var(--border)}
+@media(min-width:640px){.card{padding:28px}}
+
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.3}
+
+label{font-weight:600;display:block;margin-top:16px;color:var(--text);font-size:13px}
+label:first-of-type{margin-top:0}
+input[type="text"],input[type="date"],input[type="url"],textarea,select{
+  width:100%;padding:10px 14px;margin-top:5px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);transition:all .2s
+}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(10,61,42,.08)}
+textarea{resize:vertical;min-height:100px}
+
+.upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:5px}
+.upload-box{border:2px dashed var(--border);border-radius:10px;padding:16px 8px 12px;text-align:center;cursor:pointer;background:var(--bg);transition:all .25s;position:relative;overflow:hidden}
+.upload-box:hover{border-color:var(--gold);background:var(--gold-ghost)}
+.upload-box.has-file{border-color:var(--green);background:var(--green-ghost);border-style:solid}
+.upload-box input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2}
+.upload-box img{max-width:100%;max-height:110px;border-radius:8px;margin-top:8px;object-fit:cover;display:none;position:relative;z-index:1}
+.upload-box.has-file img{display:block}
+.upload-box.has-file .upload-placeholder{display:none}
+.upload-icon{font-size:24px;margin-bottom:2px;display:block}
+.upload-label{font-size:11px;color:var(--text3);display:block}
+
+.btn-primary{margin-top:22px;padding:13px 24px;background:linear-gradient(135deg,var(--green),var(--green-light));color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;width:100%;transition:all .25s;font-family:inherit;letter-spacing:.2px;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);pointer-events:none}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(10,61,42,.3)}
+.btn-primary:disabled{background:#b0b6bc;cursor:not-allowed;transform:none;box-shadow:none}
+
+.btn-secondary{padding:11px 16px;background:var(--card);color:var(--green);border:1.5px solid var(--green);border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;font-family:inherit}
+.btn-secondary:hover:not(:disabled){background:var(--green);color:#fff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(10,61,42,.2)}
+.btn-secondary.filled{background:var(--green);color:#fff}
+.btn-secondary:disabled{background:#d5d8dc;color:#999;border-color:#d5d8dc;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+
+.btn-danger{padding:6px 12px;background:#fee;color:#c33;border:1px solid #fcc;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit}
+.btn-danger:hover{background:#c33;color:#fff}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .55s linear infinite;vertical-align:middle;margin-right:6px}
+.spinner.dark{border-color:rgba(10,61,42,.15);border-top-color:var(--green)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#statusMsg{margin-top:10px;font-size:12px;color:var(--text3);text-align:center;min-height:18px}
+
+.result-box{background:var(--green-ghost);padding:16px 18px;border-left:3px solid var(--green);margin-top:10px;white-space:pre-wrap;word-wrap:break-word;line-height:1.7;border-radius:0 8px 8px 0;font-size:13.5px;color:var(--text)}
+
+.copy-btn{background:var(--green-ghost);color:var(--green);border:1px solid rgba(10,61,42,.15);padding:5px 14px;border-radius:6px;cursor:pointer;float:right;font-size:11px;font-weight:700;font-family:inherit;transition:all .15s}
+.copy-btn:hover{background:var(--green);color:#fff}
+
+/* ═══ ARSIP BERITA ═══ */
+.arsip-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.arsip-toolbar input[type="text"]{flex:1;min-width:200px;margin-top:0}
+.arsip-toolbar select{width:auto;min-width:140px;margin-top:0}
+.arsip-count{font-size:12px;color:var(--text3);font-weight:600}
+
+.berita-card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;transition:all .2s;display:flex;gap:14px;align-items:flex-start}
+.berita-card:hover{border-color:var(--gold);box-shadow:var(--shadow)}
+.berita-card.selected{border-color:var(--green);background:var(--green-ghost);border-width:2px}
+.berita-check{flex-shrink:0;padding-top:2px}
+.berita-check input[type="checkbox"]{width:22px;height:22px;cursor:pointer;accent-color:var(--green)}
+.berita-thumb{width:80px;height:80px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg);border:1px solid var(--border)}
+.berita-body{flex:1;min-width:0}
+.berita-meta{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:4px;display:flex;gap:10px;flex-wrap:wrap}
+.berita-meta .tag{background:var(--gold-ghost);color:var(--gold);padding:2px 8px;border-radius:4px;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.berita-title{font-size:14.5px;font-weight:700;color:var(--green);line-height:1.35;margin-bottom:6px}
+.berita-excerpt{font-size:12.5px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.arsip-empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.arsip-empty .icon{font-size:48px;margin-bottom:12px;opacity:.4}
+
+/* ═══ KOMPOSER MAJALAH ═══ */
+.composer-grid{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:960px){.composer-grid{grid-template-columns:420px 1fr}}
+
+.composer-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;border:1px solid var(--border);max-height:calc(100vh - 120px);overflow-y:auto;position:sticky;top:70px}
+
+.selected-list{background:var(--green-ghost);border-radius:8px;padding:10px;margin-top:8px;max-height:200px;overflow-y:auto}
+.selected-item{display:flex;align-items:center;gap:8px;padding:8px;background:#fff;border-radius:6px;margin-bottom:6px;font-size:12px}
+.selected-item .num{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.selected-item .title{flex:1;font-weight:600;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.iklan-list{margin-top:10px}
+.iklan-item{background:var(--gold-ghost);border:1px solid rgba(184,150,62,.25);border-radius:8px;padding:12px;margin-bottom:10px}
+.iklan-item .iklan-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.iklan-item .iklan-num{font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.iklan-item input[type="text"],.iklan-item input[type="url"]{margin-top:4px;padding:7px 10px;font-size:12px}
+.iklan-item .iklan-img-upload{margin-top:6px;border:1.5px dashed rgba(184,150,62,.4);border-radius:6px;padding:10px;text-align:center;cursor:pointer;background:#fff;font-size:11px;color:var(--text3);position:relative;overflow:hidden}
+.iklan-item .iklan-img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.iklan-item .iklan-img-upload.has-img{border-style:solid;border-color:var(--green);padding:4px}
+.iklan-item .iklan-img-upload img{max-width:100%;max-height:80px;border-radius:4px;display:block;margin:0 auto}
+
+/* ═══ PREVIEW AREA ═══ */
+.preview-area{background:linear-gradient(135deg,#dfe2e6,#e8eaed);border-radius:var(--radius);padding:20px;overflow:auto}
+.preview-page{width:794px;height:1123px;background:#fff;margin:0 auto 24px;box-shadow:0 8px 40px rgba(0,0,0,.18);position:relative;overflow:hidden;transform-origin:top center}
+.preview-page:last-child{margin-bottom:0}
+.preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:12px 16px;background:#fff;border-radius:8px;box-shadow:var(--shadow);position:sticky;top:70px;z-index:50}
+.preview-toolbar .info{font-size:13px;font-weight:700;color:var(--green)}
+.preview-toolbar .actions{display:flex;gap:8px}
+
+/* ═══ COVER EDITABLE ═══ */
+.page-cover{background:linear-gradient(160deg,#041e13 0%,#0a3d2a 45%,#12553a 100%);color:#fff}
+.page-cover::before{content:'';position:absolute;top:-200px;right:-150px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(184,150,62,.22) 0%,transparent 70%)}
+.page-cover::after{content:'';position:absolute;bottom:-180px;left:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.05) 0%,transparent 70%)}
+.cover-accent-top{height:6px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold));position:relative;z-index:2}
+.cover-inner{position:relative;z-index:2;padding:52px 60px;height:100%;display:flex;flex-direction:column}
+.cover-brand{display:flex;align-items:center;gap:14px;margin-bottom:32px}
+.cover-brand .logo-box{width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:1px;color:var(--gold-light)}
+.cover-brand .brand-text .t1{font-size:10px;letter-spacing:3px;color:var(--gold-light);font-weight:800;text-transform:uppercase}
+.cover-brand .brand-text .t2{font-size:14px;font-weight:700;color:#fff}
+.cover-kicker{font-size:12px;letter-spacing:5px;color:var(--gold-light);font-weight:800;text-transform:uppercase;margin-bottom:18px}
+.cover-title{font-family:'Playfair Display',serif;font-size:50px;font-weight:900;line-height:1.05;letter-spacing:-1px;margin-bottom:14px}
+.cover-title .accent{color:var(--gold-light);font-style:italic}
+.cover-subtitle{font-size:15px;color:rgba(255,255,255,.78);line-height:1.6;max-width:540px;margin-bottom:22px}
+.cover-highlights{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px}
+.cover-hl{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;font-size:11.5px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:8px}
+.cover-hl .n{color:var(--gold-light);font-weight:800;font-size:13px}
+.cover-photo{flex:1;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#1a5a3e,#0a3d2a);border:2px solid rgba(184,150,62,.35);display:flex;align-items:center;justify-content:center;min-height:240px;position:relative;cursor:pointer}
+.cover-photo::before{content:'📷 Klik untuk upload foto cover';position:absolute;font-size:12px;letter-spacing:1.5px;color:rgba(255,255,255,.45);font-weight:700}
+.cover-photo img{width:100%;height:100%;object-fit:cover;position:relative;z-index:2}
+.cover-photo.has-img::before{display:none}
+.cover-meta{display:flex;justify-content:space-between;align-items:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14)}
+.cover-meta .edition{font-size:11px;letter-spacing:2px;color:var(--gold-light);font-weight:800}
+.cover-meta .date{font-size:13px;color:rgba(255,255,255,.75);font-weight:600}
+
+/* ═══ COVER BELAKANG ═══ */
+.page-back-cover{background:linear-gradient(160deg,#0a3d2a 0%,#072e1f 100%);color:#fff;display:flex;flex-direction:column}
+.back-inner{position:relative;z-index:2;padding:60px;height:100%;display:flex;flex-direction:column}
+.back-quote{font-family:'Playfair Display',serif;font-style:italic;font-size:32px;line-height:1.35;font-weight:700;color:var(--gold-light);margin-bottom:24px;padding-left:24px;border-left:4px solid var(--gold)}
+.back-credit-title{font-size:11px;letter-spacing:3px;color:var(--gold-light);font-weight:800;text-transform:uppercase;margin-top:32px;margin-bottom:14px}
+.back-credit-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.8)}
+.back-credit-grid .label{font-size:10px;letter-spacing:1.5px;color:var(--gold-light);font-weight:800;text-transform:uppercase;margin-bottom:4px}
+.back-footer{margin-top:auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.14);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.6)}
+.back-footer .brand{font-weight:800;color:#fff;letter-spacing:.5px}
+
+/* ═══ HALAMAN IKLAN ═══ */
+.page-ads{background:#fff}
+.ads-header{padding:44px 60px 0;margin-bottom:20px}
+.ads-kicker{font-size:11px;letter-spacing:4px;color:var(--gold);font-weight:800;text-transform:uppercase;margin-bottom:6px}
+.ads-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--green)}
+.ads-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 60px;margin-top:20px}
+.ad-slot{background:linear-gradient(135deg,#f4f5f7,#e9ebee);border-radius:14px;border:2px dashed #c5cbd1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;text-align:center;min-height:280px;position:relative;overflow:hidden}
+.ad-slot.big{grid-column:span 2;min-height:340px}
+.ad-slot img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.ad-slot .ad-info{position:relative;z-index:2;background:rgba(255,255,255,.95);padding:12px 16px;border-radius:8px;max-width:90%}
+.ad-slot.has-img .ad-upload-icon,.ad-slot.has-img .ad-upload-label,.ad-slot.has-img .ad-upload-sub{display:none}
+.ad-slot .ad-badge{position:absolute;top:12px;left:12px;font-size:9px;letter-spacing:1.5px;font-weight:800;color:var(--gold);background:rgba(250,246,237,.95);padding:4px 10px;border-radius:4px;text-transform:uppercase;z-index:3}
+.ad-slot .ad-upload-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+.ad-slot .ad-upload-label{font-size:12px;color:#8a8f96;font-weight:700;letter-spacing:1px}
+.ad-slot .ad-upload-sub{font-size:11px;color:#a8adb4;margin-top:6px}
+
+/* ═══ HALAMAN EDITORIAL/TOC/FEATURE/etc ═══ */
+.page-header{display:flex;align-items:center;gap:14px;padding:44px 60px 0;margin-bottom:22px}
+.page-header .num{width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.page-header .label{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:800}
+.page-header .line{flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.page-footer{position:absolute;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 60px;font-size:10px;color:#b0b5bc;border-top:1px solid #f0f0f0}
+.page-footer .pf-left{letter-spacing:1.5px;font-weight:700}
+.page-footer .pf-right{font-weight:700;color:var(--gold)}
+
+/* Editorial */
+.editorial-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:800;color:var(--green);padding:0 60px;line-height:1.15;margin-bottom:22px}
+.editorial-lead{padding:0 60px;font-size:17px;line-height:1.7;color:var(--text);font-weight:500;margin-bottom:22px}
+.editorial-lead::first-letter{font-family:'Playfair Display',serif;float:left;font-size:64px;line-height:.85;padding:6px 12px 0 0;color:var(--green);font-weight:900}
+.editorial-body{padding:0 60px;font-size:14px;line-height:1.85;color:var(--text2);text-align:justify}
+.editorial-body p{margin-bottom:14px}
+.editorial-quote{margin:26px 60px;padding:22px 26px;background:var(--gold-ghost);border-left:4px solid var(--gold);font-family:'Playfair Display',serif;font-style:italic;font-size:17px;line-height:1.6;color:var(--green);border-radius:0 10px 10px 0}
+
+/* TOC */
+.toc-list{padding:0 60px}
+.toc-item{display:flex;align-items:baseline;gap:14px;padding:16px 0;border-bottom:1px dashed #e0e3e7}
+.toc-item .toc-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--gold);min-width:48px;line-height:1}
+.toc-item .toc-body{flex:1}
+.toc-item .toc-title{font-size:15px;font-weight:700;color:var(--green);line-height:1.3}
+.toc-item .toc-meta{font-size:11.5px;color:var(--text2);margin-top:3px}
+.toc-item .toc-page{font-size:13px;font-weight:800;color:var(--green);background:var(--green-ghost);padding:4px 12px;border-radius:6px}
+.toc-item .toc-tag{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:800;margin-bottom:4px;display:block}
+
+/* Feature */
+.feature-hero{height:520px;background:linear-gradient(135deg,#c9cfd6,#e2e5e9);position:relative;display:flex;align-items:center;justify-content:center;color:#8a8f96;font-size:13px;letter-spacing:2px;font-weight:700;overflow:hidden}
+.feature-hero img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.feature-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(to top,rgba(4,30,19,.9),transparent);z-index:1}
+.feature-hero-overlay{position:absolute;bottom:0;left:0;right:0;padding:36px 60px;z-index:2;color:#fff}
+.feature-hero-overlay .tag{display:inline-block;font-size:10px;letter-spacing:3px;font-weight:800;color:var(--gold-light);text-transform:uppercase;margin-bottom:10px;padding:5px 12px;background:rgba(184,150,62,.2);border-radius:4px;border:1px solid rgba(184,150,62,.4)}
+.feature-hero-overlay .title{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;line-height:1.1;letter-spacing:-.5px;margin-bottom:10px}
+.feature-hero-overlay .meta{font-size:13px;color:rgba(255,255,255,.7);font-weight:600}
+.feature-body{padding:44px 60px 0}
+.feature-body .lead{font-size:16px;line-height:1.75;color:var(--text);font-weight:500;margin-bottom:20px}
+.feature-cols{column-count:2;column-gap:28px;column-rule:1px solid var(--line);font-size:13.5px;line-height:1.8;color:var(--text);text-align:justify}
+.feature-cols p{margin-bottom:12px}
+.feature-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 60px;margin-top:24px}
+.feature-stats .stat{background:var(--green-ghost);border-radius:10px;padding:14px;text-align:center;border-top:3px solid var(--green)}
+.feature-stats .stat .v{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--green);line-height:1}
+.feature-stats .stat .l{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);font-weight:700;margin-top:6px}
+
+/* Compact */
+.compact-wrap{padding:0 60px}
+.compact-header{display:flex;align-items:baseline;gap:16px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--gold)}
+.compact-num{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--gold);line-height:.9}
+.compact-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--green);line-height:1.2;flex:1}
+.compact-meta{font-size:12px;color:var(--text2);margin-bottom:16px;font-weight:600}
+.compact-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:20px}
+.compact-photo{height:260px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#dfe2e6,#eceef0);display:flex;align-items:center;justify-content:center;color:#9aa0a7;font-size:11px;letter-spacing:1.5px;font-weight:700;border:1px solid #d4d8dd}
+.compact-photo img{width:100%;height:100%;object-fit:cover}
+.compact-article{font-size:13px;line-height:1.75;color:var(--text);text-align:justify}
+.compact-article p{margin-bottom:10px}
+.compact-quote{margin-top:16px;padding:16px 20px;background:var(--gold-ghost);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-family:'Playfair Display',serif;font-style:italic;font-size:14px;line-height:1.5;color:var(--green)}
+
+/* Gallery */
+.gallery-header{padding:0 60px;margin-bottom:16px}
+.gallery-tag{font-size:10px;letter-spacing:3px;font-weight:800;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.gallery-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:800;color:var(--green);line-height:1.15}
+.gallery-sub{font-size:12px;color:var(--text2);margin-top:6px;font-weight:600}
+.gallery-desc{padding:0 60px;font-size:13px;line-height:1.75;color:var(--text);margin:18px 0;text-align:justify}
+.gallery-grid-6{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 60px}
+.gallery-grid-6 .slot{height:150px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#dfe2e6,#eceef0);display:flex;align-items:center;justify-content:center;color:#9aa0a7;font-size:10.5px;letter-spacing:1.2px;font-weight:700;border:1px dashed #c5cbd1}
+.gallery-grid-6 .slot img{width:100%;height:100%;object-fit:cover}
+.gallery-quote{margin:22px 60px 0;padding:18px 24px;background:var(--green-ghost);border-radius:10px;border-left:4px solid var(--green);font-size:13.5px;line-height:1.7;color:var(--green);font-weight:500}
+
+/* Penutup */
+.closing-body{padding:0 60px;font-size:15px;line-height:1.85;color:var(--text);text-align:justify}
+.closing-body p{margin-bottom:16px}
+.closing-hope{margin:32px 60px 0;padding:26px 30px;background:linear-gradient(135deg,#f9f6ee,#f4efdf);border-radius:14px;border:1px solid rgba(184,150,62,.25)}
+.closing-hope .hope-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--green);margin-bottom:10px}
+.closing-hope .hope-body{font-size:13.5px;line-height:1.7;color:var(--text2)}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);display:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:768px){
+  .preview-page{transform:scale(.5);margin-bottom:-500px}
+  .composer-grid{grid-template-columns:1fr}
+  .composer-panel{position:static;max-height:none}
+  .upload-row{grid-template-columns:1fr}
+  .btn-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <img src="https://i.imgur.com/PBlqfvg.png" alt="LINES Garut" onerror="this.style.display='none'">
+    </div>
+    <h1>Asisten LINES Garut</h1>
+    <p>Generator Berita & Majalah Kegiatan — DPD LDII Kabupaten Garut</p>
+  </div>
+</div>
+
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <button class="nav-btn active" onclick="switchMainTab('tabInput', this)">✍️ Input Berita</button>
+    <button class="nav-btn" onclick="switchMainTab('tabArsip', this)">📚 Arsip <span class="badge" id="arsipBadge">0</span></button>
+    <button class="nav-btn" onclick="switchMainTab('tabKomposer', this)">📖 Komposer Majalah</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 1 — INPUT BERITA
+     ═══════════════════════════════════════════════ -->
+<div id="tabInput" class="tab-panel active">
+  <div class="container narrow">
+    <div class="card">
+      <div class="section-label">Data Kegiatan</div>
+
+      <label>📷 Upload Dua Foto Kegiatan</label>
+      <div class="upload-row">
+        <div class="upload-box" id="box1">
+          <span class="upload-placeholder">
+            <span class="upload-icon">🖼️</span>
+            <span class="upload-label">Foto 1 — Ketuk untuk upload</span>
+          </span>
+          <img id="prev1" alt="Foto 1">
+          <input type="file" id="foto1" accept="image/*" onchange="previewFoto(this,'prev1','box1',1)">
+        </div>
+        <div class="upload-box" id="box2">
+          <span class="upload-placeholder">
+            <span class="upload-icon">🖼️</span>
+            <span class="upload-label">Foto 2 — Ketuk untuk upload</span>
+          </span>
+          <img id="prev2" alt="Foto 2">
+          <input type="file" id="foto2" accept="image/*" onchange="previewFoto(this,'prev2','box2',2)">
+        </div>
+      </div>
+
+      <label>Nama Acara / Kegiatan</label>
+      <input type="text" id="namaAcara" placeholder="Contoh: Pengajian Akbar & Bakti Sosial">
+
+      <label>Tanggal Kegiatan</label>
+      <input type="date" id="tanggal">
+
+      <label>Lokasi / Tempat</label>
+      <input type="text" id="lokasi" placeholder="Contoh: Masjid Miftahul Huda, Garut">
+
+      <label>Narasumber / Tokoh Hadir</label>
+      <input type="text" id="narasumber" placeholder="Contoh: Ketua DPD LDII, Camat, Tokoh Masyarakat">
+
+      <label>Poin-Poin Utama / Jalannya Acara</label>
+      <textarea id="poinUtama" rows="5" placeholder="- Acara dibuka jam 08.00&#10;- Penyerahan 100 paket sembako&#10;- Sambutan menekankan toleransi"></textarea>
+
+      <button class="btn-primary" id="btnSubmit" onclick="generateKonten()">✨ Buat Berita & Simpan ke Arsip</button>
+      <div id="statusMsg"></div>
+    </div>
+
+    <div id="outputContainer" style="display:none">
+      <div class="card">
+        <div class="section-label">Hasil Berita</div>
+        <button class="copy-btn" onclick="copyWebBerita()">📋 Salin Semua</button>
+        <h3 id="resJudul" style="color:var(--green);font-size:16px;margin:8px 0 4px"></h3>
+        <div id="resWeb" class="result-box"></div>
+        <div style="margin-top:20px">
+          <div class="section-label">Caption Instagram</div>
+          <button class="copy-btn" onclick="copyText('resIG')">📋 Salin</button>
+          <div id="resIG" class="result-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 2 — ARSIP BERITA
+     ═══════════════════════════════════════════════ -->
+<div id="tabArsip" class="tab-panel">
+  <div class="container">
+    <div class="card">
+      <div class="section-label">Arsip Berita Tersimpan</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Centang berita yang ingin dimuat ke majalah. Setelah selesai, buka tab <b>Komposer Majalah</b>.</p>
+
+      <div class="arsip-toolbar">
+        <input type="text" id="arsipSearch" placeholder="🔍 Cari judul atau nama acara..." oninput="renderArsip()">
+        <select id="arsipFilter" onchange="renderArsip()">
+          <option value="">Semua Bulan</option>
+        </select>
+        <button class="btn-secondary" onclick="loadArsip()">🔄 Refresh</button>
+      </div>
+
+      <div id="arsipCount" class="arsip-count"></div>
+      <div id="arsipList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TAB 3 — KOMPOSER MAJALAH
+     ═══════════════════════════════════════════════ -->
+<div id="tabKomposer" class="tab-panel">
+  <div class="container">
+    <div class="composer-grid">
+
+      <!-- PANEL KIRI — Form -->
+      <div class="composer-panel">
+        <div class="section-label">Info Edisi</div>
+        <label>Judul Edisi / Bulan</label>
+        <input type="text" id="edisiBulan" placeholder="Oktober 2025" value="Oktober 2025">
+        <label>Judul Cover (baris 1)</label>
+        <input type="text" id="coverLine1" placeholder="Bergerak Bersama," oninput="updateCover()">
+        <label>Judul Cover (baris 2 — accent)</label>
+        <input type="text" id="coverLine2" placeholder="Mengabdi" oninput="updateCover()">
+        <label>Judul Cover (baris 3)</label>
+        <input type="text" id="coverLine3" placeholder="untuk Umat" oninput="updateCover()">
+        <label>Subtitle Cover</label>
+        <textarea id="coverSubtitle" rows="2" oninput="updateCover()" placeholder="Ringkasan tema edisi..."></textarea>
+
+        <div class="section-label" style="margin-top:24px">Berita Terpilih</div>
+        <div id="selectedList" class="selected-list">
+          <p style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Belum ada berita dipilih. Buka tab Arsip.</p>
+        </div>
+        <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="switchMainTab('tabArsip', document.querySelectorAll('.nav-btn')[1])">📚 Pilih Berita dari Arsip</button>
+
+        <div class="section-label" style="margin-top:24px">Iklan (Opsional)</div>
+        <div id="iklanList" class="iklan-list"></div>
+        <button class="btn-secondary" style="width:100%;margin-top:8px" onclick="addIklan()">+ Tambah Iklan</button>
+
+        <button class="btn-primary" id="btnGenerateMajalah" onclick="generateMajalah()" style="margin-top:24px">📖 Buat Majalah</button>
+        <div id="majalahStatus" style="margin-top:10px;font-size:12px;color:var(--text3);text-align:center;min-height:18px"></div>
+      </div>
+
+      <!-- PANEL KANAN — Preview -->
+      <div>
+        <div class="preview-toolbar">
+          <div class="info" id="previewInfo">Preview Majalah</div>
+          <div class="actions">
+            <button class="btn-secondary" id="btnDownloadMajalah" onclick="downloadMajalah()" disabled>⬇️ Unduh PDF</button>
+            <button class="btn-secondary filled" id="btnDriveMajalah" onclick="saveMajalahToDrive()" disabled>☁️ Simpan ke Drive</button>
+          </div>
+        </div>
+        <div id="driveMajalahStatus" style="font-size:12px;color:var(--green);text-align:center;margin-bottom:10px;min-height:16px"></div>
+        <div id="previewArea" class="preview-area">
+          <div style="text-align:center;padding:60px 20px;color:var(--text3)">
+            <div style="font-size:48px;margin-bottom:12px;opacity:.4">📖</div>
+            <p style="font-size:14px;font-weight:600">Pilih berita dari Arsip, lalu klik "Buat Majalah"</p>
+            <p style="font-size:12px;margin-top:6px">Preview majalah akan muncul di sini</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// KONFIGURASI
+// ═══════════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAsEFg6Wx8tlojdmi21kW8UMhyhPu495pB20_Dup6kChoburpg_XVVd0rx-XDBQG7y/exec";
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let foto1Base64 = null, foto2Base64 = null;
+let arsipBerita = [];        // dari server
+let selectedBeritaIds = [];  // berita yang dicentang
+let iklanList = [];          // array {id, nama, kontak, imgBase64}
+let currentMajalahData = null; // hasil AI untuk majalah
+
+// ═══════════════════════════════════════════════
+// UTIL
+// ═══════════════════════════════════════════════
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>{ t.style.display = 'none'; }, 2500);
+}
+function setStatus(id, msg, loading=false){
+  document.getElementById(id).innerHTML = loading ? `<span class="spinner"></span>${msg}` : msg;
+}
+function fmtTanggal(iso){
+  if(!iso) return '-';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function buatRingkasan(t, m=280){
+  if(!t) return '';
+  if(t.length<=m) return t;
+  let p=t.substring(0,m); const l=p.lastIndexOf(' ');
+  if(l>m*.6) p=p.substring(0,l);
+  return p.trim()+'...';
+}
+function blobToBase64(b){
+  return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(new Error('Gagal baca blob'));r.readAsDataURL(b)});
+}
+
+// ═══════════════════════════════════════════════
+// TAB NAVIGATION
+// ═══════════════════════════════════════════════
+function switchMainTab(tabId, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+  if(tabId==='tabArsip' && arsipBerita.length===0) loadArsip();
+  if(tabId==='tabKomposer') renderSelectedList();
+}
+
+// ═══════════════════════════════════════════════
+// TAB INPUT — FOTO & GENERATE BERITA
+// ═══════════════════════════════════════════════
+function previewFoto(input, prevId, boxId, slot){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const url = e.target.result;
+    document.getElementById(prevId).src = url;
+    document.getElementById(boxId).classList.add('has-file');
+    const b64 = url.split(',')[1];
+    if(slot===1) foto1Base64 = b64; else foto2Base64 = b64;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateKonten(){
+  const btn = document.getElementById('btnSubmit');
+  const namaAcara = document.getElementById('namaAcara').value.trim();
+  const tanggal = document.getElementById('tanggal').value;
+  const lokasi = document.getElementById('lokasi').value.trim();
+  const narasumber = document.getElementById('narasumber').value.trim();
+  const poinUtama = document.getElementById('poinUtama').value.trim();
+
+  if(!namaAcara || !poinUtama){ toast('⚠️ Nama Acara dan Poin Utama wajib diisi!'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Membuat berita...';
+  document.getElementById('outputContainer').style.display = 'none';
+  setStatus('statusMsg', 'Mengirim data ke server...', true);
+
+  try {
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action: 'generateBerita',
+        namaAcara, tanggal, lokasi, narasumber, poinUtama,
+        foto1: foto1Base64, foto2: foto2Base64
+      }),
+      redirect: 'follow'
+    });
+    const txt = await r.text();
+    let res; try { res = JSON.parse(txt); } catch(e){ setStatus('statusMsg','❌ Respon tidak valid'); alert('Gagal:\n'+txt.substring(0,300)); return; }
+
+    if(res.status === 'success'){
+      const d = res.data;
+      document.getElementById('resJudul').innerText = d.judulWebsite;
+      document.getElementById('resWeb').innerText = d.artikelWebsite;
+      document.getElementById('resIG').innerText = d.captionInstagram;
+      document.getElementById('outputContainer').style.display = 'block';
+      setStatus('statusMsg', '✅ Berita berhasil dibuat & disimpan ke arsip!');
+      toast('✅ Berita tersimpan di arsip');
+      arsipBerita = []; // reset cache agar refresh
+    } else {
+      setStatus('statusMsg', '❌ '+res.message);
+      alert('Gagal: '+res.message);
+    }
+  } catch(e){
+    console.error(e);
+    setStatus('statusMsg', '❌ '+e.message);
+    alert('Kesalahan: '+e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Buat Berita & Simpan ke Arsip';
+  }
+}
+
+function copyWebBerita(){
+  const j = document.getElementById('resJudul').innerText;
+  const i = document.getElementById('resWeb').innerText;
+  const full = j+'\n\n'+i;
+  navigator.clipboard.writeText(full).then(()=>toast('✅ Berita disalin')).catch(()=>{});
+}
+function copyText(id){
+  const t = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(t).then(()=>toast('✅ Teks disalin')).catch(()=>{});
+}
+
+// ═══════════════════════════════════════════════
+// TAB ARSIP
+// ═══════════════════════════════════════════════
+async function loadArsip(){
+  document.getElementById('arsipList').innerHTML = '<p style="text-align:center;padding:40px;color:var(--text3)"><span class="spinner dark"></span>Memuat arsip...</p>';
+  try {
+    const r = await fetch(APPS_SCRIPT_URL + '?action=listBerita', { redirect: 'follow' });
+    const txt = await r.text();
+    let res; try { res = JSON.parse(txt); } catch(e){ throw new Error('Respon invalid: '+txt.substring(0,200)); }
+    if(res.status === 'success'){
+      arsipBerita = res.data || [];
+      document.getElementById('arsipBadge').textContent = arsipBerita.length;
+      populateFilterBulan();
+      renderArsip();
+    } else {
+      throw new Error(res.message || 'Gagal load arsip');
+    }
+  } catch(e){
+    document.getElementById('arsipList').innerHTML = `<p style="text-align:center;padding:40px;color:#c33">❌ ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function populateFilterBulan(){
+  const bulanSet = new Set();
+  arsipBerita.forEach(b=>{
+    if(b.tanggal){
+      const d = new Date(b.tanggal);
+      if(!isNaN(d)) bulanSet.add(d.toLocaleDateString('id-ID',{month:'long',year:'numeric'}));
+    }
+  });
+  const sel = document.getElementById('arsipFilter');
+  sel.innerHTML = '<option value="">Semua Bulan</option>' +
+    [...bulanSet].map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+}
+
+function renderArsip(){
+  const search = (document.getElementById('arsipSearch').value || '').toLowerCase().trim();
+  const filterBulan = document.getElementById('arsipFilter').value;
+
+  let filtered = arsipBerita.filter(b=>{
+    const matchSearch = !search ||
+      (b.namaAcara||'').toLowerCase().includes(search) ||
+      (b.judulWebsite||'').toLowerCase().includes(search);
+    let matchBulan = true;
+    if(filterBulan && b.tanggal){
+      const d = new Date(b.tanggal);
+      if(!isNaN(d)) matchBulan = d.toLocaleDateString('id-ID',{month:'long',year:'numeric'}) === filterBulan;
+    }
+    return matchSearch && matchBulan;
+  });
+
+  document.getElementById('arsipCount').textContent = `Menampilkan ${filtered.length} dari ${arsipBerita.length} berita`;
+  const list = document.getElementById('arsipList');
+
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="arsip-empty"><div class="icon">📭</div><p>Belum ada berita. Buat berita dulu di tab Input Berita.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(b=>{
+    const selected = selectedBeritaIds.includes(b.id);
+    const thumb = b.foto1 ? `<img src="${b.foto1}" class="berita-thumb" alt="">` : `<div class="berita-thumb"></div>`;
+    return `
+      <div class="berita-card ${selected?'selected':''}">
+        <div class="berita-check">
+          <input type="checkbox" ${selected?'checked':''} onchange="toggleSelectBerita('${b.id}', this.checked)">
+        </div>
+        ${thumb}
+        <div class="berita-body">
+          <div class="berita-meta">
+            <span class="tag">${escapeHtml(b.namaAcara||'-')}</span>
+            <span>📅 ${fmtTanggal(b.tanggal)}</span>
+          </div>
+          <div class="berita-title">${escapeHtml(b.judulWebsite||'-')}</div>
+          <div class="berita-excerpt">${escapeHtml(buatRingkasan(b.artikelWebsite||'', 160))}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleSelectBerita(id, checked){
+  if(checked){
+    if(!selectedBeritaIds.includes(id)) selectedBeritaIds.push(id);
+  } else {
+    selectedBeritaIds = selectedBeritaIds.filter(x=>x!==id);
+  }
+  renderArsip();
+  renderSelectedList();
+}
+
+function renderSelectedList(){
+  const el = document.getElementById('selectedList');
+  if(selectedBeritaIds.length === 0){
+    el.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Belum ada berita dipilih. Buka tab Arsip.</p>';
+    return;
+  }
+  el.innerHTML = selectedBeritaIds.map((id, i)=>{
+    const b = arsipBerita.find(x=>x.id===id);
+    if(!b) return '';
+    return `
+      <div class="selected-item">
+        <span class="num">${i+1}</span>
+        <span class="title">${escapeHtml(b.namaAcara||'-')}</span>
+        <button class="btn-danger" onclick="toggleSelectBerita('${id}', false)">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// TAB KOMPOSER — IKLAN
+// ═══════════════════════════════════════════════
+function addIklan(){
+  const id = 'iklan_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  iklanList.push({id, nama:'', kontak:'', imgBase64:null});
+  renderIklanList();
+}
+function removeIklan(id){
+  iklanList = iklanList.filter(i=>i.id!==id);
+  renderIklanList();
+}
+function updateIklan(id, field, value){
+  const i = iklanList.find(x=>x.id===id);
+  if(i) i[field] = value;
+}
+function uploadIklanImg(id, input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const url = e.target.result;
+    const i = iklanList.find(x=>x.id===id);
+    if(i){ i.imgBase64 = url.split(',')[1]; renderIklanList(); }
+  };
+  reader.readAsDataURL(file);
+}
+function renderIklanList(){
+  const el = document.getElementById('iklanList');
+  if(iklanList.length === 0){
+    el.innerHTML = '<p style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Belum ada iklan. Halaman iklan tidak akan dibuat.</p>';
+    return;
+  }
+  el.innerHTML = iklanList.map((ik, idx)=>`
+    <div class="iklan-item">
+      <div class="iklan-head">
+        <span class="iklan-num">Iklan #${idx+1}</span>
+        <button class="btn-danger" onclick="removeIklan('${ik.id}')">✕ Hapus</button>
+      </div>
+      <input type="text" placeholder="Nama produk / brand" value="${escapeHtml(ik.nama)}" oninput="updateIklan('${ik.id}','nama',this.value)">
+      <input type="text" placeholder="Kontak / link (opsional)" value="${escapeHtml(ik.kontak)}" oninput="updateIklan('${ik.id}','kontak',this.value)">
+      <div class="iklan-img-upload ${ik.imgBase64?'has-img':''}">
+        ${ik.imgBase64 ? `<img src="data:image/jpeg;base64,${ik.imgBase64}">` : '<span>🖼️ Upload gambar produk</span>'}
+        <input type="file" accept="image/*" onchange="uploadIklanImg('${ik.id}', this)">
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// TAB KOMPOSER — UPDATE COVER (live)
+// ═══════════════════════════════════════════════
+function updateCover(){
+  const l1 = document.getElementById('coverLine1').value;
+  const l2 = document.getElementById('coverLine2').value;
+  const l3 = document.getElementById('coverLine3').value;
+  const sub = document.getElementById('coverSubtitle').value;
+  const el = id => document.getElementById(id);
+  if(el('cvLine1')) el('cvLine1').textContent = l1;
+  if(el('cvLine2')) el('cvLine2').textContent = l2;
+  if(el('cvLine3')) el('cvLine3').textContent = l3;
+  if(el('cvSubtitle')) el('cvSubtitle').textContent = sub;
+  if(el('cvEdition')) el('cvEdition').textContent = 'EDISI — ' + (document.getElementById('edisiBulan').value || '').toUpperCase();
+}
+
+// ═══════════════════════════════════════════════
+// TAB KOMPOSER — GENERATE MAJALAH
+// ═══════════════════════════════════════════════
+async function generateMajalah(){
+  if(selectedBeritaIds.length === 0){ toast('⚠️ Pilih minimal 1 berita dari tab Arsip!'); return; }
+
+  const btn = document.getElementById('btnGenerateMajalah');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Menyusun majalah...';
+  setStatus('majalahStatus', 'AI menyusun editorial + layout...', true);
+
+  try {
+    const edisiBulan = document.getElementById('edisiBulan').value || 'Edisi';
+    const coverLine1 = document.getElementById('coverLine1').value;
+    const coverLine2 = document.getElementById('coverLine2').value;
+    const coverLine3 = document.getElementById('coverLine3').value;
+    const coverSubtitle = document.getElementById('coverSubtitle').value;
+
+    const payload = {
+      action: 'generateMajalah',
+      edisiBulan,
+      cover: { line1: coverLine1, line2: coverLine2, line3: coverLine3, subtitle: coverSubtitle },
+      beritaIds: selectedBeritaIds,
+      iklan: iklanList.map(i=>({ nama: i.nama, kontak: i.kontak, imgBase64: i.imgBase64 }))
+    };
+
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    const txt = await r.text();
+    let res; try { res = JSON.parse(txt); } catch(e){ throw new Error('Respon invalid: '+txt.substring(0,200)); }
+
+    if(res.status === 'success'){
+      currentMajalahData = res.data;
+      renderMajalahPreview(res.data);
+      setStatus('majalahStatus', '✅ Majalah berhasil dibuat!');
+      toast('✅ Majalah siap diunduh');
+    } else {
+      throw new Error(res.message || 'Gagal generate majalah');
+    }
+  } catch(e){
+    console.error(e);
+    setStatus('majalahStatus', '❌ '+e.message);
+    alert('Gagal: '+e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📖 Buat Majalah';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// RENDER PREVIEW MAJALAH (semua halaman)
+// ═══════════════════════════════════════════════
+function renderMajalahPreview(data){
+  const {
+    edisiBulan,
+    cover,
+    editorial,
+    berita,   // array hasil AI: [{judul, artikel, kutipan, poinData, layout}]
+    penutup,
+    iklan     // array {nama, kontak, imgBase64}
+  } = data;
+
+  const totalKegiatan = berita.length;
+  const pages = [];
+  let pageNum = 1;
+
+  // ═══ PAGE 1: COVER ═══
+  pages.push(renderCoverPage(cover, edisiBulan, totalKegiatan, data, pageNum++));
+
+  // ═══ PAGE 2: EDITORIAL ═══
+  pages.push(renderEditorialPage(editorial, edisiBulan, pageNum++, totalKegiatan));
+
+  // ═══ PAGE 3: DAFTAR ISI ═══
+  const tocStartPage = pageNum;
+  let tocEntries = [];
+  let runningPage = pageNum + 1;
+  berita.forEach((b, i)=>{
+    const layoutPages = b.layout === 'feature' ? 2 : 1;
+    tocEntries.push({...b, no: i+1, startPage: runningPage});
+    runningPage += layoutPages;
+  });
+  pages.push(renderTOCPage(tocEntries, edisiBulan, pageNum++, totalKegiatan));
+
+  // ═══ KEGIATAN PAGES ═══
+  berita.forEach((b, i)=>{
+    if(b.layout === 'feature'){
+      pages.push(renderFeaturePage1(b, i+1, data, pageNum++));
+      pages.push(renderFeaturePage2(b, i+1, data, pageNum++));
+    } else if(b.layout === 'compact'){
+      pages.push(renderCompactPage(b, i+1, data, pageNum++));
+    } else if(b.layout === 'gallery'){
+      pages.push(renderGalleryPage(b, i+1, data, pageNum++));
+    } else {
+      pages.push(renderCompactPage(b, i+1, data, pageNum++));
+    }
+  });
+
+  // ═══ IKLAN PAGE (jika ada) ═══
+  if(iklan && iklan.length > 0){
+    pages.push(renderIklanPage(iklan, edisiBulan, pageNum++));
+  }
+
+  // ═══ COVER BELAKANG ═══
+  pages.push(renderBackCoverPage(data, edisiBulan, pageNum++));
+
+  // Inject ke DOM
+  const totalPages = pages.length;
+  // Update nomor halaman "/N"
+  pages.forEach((html, i)=>{
+    const finalHtml = html.replace(/__TOTAL__/g, totalPages);
+    const div = document.createElement('div');
+    div.className = 'preview-page';
+    div.innerHTML = finalHtml;
+    // remove wrapper class since we put innerHTML
+    div.outerHTML = `<div class="preview-page">${finalHtml}</div>`;
+  });
+
+  const previewArea = document.getElementById('previewArea');
+  previewArea.innerHTML = pages.map((html, i)=>{
+    const finalHtml = html.replace(/__TOTAL__/g, totalPages);
+    return `<div class="preview-page">${finalHtml}</div>`;
+  }).join('');
+
+  document.getElementById('previewInfo').textContent = `Preview Majalah · ${totalPages} halaman · ${berita.length} kegiatan`;
+  document.getElementById('btnDownloadMajalah').disabled = false;
+  document.getElementById('btnDriveMajalah').disabled = false;
+
+  // Scroll ke preview
+  previewArea.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ─── PAGE RENDERERS ───
+function renderCoverPage(cover, edisiBulan, totalKegiatan, data, pageNum){
+  const highlights = data.berita.slice(0,4).map((b,i)=>{
+    return `<div class="cover-hl"><span class="n">${String(i+1).padStart(2,'0')}</span> ${escapeHtml(b.namaAcara||b.judul||'Kegiatan')}</div>`;
+  }).join('');
+
+  return `
+    <div class="page-cover" style="width:100%;height:100%">
+      <div class="cover-accent-top"></div>
+      <div class="cover-inner">
+        <div class="cover-brand">
+          <div class="logo-box">LDII</div>
+          <div class="brand-text">
+            <div class="t1">Dewan Pimpinan Daerah</div>
+            <div class="t2">LDII Kabupaten Garut</div>
+          </div>
+        </div>
+        <div class="cover-kicker">Majalah Kegiatan · Edisi ${escapeHtml(edisiBulan)}</div>
+        <h1 class="cover-title">
+          ${escapeHtml(cover.line1||'')}<br>
+          <span class="accent">${escapeHtml(cover.line2||'')}</span><br>
+          ${escapeHtml(cover.line3||'')}
+        </h1>
+        <p class="cover-subtitle">${escapeHtml(cover.subtitle||'')}</p>
+        <div class="cover-highlights">${highlights}</div>
+        <div class="cover-photo ${data.coverFoto ? 'has-img':''}">
+          ${data.coverFoto ? `<img src="${data.coverFoto}">` : ''}
+        </div>
+        <div class="cover-meta">
+          <div class="edition">EDISI — ${escapeHtml(edisiBulan).toUpperCase()}</div>
+          <div class="date">${totalKegiatan} Kegiatan · __TOTAL__ Halaman</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEditorialPage(editorial, edisiBulan, pageNum, totalKegiatan){
+  const paras = (editorial || '').split(/\n\n+/).filter(p=>p.trim());
+  const lead = paras[0] || '';
+  const body = paras.slice(1).map(p=>`<p>${escapeHtml(p)}</p>`).join('');
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="page-header"><div class="num">${String(pageNum).padStart(2,'0')}</div><div class="label">Editorial</div><div class="line"></div></div>
+      <h2 class="editorial-title">Menebar Manfaat Sepanjang ${escapeHtml(edisiBulan)}</h2>
+      <p class="editorial-lead">${escapeHtml(lead)}</p>
+      <div class="editorial-body">${body}</div>
+      <div class="editorial-quote">"Setiap kegiatan adalah amal soleh yang harus berdampak langsung bagi masyarakat."</div>
+      <div style="padding:0 60px;font-size:12px;color:var(--text2)"><b style="display:block;color:var(--green);font-size:13px">Humas DPD LDII Kabupaten Garut</b>Redaksi Majalah Kegiatan · Edisi ${escapeHtml(edisiBulan)}</div>
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderTOCPage(entries, edisiBulan, pageNum, totalKegiatan){
+  const items = entries.map(e=>`
+    <div class="toc-item">
+      <div class="toc-num">${String(e.no).padStart(2,'0')}</div>
+      <div class="toc-body">
+        <span class="toc-tag">${(e.layout||'compact').toUpperCase()}</span>
+        <div class="toc-title">${escapeHtml(e.judul||'-')}</div>
+        <div class="toc-meta">${escapeHtml(e.namaAcara||'')} · ${fmtTanggal(e.tanggal)}</div>
+      </div>
+      <div class="toc-page">Hal ${e.startPage}</div>
+    </div>
+  `).join('');
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="page-header"><div class="num">${String(pageNum).padStart(2,'0')}</div><div class="label">Daftar Isi</div><div class="line"></div></div>
+      <div class="toc-list">${items}</div>
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderFeaturePage1(b, no, data, pageNum){
+  const coverImg = b.fotoUtama ? `<img src="${b.fotoUtama}">` : '';
+  const paras = (b.artikel||'').split(/\n\n+/).filter(p=>p.trim());
+  const lead = paras[0] || '';
+  const bodyParas = paras.slice(1,3);
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="feature-hero">
+        ${coverImg}
+        <div class="feature-hero-overlay">
+          <span class="tag">Kegiatan ${String(no).padStart(2,'0')} · Feature</span>
+          <h2 class="title">${escapeHtml(b.judul||'-')}</h2>
+          <div class="meta">${fmtTanggal(b.tanggal)} · ${escapeHtml(b.lokasi||'')}</div>
+        </div>
+      </div>
+      <div class="feature-body">
+        <p class="lead">${escapeHtml(lead)}</p>
+        <div class="feature-cols">
+          ${bodyParas.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}
+        </div>
+      </div>
+      ${renderStats(b.poinData)}
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderFeaturePage2(b, no, data, pageNum){
+  const paras = (b.artikel||'').split(/\n\n+/).filter(p=>p.trim());
+  const bodyParas = paras.slice(3);
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="page-header"><div class="num">${String(no).padStart(2,'0')}</div><div class="label">${escapeHtml(b.namaAcara||'Kegiatan')} · Lanjutan</div><div class="line"></div></div>
+      <div style="padding:0 60px">
+        <div class="feature-cols">
+          ${bodyParas.length ? bodyParas.map(p=>`<p>${escapeHtml(p)}</p>`).join('') : '<p>...</p>'}
+        </div>
+      </div>
+      ${b.kutipan ? `<div style="margin:28px 60px 0;padding:20px 26px;background:var(--gold-ghost);border-left:4px solid var(--gold);border-radius:0 10px 10px 0"><div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;line-height:1.6;color:var(--green)">"${escapeHtml(b.kutipan)}"</div></div>` : ''}
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderCompactPage(b, no, data, pageNum){
+  const coverImg = b.fotoUtama ? `<img src="${b.fotoUtama}">` : '📷 FOTO';
+  const paras = (b.artikel||'').split(/\n\n+/).filter(p=>p.trim());
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="page-header"><div class="num">${String(no).padStart(2,'0')}</div><div class="label">${escapeHtml(b.namaAcara||'Kegiatan')}</div><div class="line"></div></div>
+      <div class="compact-wrap">
+        <div class="compact-header">
+          <div class="compact-num">${String(no).padStart(2,'0')}</div>
+          <h2 class="compact-title">${escapeHtml(b.judul||'-')}</h2>
+        </div>
+        <div class="compact-meta">📅 ${fmtTanggal(b.tanggal)} · 📍 ${escapeHtml(b.lokasi||'-')}</div>
+        <div class="compact-layout">
+          <div class="compact-photo">${coverImg}</div>
+          <div class="compact-article">${paras.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}</div>
+        </div>
+        ${b.kutipan ? `<div class="compact-quote">"${escapeHtml(b.kutipan)}"</div>` : ''}
+      </div>
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderGalleryPage(b, no, data, pageNum){
+  const fotoArr = b.fotoGaleri || [];
+  const slots = [];
+  for(let i=0;i<6;i++){
+    if(fotoArr[i]) slots.push(`<div class="slot"><img src="${fotoArr[i]}"></div>`);
+    else slots.push(`<div class="slot">📷 FOTO ${i+1}</div>`);
+  }
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="page-header"><div class="num">${String(no).padStart(2,'0')}</div><div class="label">Galeri</div><div class="line"></div></div>
+      <div class="gallery-header">
+        <div class="gallery-tag">Kegiatan ${String(no).padStart(2,'0')} · Gallery</div>
+        <h2 class="gallery-title">${escapeHtml(b.judul||'-')}</h2>
+        <div class="gallery-sub">${fmtTanggal(b.tanggal)} · ${escapeHtml(b.lokasi||'')}</div>
+      </div>
+      <p class="gallery-desc">${escapeHtml(buatRingkasan(b.artikel||'', 280))}</p>
+      <div class="gallery-grid-6">${slots.join('')}</div>
+      ${b.kutipan ? `<div class="gallery-quote">"${escapeHtml(b.kutipan)}"</div>` : ''}
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderStats(poinData){
+  if(!poinData || poinData.length === 0) return '';
+  const items = poinData.slice(0,3).map(p=>`<div class="stat"><div class="v">${escapeHtml(p.nilai||'-')}</div><div class="l">${escapeHtml(p.label||'')}</div></div>`).join('');
+  return `<div class="feature-stats">${items}</div>`;
+}
+
+function renderIklanPage(iklan, edisiBulan, pageNum){
+  const big = iklan[0];
+  const smalls = iklan.slice(1);
+  let slots = '';
+  if(big){
+    slots += `<div class="ad-slot big ${big.imgBase64?'has-img':''}">
+      <div class="ad-badge">Iklan Utama</div>
+      ${big.imgBase64 ? `<img src="data:image/jpeg;base64,${big.imgBase64}">` : ''}
+      ${big.nama ? `<div class="ad-info"><div style="font-weight:800;color:var(--green);font-size:14px">${escapeHtml(big.nama)}</div>${big.kontak?`<div style="font-size:11px;color:var(--text2);margin-top:4px">${escapeHtml(big.kontak)}</div>`:''}</div>` : '<div class="ad-upload-icon">🖼️</div><div class="ad-upload-label">Iklan Utama</div>'}
+    </div>`;
+  }
+  smalls.forEach(s=>{
+    slots += `<div class="ad-slot ${s.imgBase64?'has-img':''}">
+      <div class="ad-badge">Iklan</div>
+      ${s.imgBase64 ? `<img src="data:image/jpeg;base64,${s.imgBase64}">` : ''}
+      ${s.nama ? `<div class="ad-info"><div style="font-weight:800;color:var(--green);font-size:13px">${escapeHtml(s.nama)}</div>${s.kontak?`<div style="font-size:10px;color:var(--text2);margin-top:4px">${escapeHtml(s.kontak)}</div>`:''}</div>` : '<div class="ad-upload-icon">🖼️</div><div class="ad-upload-label">Iklan</div>'}
+    </div>`;
+  });
+  return `
+    <div style="width:100%;height:100%;background:#fff">
+      <div class="ads-header">
+        <div class="ads-kicker">Iklan &amp; Mitra</div>
+        <h2 class="ads-title">Produk &amp; Layanan Mitra</h2>
+      </div>
+      <div class="ads-grid">${slots}</div>
+      <div class="page-footer"><span class="pf-left">LINES · MAJALAH KEGIATAN</span><span class="pf-right">${String(pageNum).padStart(2,'0')} / __TOTAL__</span></div>
+    </div>`;
+}
+
+function renderBackCoverPage(data, edisiBulan, pageNum){
+  return `
+    <div class="page-back-cover" style="width:100%;height:100%">
+      <div class="back-inner">
+        <div class="back-quote">"Setiap amal yang kita lakukan hari ini adalah warisan yang akan terus mengalir manfaatnya bagi generasi mendatang."</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:600;padding-left:24px">— Ketua DPD LDII Kabupaten Garut</div>
+        <div class="back-credit-title">Redaksi &amp; Kontak</div>
+        <div class="back-credit-grid">
+          <div><div class="label">Penanggung Jawab</div><div>DPD LDII Kabupaten Garut</div></div>
+          <div><div class="label">Redaktur</div><div>Bidang Humas DPD LDII</div></div>
+          <div><div class="label">Alamat</div><div>Garut, Jawa Barat</div></div>
+          <div><div class="label">Kontak</div><div>ldii.or.id · lines.ldii.or.id</div></div>
+        </div>
+        <div class="back-credit-title">Terima Kasih</div>
+        <div style="font-size:12px;line-height:1.7;color:rgba(255,255,255,.75)">Kami mengucapkan terima kasih kepada seluruh pengurus, relawan, dan masyarakat yang telah mendukung terselenggaranya seluruh kegiatan pada edisi ini.</div>
+        <div class="back-footer">
+          <div class="brand">HUMAS DPD LDII KABUPATEN GARUT</div>
+          <div>ldii.or.id · lines.ldii.or.id</div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:14px;left:60px;right:60px;text-align:center;font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1.5px">${String(pageNum).padStart(2,'0')} / __TOTAL__</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════
+// DOWNLOAD & SAVE PDF
+// ═══════════════════════════════════════════════
+async function buildMajalahPDFBlob(){
+  const {jsPDF} = window.jspdf;
+  const pages = document.querySelectorAll('#previewArea .preview-page');
+  const pdf = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const pW = 210, pH = 297;
+
+  for(let i=0; i<pages.length; i++){
+    if(i>0) pdf.addPage();
+    const canvas = await html2canvas(pages[i], {
+      scale: 2, useCORS: true, allowTaint: true,
+      backgroundColor: '#ffffff', logging: false,
+      windowWidth: 794, windowHeight: 1123
+    });
+    const img = canvas.toDataURL('image/jpeg', 0.9);
+    pdf.addImage(img, 'JPEG', 0, 0, pW, pH);
+  }
+  return { blob: pdf.output('blob'), pdf };
+}
+
+async function downloadMajalah(){
+  const btn = document.getElementById('btnDownloadMajalah');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner dark"></span>PDF...';
+  try {
+    const { pdf } = await buildMajalahPDFBlob();
+    const edisi = (document.getElementById('edisiBulan').value || 'majalah').replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'-');
+    pdf.save(`Majalah-LDII-${edisi}.pdf`);
+    toast('✅ PDF berhasil diunduh');
+  } catch(e){
+    toast('❌ Gagal: '+e.message);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⬇️ Unduh PDF';
+  }
+}
+
+async function saveMajalahToDrive(){
+  const btn = document.getElementById('btnDriveMajalah');
+  const st = document.getElementById('driveMajalahStatus');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Upload...';
+  st.textContent = '';
+  try {
+    const { blob } = await buildMajalahPDFBlob();
+    const edisi = (document.getElementById('edisiBulan').value || 'majalah').replace(/[^a-zA-Z0-9 \-]/g,'').substring(0,60);
+    const fileName = `Majalah-LDII-${edisi}.pdf`;
+    const b64 = await blobToBase64(blob);
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify({ action: 'savePDF', fileName, pdfBase64: b64.split(',')[1] }),
+      redirect: 'follow'
+    });
+    const txt = await r.text();
+    let res; try { res = JSON.parse(txt); } catch(e){ throw new Error('Respon invalid'); }
+    if(res.status === 'success'){
+      st.innerHTML = `✅ Tersimpan! <a href="${res.driveUrl}" target="_blank" style="color:var(--green);font-weight:700">Buka File →</a>`;
+      toast('✅ Tersimpan ke Drive');
+    } else {
+      throw new Error(res.message || 'Gagal');
+    }
+  } catch(e){
+    st.textContent = '❌ '+e.message;
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '☁️ Simpan ke Drive';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('load', ()=>{
+  renderIklanList();
+  renderSelectedList();
+});
+</script>
+</body>
+</html>
